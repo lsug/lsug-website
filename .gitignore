@@ -1,0 +1,10 @@
+.metals
+.bloop
+out
+*~
+*\#
+target
+*.js
+*.js.map
+*.css
+*.css.map
