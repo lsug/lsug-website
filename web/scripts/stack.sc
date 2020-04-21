@@ -85,7 +85,10 @@ def main(
           Instance.public,
           keyName=Some("admin")
         )
-      } yield instance
+      } yield {
+        bucket.grantRead(instance)
+        instance
+      }
     )
   ).synth()
 }
