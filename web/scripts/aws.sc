@@ -127,14 +127,6 @@ object Instance {
       instanceType: ec2.InstanceType = ec2.InstanceType
         .of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
       keyName: Option[String] = None,
-      blockDevices: ec2.CfnInstance.BlockDeviceMappingProperty =
-        ec2.CfnInstance.BlockDeviceMappingProperty
-          .builder()
-          .deviceName("/dev/xvda")
-          .virtualName(
-            "ephemeral0"
-          )
-          .build
   ): Resource[ec2.Instance] = { scope =>
     {
       val props =
@@ -150,10 +142,6 @@ object Instance {
         id,
         keyName.map(props.keyName(_)).getOrElse(props).build
       )
-      instance.getInstance
-        .setBlockDeviceMappings(
-          List(blockDevices).map(_.asInstanceOf[Object]).asJava
-        )
       instance
     }
   }
@@ -211,6 +199,12 @@ object Image {
         }
         userData
       }
+    }
+
+    def custom(s: String): Resource[ec2.UserData] = { scope =>
+      ec2.UserData.custom(
+        s
+      )
     }
   }
 

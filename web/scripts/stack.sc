@@ -48,35 +48,38 @@ def main(
         )
         image <- Image(
           Some(
-            Image.Data(
-              Image.Data.Command
-                .yumInstall("java-11-amazon-corretto-headless"),
-              Image.Data.Command.s3(
-                _ => asset.getBucket,
-                asset.getS3ObjectKey,
-                "/tmp/assets.zip"
-              ),
-              Image.Data.Command.exec(
-                "unzip /tmp/assets.zip"
-              ),
-              Image.Data.Command.mkdir(
-                "/var/www/html"
-              ),
-              Image.Data.Command.mv(
-                "/tmp/static",
-                "/var/www/html"
-              ),
-              Image.Data.Command.mkdir(
-                "/usr/local/lsug/.config"
-              ),
-              Image.Data.Command.mv(
-                "/tmp/resources",
-                "/usr/local/lsug/.config"
-              ),
-              Image.Data.Command.mv(
-                "/tmp/app.jar",
-                "/usr/local/lsug/app.jar"
-              )
+            Image.Data.custom(
+              """Content-Type: multipart/mixed; boundary="//"
+                |MIME-Version: 1.0
+                |
+                |--//
+                |Content-Type: text/cloud-config; charset="us-ascii"
+                |MIME-Version: 1.0
+                |Content-Transfer-Encoding: 7bit
+                |Content-Disposition: attachment; filename="cloud-config.txt"
+                |
+                |#cloud-config
+                |cloud_final_modules:
+                |- [scripts-user, always]
+                |
+                |--//
+                |Content-Type: text/x-shellscript; charset="us-ascii"
+                |MIME-Version: 1.0
+                |Content-Transfer-Encoding: 7bit
+                |Content-Disposition: attachment; filename="userdata.txt"
+                |
+                |#!/bin/bash
+                |yum install -y java-11-amazon-corretto-headless
+                |
+                |mkdir -p $(dirname '/tmp/assets.zip')""".stripMargin +
+              s"""aws s3 cp '${asset.getS3Url}' /tmp/assets.zip""" +
+              """cd /tmp
+                |unzip /tmp/assets.zip
+                |mkdir --p /var/www/html
+                |mv /tmp/static /var/www/html
+                |mkdir --parents /usr/local/lsug/.config
+                |mv /tmp/resources /usr/local/lsug/.config
+                |mv /tmp/app.jar /usr/local/lsug/app.jar""".stripMargin
             )
           )
         )
@@ -86,7 +89,7 @@ def main(
           image,
           sg,
           Instance.public,
-          keyName=Some("admin"),
+          keyName = Some("admin")
         )
       } yield {
         // Really ugly...
