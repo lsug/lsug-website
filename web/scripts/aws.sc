@@ -131,8 +131,8 @@ object Instance {
         ec2.CfnInstance.BlockDeviceMappingProperty
           .builder()
           .deviceName("/dev/sda1")
-          .noDevice(
-            ec2.CfnInstance.NoDeviceProperty.builder.build
+          .virtualName(
+            "ephemeral0"
           )
           .build
   ): Resource[ec2.Instance] = { scope =>
