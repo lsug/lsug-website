@@ -220,7 +220,7 @@ object ci extends WebModule {
 
   def deploy() = T.command {
     val wd = synth()
-    yarn().%("cdk", "deploy", "--", "--require-approval", "never")(wd = wd.path)
+    yarn().%("cdk", "deploy", "--require-approval", "never")(wd = wd.path)
   }
 
 }
