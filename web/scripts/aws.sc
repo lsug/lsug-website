@@ -125,7 +125,7 @@ object Instance {
       securityGroup: SecurityGroup.AWS,
       subnetSelection: ec2.SubnetSelection,
       instanceType: ec2.InstanceType = ec2.InstanceType
-        .of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.NANO),
+        .of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
       keyName: Option[String] = None
   ): Resource[ec2.Instance] = { scope =>
     {
@@ -174,14 +174,17 @@ object Image {
           )
         }
 
+      def exec(command: String): Resource[Exec] =
+        _ => Exec(command)
+
       def mv(from: String, to: String): Resource[Exec] =
-        _ => Exec(s"mv $from $to")
+        exec(s"mv $from $to")
 
       def mkdir(dir: String): Resource[Exec] =
-        _ => Exec(s"mkdir --parents $dir")
+        exec(s"mkdir --parents $dir")
 
       def yumInstall(packages: String*): Resource[Exec] =
-        _ => Exec(s"""yum install -y ${packages.mkString(" ")}""")
+        exec(s"""yum install -y ${packages.mkString(" ")}""")
     }
 
     def apply(cmds: Resource[Command]*): Resource[ec2.UserData] = { scope =>
