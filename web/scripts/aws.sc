@@ -126,7 +126,15 @@ object Instance {
       subnetSelection: ec2.SubnetSelection,
       instanceType: ec2.InstanceType = ec2.InstanceType
         .of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
-      keyName: Option[String] = None
+      keyName: Option[String] = None,
+      blockDevices: ec2.CfnInstance.BlockDeviceMappingProperty =
+        ec2.CfnInstance.BlockDeviceMappingProperty
+          .builder()
+          .deviceName("/dev/sda1")
+          .noDevice(
+            ec2.CfnInstance.NoDeviceProperty.builder.build
+          )
+          .build
   ): Resource[ec2.Instance] = { scope =>
     {
       val props =
@@ -137,11 +145,16 @@ object Instance {
           .instanceType(instanceType)
           .machineImage(ami)
           .allowAllOutbound(true)
-      new ec2.Instance(
+      val instance = new ec2.Instance(
         scope,
         id,
         keyName.map(props.keyName(_)).getOrElse(props).build
       )
+      instance.getInstance
+        .setBlockDeviceMappings(
+          List(blockDevices).map(_.asInstanceOf[Object]).asJava
+        )
+      instance
     }
   }
 }

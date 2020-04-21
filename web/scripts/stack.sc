@@ -86,7 +86,7 @@ def main(
           image,
           sg,
           Instance.public,
-          keyName=Some("admin")
+          keyName=Some("admin"),
         )
       } yield {
         // Really ugly...
