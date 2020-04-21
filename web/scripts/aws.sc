@@ -130,7 +130,7 @@ object Instance {
       blockDevices: ec2.CfnInstance.BlockDeviceMappingProperty =
         ec2.CfnInstance.BlockDeviceMappingProperty
           .builder()
-          .deviceName("/dev/sda1")
+          .deviceName("/dev/xvda")
           .virtualName(
             "ephemeral0"
           )
