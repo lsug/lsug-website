@@ -51,13 +51,13 @@ def main(
             Image.Data(
               Image.Data.Command
                 .yumInstall("java-11-amazon-corretto-headless"),
-              Image.Data.Command(
+              _ => Image.Data.Command.Exec(
                 s"echo ${asset.getS3ObjectKey}"
               ),
               Image.Data.Command.s3(
                 _ => asset.getBucket,
                 asset.getS3ObjectKey,
-                "/tmp"
+                "/tmp/assets.zip"
               ),
               Image.Data.Command.mkdir(
                 "/var/www/html"
