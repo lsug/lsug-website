@@ -47,6 +47,7 @@ object Peer {
 
 object Port {
   val http = ec2.Port.tcp(80)
+  val ssh = ec2.Port.tcp(22)
   val https = ec2.Port.tcp(443)
 }
 
@@ -89,7 +90,7 @@ object App {
     val app =
       new core.App(
         core.AppProps.builder
-          // .outdir(path.toString)
+        // .outdir(path.toString)
           .build()
       )
     children.foreach(_(app))
@@ -123,13 +124,12 @@ object Instance {
       ami: Image.AWS,
       securityGroup: SecurityGroup.AWS,
       subnetSelection: ec2.SubnetSelection,
-      instanceType: ec2.InstanceType =
-        ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.NANO)
+      instanceType: ec2.InstanceType = ec2.InstanceType
+        .of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.NANO),
+      keyName: Option[String] = None
   ): Resource[ec2.Instance] = { scope =>
     {
-      new ec2.Instance(
-        scope,
-        id,
+      val props =
         ec2.InstanceProps.builder
           .vpc(vpc)
           .securityGroup(securityGroup)
@@ -137,7 +137,10 @@ object Instance {
           .instanceType(instanceType)
           .machineImage(ami)
           .allowAllOutbound(true)
-          .build
+      new ec2.Instance(
+        scope,
+        id,
+        keyName.map(props.keyName(_)).getOrElse(props).build
       )
     }
   }

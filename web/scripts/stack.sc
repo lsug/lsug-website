@@ -38,7 +38,8 @@ def main(
           List(sg),
           List(
             Peer.ipv4 -> Port.http,
-            Peer.ipv4 -> Port.https
+            Peer.ipv4 -> Port.https,
+            Peer.ipv4 -> Port.ssh
           )
         )
         bucket <- Asset(
@@ -81,7 +82,8 @@ def main(
           vpc,
           image,
           sg,
-          Instance.public
+          Instance.public,
+          keyName=Some("admin")
         )
       } yield instance
     )
