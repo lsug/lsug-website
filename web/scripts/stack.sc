@@ -42,18 +42,18 @@ def main(
             Peer.ipv4 -> Port.ssh
           )
         )
-        bucket <- Asset(
+        asset <- Asset(
           "CodeAssets",
           assetPath
-        ).map(_.getBucket)
+        )
         image <- Image(
           Some(
             Image.Data(
               Image.Data.Command
                 .yumInstall("java-11-amazon-corretto-headless"),
               Image.Data.Command.s3(
-                _ => bucket,
-                "**",
+                _ => asset.getBucket,
+                asset.getS3ObjectKey,
                 "/tmp"
               ),
               Image.Data.Command.mkdir(
@@ -86,7 +86,8 @@ def main(
           keyName=Some("admin")
         )
       } yield {
-        bucket.grantRead(instance)
+        // Really ugly...
+        asset.getBucket.grantRead(instance)
         instance
       }
     )
