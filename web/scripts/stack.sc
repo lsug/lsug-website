@@ -68,7 +68,7 @@ def main(
                 |- content: |
                 |    [Service]
                 |    Type=exec
-                |    ExecStart=/usr/local/bin/lsug /var/www/html /usr/local/lsug/.config
+                |    ExecStart=/bin/bash /usr/local/bin/lsug /var/www/html /usr/local/lsug/.config
                 |  path: /etc/systemd/system/lsug.service
                 |--//
                 |Content-Type: text/x-shellscript; charset="us-ascii"
@@ -87,13 +87,13 @@ def main(
                 |  rm -rf /var/www/html
                 |fi
                 |mkdir --p /var/www/html
-                |mv $code_dir/static/ /var/www/html
+                |mv static /var/www/html
                 |if [ -d /usr/local/lsug/.config ]; then
                 |  rm -rf /usr/local/lsug/.config
                 |fi
                 |mkdir --parents /usr/local/lsug/.config
-                |mv $code_dir/resources /usr/local/lsug/.config
-                |mv $code_dir/app.jar /usr/local/bin/lsug
+                |mv resources /usr/local/lsug/.config
+                |mv app.jar /usr/local/bin/lsug
                 |chmod +x /usr/local/bin/lsug
                 |rm -rf $code_dir""".stripMargin
             )

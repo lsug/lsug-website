@@ -152,7 +152,7 @@ object ci extends WebModule {
   import ammonite.ops._
   import ammonite.ops.ImplicitWd._
 
-  def mainJS = client.fastOpt
+  def mainJS = client.fullOpt
   def development = false
   def account: T[String] = "930183804331"
   def region: T[String] = "eu-west-2"
