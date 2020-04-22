@@ -69,7 +69,7 @@ object server extends ScalaModule {
       "http4s-circe",
       "http4s-blaze-server",
       "http4s-blaze-client"
-    ).map { dep => ivy"org.http4s::${dep}::0.21.2" } ++ Agg(
+    ).map { dep => ivy"org.http4s::${dep}::0.21.3" } ++ Agg(
       "fs2-io",
       "fs2-core"
     ).map { dep => ivy"co.fs2::${dep}::2.3.0" } ++ monocleDeps
