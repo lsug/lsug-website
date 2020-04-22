@@ -16,7 +16,7 @@ nav {
 
     background-color: color.$secondary;
 
-    $side-padding: 50px;
+    $side-padding: 1.5rem;
 
     align-items: center;
     display: flex;
@@ -33,12 +33,12 @@ nav {
     }
 
     a {
-	border-radius: 20px;
+	border-radius: 1rem;
 	display: block;
-	margin: 5px;
-	border: 10px solid color.$secondary;
+	margin: 0.5rem;
+	border: 0.5rem solid color.$secondary;
 	&:hover {
-	    border: 10px solid color.$primary;
+	    border: 0.5rem solid color.$primary;
 	    background-color: color.$primary;
 	    cursor: pointer;
 	}
@@ -52,8 +52,8 @@ nav {
 
 main {
     padding: {
-	left: 50px;
-	right: 50px;
+	left: 3rem;
+	right: 3rem;
     }
 }
 

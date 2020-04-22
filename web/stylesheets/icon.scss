@@ -1,6 +1,7 @@
 @use "color";
+@use "font";
 
-$standard-size: 44px;
+$standard-size: 2.25rem;
 
 .material-icons {
     font-size: $standard-size;
@@ -18,14 +19,14 @@ $standard-size: 44px;
     display: flex;
     align-items: center;
     font: {
-	size: 18px;
+	size: font.$normal-size;
 	style: italic;
     }
     span {
-	padding-right: 16px;
+	padding-right: 1.25rem;
     }
     img {
 	border-radius: 50%;
-	height: 80px;
+	height: 4.25rem;
     }
 }
