@@ -80,13 +80,13 @@ def main(
                 |  rm -rf /var/www/html
                 |fi
                 |mkdir --p /var/www/html
-                |mv /tmp/static/ /var/www/html/
+                |mv $code_dir/static/ /var/www/html/
                 |if [ -d /usr/local/lsug/.config ]; then
                 |  rm -rf /usr/local/lsug/.config
                 |fi
                 |mkdir --parents /usr/local/lsug/.config
-                |mv /tmp/resources/ /usr/local/lsug/.config/
-                |mv /tmp/app.jar /usr/local/lsug/app.jar
+                |mv $code_dir/resources/ /usr/local/lsug/.config/
+                |mv $code_dir/app.jar /usr/local/lsug/app.jar
                 |rm -rf $code_dir""".stripMargin
             )
           )
