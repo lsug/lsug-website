@@ -8,6 +8,7 @@ import aws.{
   Asset,
   Bucket,
   Vpc,
+  Eip,
   Instance,
   Peer,
   Port,
@@ -107,6 +108,7 @@ def main(
           Instance.public,
           keyName = Some("admin")
         )
+        _ <- Eip("WebsiteIp", instance.getInstanceId)
       } yield {
         // Really ugly...
         asset.getBucket.grantRead(instance)

@@ -15,6 +15,20 @@ trait Resource[+A] {
     parent => f(apply(parent))(parent)
 }
 
+object Eip {
+
+  type AWS = ec2.CfnEIP
+
+  def apply(
+      id: String,
+      instance: String
+  ): Resource[AWS] = { scope =>
+    {
+      ec2.CfnEIP.Builder.create(scope, id).domain("vpc").instanceId(instance).build
+    }
+  }
+}
+
 object Vpc {
   type AWS = ec2.IVpc
   def apply(
@@ -126,7 +140,7 @@ object Instance {
       subnetSelection: ec2.SubnetSelection,
       instanceType: ec2.InstanceType = ec2.InstanceType
         .of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
-      keyName: Option[String] = None,
+      keyName: Option[String] = None
   ): Resource[ec2.Instance] = { scope =>
     {
       val props =
