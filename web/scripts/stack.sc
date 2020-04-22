@@ -72,7 +72,7 @@ def main(
                 |yum install -y java-11-amazon-corretto-headless
                 |code_dir=$(mktemp -d)
                 |""".stripMargin +
-              s"""aws s3 cp '${asset.getS3Url}' """ + """ "/tmp/$code_dir/assets.zip" """ +
+              s"""aws s3 cp 's3://${asset.getS3BucketName}/${asset.getS3ObjectKey}' """ + """ "/tmp/$code_dir/assets.zip" """ +
               """
                 |cd $code_dir
                 |unzip assets.zip
