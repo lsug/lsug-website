@@ -45,6 +45,7 @@ trait WebpackModule extends Module {
   def npmDeps: T[Agg[NpmDependency]]
   def devDependencies: T[Agg[(String, String)]] = T { Agg() }
   def mainJS: T[PathRef]
+  def mainStylesheet: T[PathRef] = T.source { PathRef(millSourcePath / "stylesheets" / "main.scss") }
 
   def entryPoint = T {
     val path = T.ctx.dest / "entrypoint.js"
@@ -78,7 +79,7 @@ trait WebpackModule extends Module {
               "webpack" -> webpackVersion(),
               "webpack-cli" -> webpackCliVersion(),
               "webpack-dev-server" -> webpackDevServerVersion(),
-              "node-sass" -> sassVersion(),
+              "dart-sass" -> sassVersion(),
               "source-map-loader" -> "0.2.3"
             ) ++ devDependencies()
           )
@@ -99,7 +100,7 @@ trait WebpackModule extends Module {
   }
 
   def stylesheets = T.sources {
-    os.walk(millSourcePath).filter(_.ext == "scss").map(PathRef(_))
+    os.walk(millSourcePath / "stylesheets").filter(_.ext == "scss").map(PathRef(_))
   }
 
   def assets = T.source {
@@ -111,11 +112,11 @@ trait WebpackModule extends Module {
   }
 
   def sass = T {
-    //TODO: main stylesheet
-    val main = stylesheets().apply(0)
+    stylesheets()
+    val main = mainStylesheet()
     val out =
       T.ctx.dest / s"${main.path.last.split('.')(0)}.css"
-    yarn().%("node-sass", main.path, out)(T.ctx.dest)
+    yarn().%("dart-sass", main.path, out)(T.ctx.dest)
     PathRef(out)
   }
 

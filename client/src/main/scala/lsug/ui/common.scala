@@ -247,9 +247,12 @@ object common {
     .builder[Unit]("nav-bar")
     .renderStatic(
       <.nav(
-        <.span("lsug"),
         <.div(
-          <.a("abous us")
+          <.span(^.cls := "abbrev-name", "LSUG"),
+        ),
+        <.div(
+          <.a("About"),
+          <.a("Sponsors")
         )
       )
     )

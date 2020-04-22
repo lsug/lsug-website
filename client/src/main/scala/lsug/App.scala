@@ -13,14 +13,20 @@ import java.time.Clock
 object App extends IOApp {
 
   import ui.Page
+  import lsug.{ui => lui}
 
   val routerConfig = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
 
     def homeRoute =
-      staticRoute(root, Page.Home) ~> renderR(ctl =>
-        lsug.ui.home.Home(ctl, LocalDateTime.now(Clock.systemUTC()))
-      )
+      staticRoute(root, Page.Home) ~> renderR{ ctl =>
+        val now = LocalDateTime.now(Clock.systemUTC())
+        React.Fragment(
+          lui.common.NavBar(),
+          lui.home.Home(ctl, now),
+          lui.common.Footer(now.toLocalDate)
+        )
+      }
 
     def eventRoute =
       dynamicRouteCT(

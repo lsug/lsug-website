@@ -116,11 +116,11 @@ package object ui {
           <.div(
             ^.cls := "person-badge",
             <.span(name),
-            asset.map(
-              a => <.img(^.src := a.show)
-            ).getOrElse(
-              MaterialIcon("person")
-            )
+            asset
+              .map(a => <.img(^.src := a.show))
+              .getOrElse(
+                MaterialIcon("person")
+              )
           )
       }
       .configure(Reusability.shouldComponentUpdate)
@@ -199,7 +199,9 @@ package object ui {
     val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     ScalaComponent
-      .builder[(RouterCtl[Page.Event], LocalDateTime, P.Event.Summary[P.Event.Blurb])](
+      .builder[
+        (RouterCtl[Page.Event], LocalDateTime, P.Event.Summary[P.Event.Blurb])
+      ](
         "EventSummary"
       )
       .render_P {
@@ -208,36 +210,42 @@ package object ui {
             now,
             P.Event.Summary(id, P.Event.Time(start, end), location, events)
             ) =>
-          <.section(
-            ^.cls := "event-summary",
-            <.h1(
-              EventTime(now, start, end),
-              EventLocation(location)
-            ),
-            <.div(
-              ^.cls := "event-content",
-              events.map {
-                case b @ protocol.Event.Blurb(e, _, _, _) =>
-                  Blurb.withKey(e)(b)
-              }.toTagMod,
-              <.ul(
-                ^.cls := "event-tags",
-                events
-                  .flatMap(_.tags)
-                  .distinct
-                  .map { t =>
-                    <.li(
-                      TagBadge(t)
-                    )
-                  }
-                  .toTagMod
+          <.a(
+            ^.cls := "event",
+            ^.href := s"/events/${start.format(format)}",
+            <.section(
+              ^.cls := "event-summary",
+              <.h1(
+                EventTime(now, start, end),
+                EventLocation(location)
               ),
-              <.span(
-                ^.cls := "event-more",
-                "read more"
+              <.div(
+                ^.cls := "event-content",
+                events.map {
+                  case b @ protocol.Event.Blurb(e, _, _, _) =>
+                    Blurb.withKey(e)(b)
+                }.toTagMod,
+                <.ul(
+                  ^.cls := "event-tags",
+                  events
+                    .flatMap(_.tags)
+                    .distinct
+                    .map { t =>
+                      <.li(
+                        TagBadge(t)
+                      )
+                    }
+                    .toTagMod
+                ),
+                <.div(
+                  ^.cls := "event-more",
+                  <.span(
+                    "read more"
+                  )
+                )
               )
-            ),
-            ^.onClick --> router.set(Page.Event(start.format(format)))
+              // ^.onClick --> router.set(Page.Event(start.format(format)))
+            )
           )
       }
       .build

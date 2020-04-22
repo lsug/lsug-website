@@ -1,0 +1,63 @@
+@use "color";
+@use "font";
+@use "home";
+@use "icon";
+
+body {
+    background-color: color.$background;
+    margin: 0px;
+    font: {
+	family: font.$family;
+	font: font.$normal-size;
+    }
+}
+
+nav {
+
+    background-color: color.$secondary;
+
+    $side-padding: 50px;
+
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: color.$box-shadow-primary;
+    padding-left: $side-padding;
+    padding-right: $side-padding;
+    font-size: font.$large-size;
+
+    color: color.$background;
+
+    .abbrev-name {
+	font-weight: 800;
+    }
+
+    a {
+	border-radius: 20px;
+	display: block;
+	margin: 5px;
+	border: 10px solid color.$secondary;
+	&:hover {
+	    border: 10px solid color.$primary;
+	    background-color: color.$primary;
+	    cursor: pointer;
+	}
+    }
+
+    div {
+	display: flex;
+    }
+
+}
+
+main {
+    padding: {
+	left: 50px;
+	right: 50px;
+    }
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+}

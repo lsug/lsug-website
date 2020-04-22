@@ -1,0 +1,115 @@
+@use "color";
+
+.tab-content {
+    display: flex;
+    justify-content: center;
+}
+
+
+.event {
+    display: contents;
+    text-decoration: none;
+
+    color: color.$foreground;
+
+    &:visited {
+	color: color.$foreground;
+    }
+
+    &:active {
+	color: color.$foreground;
+    }
+
+    &:hover {
+	color: color.$foreground;
+    }
+}
+
+.event-summary {
+
+    box-shadow: color.$box-shadow-primary;
+    border-radius: 5px;
+    max-width: 800px;
+
+    &:hover {
+	background-color: darken(color.$background, 2%);
+	box-shadow: color.$box-shadow-action;
+	cursor: pointer;
+    }
+
+    h1 {
+	font: {
+	    size: 18px;
+	    weight: 100;
+	}
+	display: flex;
+	justify-content: space-between;
+	padding: 10px;
+	div {
+	    display: flex;
+	    align-items: center;
+	    span {
+		padding: 10px;
+	    }
+	}
+    }
+
+    h2 {
+	font: {
+	    size: 18px;
+	}
+	color: color.$primary;
+    }
+
+    $content-padding: 30px;
+
+    .event-content {
+	padding: {
+	    left: $content-padding;
+	    right: $content-padding;
+	    bottom: $content-padding;
+	}
+
+
+	.event-tags {
+	    list-style: none;
+	    li {
+		padding-right: 5px;
+		display: inline-block;
+	    }
+	    padding: 0px;
+	    margin-bottom: 10px;
+	}
+    }
+
+    .person-badge {
+	font: {
+	    size: 18px;
+	    style: italic;
+	}
+    }
+
+    .speakers {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	ul {
+	    list-style: none;
+	    li {
+		padding-left: 20px;
+		display: inline-block;
+	    }
+	}
+    }
+
+    .event-more {
+	display: flex;
+	padding-top: 5px;
+	font: {
+	    weight: bold;
+	    size: 16px;
+	}
+	flex-direction: row-reverse;
+	text-transform: uppercase;
+    }
+}

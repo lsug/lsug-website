@@ -109,7 +109,7 @@ trait WebModule extends WebpackModule {
   def webpackVersion = "4.17.1"
   def webpackCliVersion = "3.1.0"
   def webpackDevServerVersion = "3.1.7"
-  def sassVersion = "4.13.1"
+  def sassVersion = "1.25.0"
   def npmDeps =
     Agg("react" -> "React", "react-dom" -> "ReactDOM").map {
       case (n, g) => NpmDependency(n, "16.7.0", g)

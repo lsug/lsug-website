@@ -1,0 +1,31 @@
+@use "color";
+
+$standard-size: 44px;
+
+.material-icons {
+    font-size: $standard-size;
+}
+
+.tag-badge {
+    background-color: color.$secondary;
+    color: color.$background;
+    border-radius: 5px;
+    border: 5px solid color.$secondary;
+}
+
+.person-badge {
+
+    display: flex;
+    align-items: center;
+    font: {
+	size: 18px;
+	style: italic;
+    }
+    span {
+	padding-right: 16px;
+    }
+    img {
+	border-radius: 50%;
+	height: 80px;
+    }
+}

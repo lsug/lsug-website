@@ -1,0 +1,12 @@
+$primary: #B34343;
+$shadow: #888888;
+$secondary: #903669;
+$secondary-alternative: #B37643;
+$background: #FFFFFF;
+$foreground: black;
+
+$box-shadow-1: rgba(0,0,0,0.2);
+$box-shadow-2: rgba(0,0,0,0.14);
+$box-shadow-3: rgba(0,0,0,0.12);
+$box-shadow-primary: 0px 2px 1px -1px $box-shadow-1,0px 1px 1px 0px $box-shadow-2,0px 1px 3px 0px $box-shadow-3;
+$box-shadow-action: $box-shadow-1 0px 3px 3px -2px, $box-shadow-2 0px 3px 4px 0px, $box-shadow-3 0px 1px 8px 0px;
