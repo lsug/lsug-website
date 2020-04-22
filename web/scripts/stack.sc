@@ -70,15 +70,21 @@ def main(
                 |
                 |#!/bin/bash
                 |yum install -y java-11-amazon-corretto-headless
-                |
-                |mkdir -p $(dirname '/tmp/assets.zip')""".stripMargin +
-              s"""aws s3 cp '${asset.getS3Url}' /tmp/assets.zip""" +
-              """cd /tmp
-                |unzip /tmp/assets.zip
+                |code_dir=$(mktemp -d)""".stripMargin +
+              s"""aws s3 cp '${asset.getS3Url}' """ + """ "/$code_dir/assets.zip" """ +
+              """
+                |cd $code_dir
+                |unzip assets.zip
+                |if [ -d /var/www/html ]; then
+                |  rm -rf /var/www/html
+                |fi
                 |mkdir --p /var/www/html
-                |mv /tmp/static /var/www/html
+                |mv /tmp/static/ /var/www/html/
+                |if [ -d /usr/local/lsug/.config ]; then
+                |  rm -rf /usr/local/lsug/.config
+                |fi
                 |mkdir --parents /usr/local/lsug/.config
-                |mv /tmp/resources /usr/local/lsug/.config
+                |mv /tmp/resources/ /usr/local/lsug/.config/
                 |mv /tmp/app.jar /usr/local/lsug/app.jar""".stripMargin
             )
           )
