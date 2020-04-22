@@ -96,7 +96,9 @@ def main(
                 |mv resources /usr/local/lsug/.config
                 |mv app.jar /usr/local/bin/lsug
                 |chmod +x /usr/local/bin/lsug
-                |rm -rf $code_dir""".stripMargin
+                |rm -rf $code_dir
+                |systemctl enable lsug.service
+                |systemctl start lsug.service""".stripMargin
             )
           )
         )
