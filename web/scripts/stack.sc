@@ -86,12 +86,12 @@ def main(
                 |if [ -d /var/www/html ]; then
                 |  rm -rf /var/www/html
                 |fi
-                |mkdir --p /var/www/html
+                |mkdir --p /var/www
                 |mv static /var/www/html
                 |if [ -d /usr/local/lsug/.config ]; then
                 |  rm -rf /usr/local/lsug/.config
                 |fi
-                |mkdir --parents /usr/local/lsug/.config
+                |mkdir --p /usr/local/lsug
                 |mv resources /usr/local/lsug/.config
                 |mv app.jar /usr/local/bin/lsug
                 |chmod +x /usr/local/bin/lsug
