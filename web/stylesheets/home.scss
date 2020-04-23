@@ -100,17 +100,29 @@
     }
 
     .speakers {
+
+	$padding: 0.5rem;
+
 	display: contents;
+	flex-direction: row-reverse;
+
+	div {
+	    display: flex;
+	    justify-content: flex-end;
+	    padding: $padding;
+	    .person-badge {
+		padding: $padding;
+	    }
+	}
 	ul {
 	    display: flex;
 	    padding: 0rem;
-	    flex-direction: row-reverse;
+	    flex-direction: inherit;
 	    flex-wrap: wrap-reverse;
 	    align-items: center;
 	    list-style: none;
 	    li {
-		padding: 0.5rem;
-		// display: inline-block;
+		padding: $padding;
 	    }
 	}
     }
