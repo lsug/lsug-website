@@ -38,6 +38,8 @@
 	cursor: pointer;
     }
 
+    $content-padding: 2rem;
+
     h1 {
 	font: {
 	    size: font.$large-size;
@@ -45,8 +47,9 @@
 	}
 
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: space-between;
-	padding: 0.2rem;
+	padding: $content-padding - 0.5rem;
 	div {
 	    display: flex;
 	    align-items: center;
@@ -62,8 +65,6 @@
 	}
 	color: color.$primary;
     }
-
-    $content-padding: 2rem;
 
     .event-content {
 	padding: {
@@ -99,14 +100,17 @@
     }
 
     .speakers {
-	display: flex;
-	justify-content: flex-end;
-	align-items: center;
+	display: contents;
 	ul {
+	    display: flex;
+	    padding: 0rem;
+	    flex-direction: row-reverse;
+	    flex-wrap: wrap-reverse;
+	    align-items: center;
 	    list-style: none;
 	    li {
-		padding-left: 1.5rem;
-		display: inline-block;
+		padding: 0.5rem;
+		// display: inline-block;
 	    }
 	}
     }
