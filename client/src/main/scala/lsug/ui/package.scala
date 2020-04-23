@@ -25,7 +25,7 @@ package object ui {
   implicit val profileReusability = Reusability.byEq[P.Speaker.Profile]
   implicit val localDateTime = Reusability.byEq[LocalDateTime]
 
-  import common.{Spinner, Banner, Markup, MaterialIcon}
+  import common.{Spinner, Banner, Markup, MaterialIcon, markup}
 
   val EventLocation = {
     ScalaComponent
@@ -186,10 +186,16 @@ package object ui {
             <.h2(event),
             <.div(
               ^.cls := "text-content",
-              desc.zipWithIndex.map {
-                case (d, i) =>
-                  Markup.withKey(i)(d)
+              desc.headOption.map { m =>
+                React.Fragment(
+                  markup.Markup(m, markup.Options(false)),
+                  desc.tail.headOption.map(const(<.p("..."))).getOrElse(None)
+                )
               }.toTagMod
+              // desc.zipWithIndex.map {
+              //   case (d, i) =>
+              //     Markup.withKey(i)(d)
+              // }.toTagMod
             ),
             EventSummarySpeakers(speakers)
           )
@@ -244,7 +250,6 @@ package object ui {
                   )
                 )
               )
-              // ^.onClick --> router.set(Page.Event(start.format(format)))
             )
           )
       }

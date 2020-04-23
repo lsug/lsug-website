@@ -49,6 +49,40 @@ object common {
     .configure(Reusability.shouldComponentUpdate)
     .build
 
+  object markup {
+
+    case class Options(link: Boolean)
+
+    private def toTagMod(markup: P.Markup.Text, options: Options): TagMod = {
+      markup match {
+        case P.Markup.Text.Plain(s) => s
+        case P.Markup.Text.Styled.Italic(text) =>
+          <.em(text.map(toTagMod(_, options)).toList.toTagMod)
+        case P.Markup.Text.Styled.Strong(text) =>
+          <.strong(text.map((toTagMod(_, options))).toList.toTagMod)
+        case P.Markup.Text.Styled.Code(code) =>
+          <.pre(<.code(code))
+        case P.Markup.Text.Link(text, loc) =>
+          if (options.link) {
+            <.a(^.href := loc, text)
+          } else {
+            <.span(text)
+          }
+      }
+    }
+
+    val Markup = ScalaComponent
+      .builder[(P.Markup, Options)]("Markup")
+      .render_P {
+        case (P.Markup.Paragraph(text), options) =>
+          <.p(text.map(toTagMod(_, options)).toList.toTagMod)
+        case m =>
+          println(m)
+          ???
+      }
+      .build
+  }
+
   //TODO: Need props for header
   val Markup = {
 
@@ -248,7 +282,7 @@ object common {
     .renderStatic(
       <.nav(
         <.div(
-          <.span(^.cls := "abbrev-name", "LSUG"),
+          <.span(^.cls := "abbrev-name", "LSUG")
         ),
         <.div(
           <.a("About"),

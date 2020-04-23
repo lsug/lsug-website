@@ -43,9 +43,10 @@
 	    size: font.$large-size;
 	    weight: 400;
 	}
+
 	display: flex;
 	justify-content: space-between;
-	padding: 1rem;
+	padding: 0.2rem;
 	div {
 	    display: flex;
 	    align-items: center;
@@ -71,14 +72,21 @@
 	    bottom: $content-padding;
 	}
 
+	.text-content {
+	    line-height: font.$block-line-height;
+	}
+
 
 	.event-tags {
+
 	    list-style: none;
+
 	    li {
-		padding-right: 1rem;
+		padding-right: 0.5rem;
 		display: inline-block;
 	    }
-	    padding: 0px;
+
+	    padding: 0rem;
 	    margin-bottom: 1rem;
 	}
     }

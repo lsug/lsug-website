@@ -10,8 +10,8 @@ $standard-size: 2.25rem;
 .tag-badge {
     background-color: color.$secondary;
     color: color.$background;
-    border-radius: 5px;
-    border: 5px solid color.$secondary;
+    border-radius: 0.5rem;
+    border: 0.5rem solid color.$secondary;
 }
 
 .person-badge {
