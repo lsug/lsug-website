@@ -93,18 +93,28 @@ div[role=tablist] {
 		size: font.$large-size;
 		weight: 400;
 	    }
+	    padding: 0rem;
+	    margin: 0rem;
 	}
 
-	h2 {
-	    font: {
-		size: font.$large-size;
-	    }
-	    color: color.$primary;
-	}
 
     }
 
     .event-content {
+
+	header {
+
+	    padding: 0rem;
+
+	    h2 {
+		font: {
+		    size: font.$large-size;
+		}
+		color: color.$primary;
+		padding: 0rem;
+	    }
+	}
+
 	padding: {
 	    left: $content-padding;
 	    right: $content-padding;
