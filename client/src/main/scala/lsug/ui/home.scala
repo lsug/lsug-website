@@ -38,7 +38,7 @@ object home {
           <.div(
             ^.cls := "event-location",
             MaterialIcon("cloud"),
-            <.span("virtual")
+            <.span("Virtual only")
           )
         case (P.Event.Location.Physical(id), venue) =>
           <.div(

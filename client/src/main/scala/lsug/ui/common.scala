@@ -68,7 +68,7 @@ object common {
           if (options.link) {
             <.a(^.href := loc, text)
           } else {
-            <.span(text)
+            <.em(^.cls := "link", text)
           }
       }
     }
@@ -214,14 +214,17 @@ object common {
         def render(props: Int, state: Int, children: PropsChildren) = {
           val width = state
           <.div(
-            <.div.withRef(ref)(
-              ^.role := "tablist",
-              children
-            ),
-            <.span(
-              ^.cls := "tab-indicator",
-              ^.width := s"${width.show}px",
-              ^.left := s"${props * width}px"
+            ^.cls := "tabs",
+            <.div(
+              <.div.withRef(ref)(
+                ^.role := "tablist",
+                children
+              ),
+              <.span(
+                ^.cls := "tab-indicator",
+                ^.width := s"${width.show}px",
+                ^.left := s"${props * width}px"
+              )
             )
           ),
         }
