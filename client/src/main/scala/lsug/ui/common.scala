@@ -47,7 +47,7 @@ object common {
 
   val MaterialIcon = ScalaComponent
     .builder[String]("MaterialIcon")
-    .render_P(<.span(^.cls := "material-icons", _))
+    .render_P(<.span(^.cls := "material-icons", ^.aria.hidden := true, _))
     .configure(Reusability.shouldComponentUpdate)
     .build
 
@@ -231,7 +231,7 @@ object common {
             val width = el.firstElementChild.domAsHtml.offsetWidth
             $.setState(width.toInt)
           }.void
-        }
+      }
 
       ScalaComponent
         .builder[Int]("Tabs")
@@ -356,6 +356,24 @@ object common {
       }
       .build
   }
+
+  val ProfilePicture =
+    ScalaComponent
+      .builder[Option[P.Speaker.Profile]]("ProfilePicture")
+      .render_P { profile =>
+        <.div(
+          ^.cls := "profile-picture",
+          (for {
+            P.Speaker.Profile(_, _, asset) <- profile
+          } yield asset
+            .map { pic => <.img(^.src := pic.show) }
+            .getOrElse[TagMod](MaterialIcon("person"))).getOrElse(
+            <.div(^.cls := "placeholder")
+          )
+        )
+      }
+      .configure(Reusability.shouldComponentUpdate)
+      .build
 
   val Footer = ScalaComponent
     .builder[LocalDate]("Footer")

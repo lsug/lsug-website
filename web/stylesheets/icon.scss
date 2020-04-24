@@ -15,17 +15,8 @@ $standard-size: 2.25rem;
     border: 0.5rem solid color.$secondary;
 }
 
-.person-badge {
-
-    display: flex;
-    align-items: center;
-    font: {
-	size: font.$normal-size;
-	style: italic;
-    }
-    span {
-	padding-right: 1.25rem;
-    }
+.profile-picture {
+    padding: 0rem;
     img {
 	border-radius: 50%;
 	height: 4.25rem;

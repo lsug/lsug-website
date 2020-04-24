@@ -1,13 +1,16 @@
 @use "color";
 @use "font";
 
-.tab-content {
+div[role=tabpanel] {
     display: flex;
     justify-content: center;
+    &[hidden] {
+	display: none;
+    }
 }
 
 .tab-indicator {
-    height: 2px;
+    height: 0.2rem;
     display: inline-block;
     position: relative;
     background-color: lighten(color.$secondary, 30%);
@@ -21,10 +24,16 @@ div[role=tablist] {
     }
 }
 
-
+.events {
+    list-style: none;
+    li {
+	padding-top: 1.5rem;
+    }
+}
 
 .event {
-    display: contents;
+
+    display: block;
     text-decoration: none;
 
     color: color.$foreground;
@@ -37,13 +46,6 @@ div[role=tablist] {
 	color: color.$foreground;
     }
 
-    &:hover {
-	color: color.$foreground;
-    }
-}
-
-.event-summary {
-
     box-shadow: color.$box-shadow-primary;
     border-radius: 0.5rem;
     max-width: 45rem;
@@ -54,32 +56,52 @@ div[role=tablist] {
 	cursor: pointer;
     }
 
+    &:focus {
+	background-color: darken(color.$background, 2%);
+	box-shadow: color.$box-shadow-action;
+	cursor: pointer;
+    }
+
     $content-padding: 2rem;
 
-    h1 {
-	font: {
-	    size: font.$large-size;
-	    weight: 400;
-	}
+    header {
 
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
+	align-items: center;
 	padding: $content-padding - 0.5rem;
-	div {
-	    display: flex;
-	    align-items: center;
+
+	.event-location {
 	    span {
 		padding: 0.5rem;
 	    }
 	}
-    }
 
-    h2 {
-	font: {
-	    size: font.$large-size;
+	div {
+	    display: flex;
+	    align-items: inherit;
 	}
-	color: color.$primary;
+
+	h1 {
+	    display: flex;
+	    align-items: inherit;
+	    span {
+		padding: 0.25rem;
+	    }
+	    font: {
+		size: font.$large-size;
+		weight: 400;
+	    }
+	}
+
+	h2 {
+	    font: {
+		size: font.$large-size;
+	    }
+	    color: color.$primary;
+	}
+
     }
 
     .event-content {
@@ -108,7 +130,16 @@ div[role=tablist] {
 	}
     }
 
-    .person-badge {
+    .speaker {
+	span {
+	    padding-right: 1.25rem;
+	}
+	display: flex;
+	align-items: center;
+	font: {
+	    size: font.$normal-size;
+	    style: italic;
+	}
 	font: {
 	    size: 1rem;
 	    style: italic;

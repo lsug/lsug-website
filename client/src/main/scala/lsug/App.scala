@@ -23,7 +23,12 @@ object App extends IOApp {
         val now = LocalDateTime.now(Clock.systemUTC())
         React.Fragment(
           lui.common.NavBar(),
-          lui.home.Home(ctl, now),
+          lui.home.Home(
+            lui.home.Props(
+              ctl,
+              now
+            )
+          ),
           lui.common.Footer(now.toLocalDate)
         )
       }

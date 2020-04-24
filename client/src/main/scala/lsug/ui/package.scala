@@ -221,6 +221,7 @@ package object ui {
             ^.href := s"/events/${start.format(format)}",
             <.section(
               ^.cls := "event-summary",
+              ^.tabIndex := 0,
               <.h1(
                 EventTime(now, start, end),
                 EventLocation(location)

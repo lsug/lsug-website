@@ -145,6 +145,20 @@ object web extends WebModule {
 
   }
 
+  def run(ev: Evaluator) = T.command {
+    val t0 = bundle
+    val t1 = server.assetDir
+    val r = ev.evaluate(SAgg[Task[_]](t0, t1)).results
+    val r0 = r(t0).map(_.asInstanceOf[PathRef])
+    val r1 = r(t1).map(_.asInstanceOf[PathRef])
+
+    (r0, r1) match {
+      case (Result.Success(bundle), Result.Success(assetDir)) =>
+        server.run(bundle.path.toString, assetDir.path.toString)
+    }
+
+  }
+
 }
 
 object ci extends WebModule {
