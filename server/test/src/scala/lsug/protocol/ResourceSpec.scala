@@ -58,7 +58,6 @@ final class ResourceSpec extends IOSuite with PathImplicits {
             }
           )
       )
-
     }
   }
 }

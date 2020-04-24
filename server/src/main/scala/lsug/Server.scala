@@ -149,6 +149,9 @@ final class Server[F[_]: Sync: ContextShift: Logger](
   def event(id: Event.Id): F[Option[Event[Event.Item]]] =
     decodeMarkup(decoders.event.event, "events")(id)
 
+  def venue(id: Venue.Id): F[Option[Venue.Summary]] =
+    decodeMarkup(decoders.venue.summary, "venues")(id)
+
   def eventMeetup(id: Event.Id): F[Option[Event.Meetup.Event]] = {
     val link =
       Yaml._objKey("meetup") ^|-? Yaml._strValue

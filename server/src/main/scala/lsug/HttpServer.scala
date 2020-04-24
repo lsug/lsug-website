@@ -32,6 +32,14 @@ object Routes {
         ).map(_.asJson)
           .semiflatMap(Ok(_))
           .getOrElseF(NotFound())
+      case GET -> Root / "venues" / id / "summary" =>
+        OptionT(
+          server
+          //TODO: create unappy
+            .venue(new Venue.Id(id))
+        ).map(_.asJson)
+          .semiflatMap(Ok(_))
+          .getOrElseF(NotFound())
       case GET -> Root / "events" / id / "meetup" =>
         OptionT(
           server

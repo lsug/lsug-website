@@ -25,58 +25,38 @@ object home {
 
   type PEventSummary = P.Event.Summary[P.Event.Blurb]
 
-  val EventSearch = {
-
-    final class Backend(
-        $ : BackendScope[
-          (RouterCtl[Page.Event], LocalDateTime, List[PEventSummary]),
-          Option[String]
-        ]
-    ) {
-      def render(
-          s: Option[String],
-          p: (RouterCtl[Page.Event], LocalDateTime, List[PEventSummary])
-      ): VdomNode = {
-        <.div(
-          <.div(
-            ^.cls := "event-search-box",
-            <.label(^.`for` := "event-search"),
-            <.input(
-              ^.tpe := "text",
-              ^.id := "event-search",
-              ^.onChange ==> ((e: ReactEventFromInput) =>
-                $.setState(e.target.value.some)
-              )
-            )
-          ),
-          <.section(
-            p._3.zipWithIndex.map {
-              case (summary @ P.Event.Summary(_, _, _, blurbs), i) =>
-                EventSummary.withKey(i)((p._1, p._2, summary)).when {
-                  s.map { search =>
-                      blurbs.find(b => b.event.contains(search)).isDefined
-                    }
-                    .getOrElse(true)
-                }
-            }.toTagMod
-          )
-        )
-      }
-    }
-
-    ScalaComponent
-      .builder[(RouterCtl[Page.Event], LocalDateTime, List[PEventSummary])](
-        "EventSearch"
-      )
-      .initialState[Option[String]](none)
-      .renderBackend[Backend]
-      .build
-  }
-
   import common.{Spinner, Banner, Markup, MaterialIcon, markup, ProfilePicture}
 
   type Speakers = Map[P.Speaker.Id, P.Speaker.Profile]
   type Venues = Map[P.Venue.Id, P.Venue.Summary]
+
+  val EventLocation = {
+    ScalaComponent
+      .builder[(P.Event.Location, Option[P.Venue.Summary])]("EventLocation")
+      .render_P {
+        case (P.Event.Location.Virtual, _) =>
+          <.div(
+            ^.cls := "event-location",
+            MaterialIcon("cloud"),
+            <.span("virtual")
+          )
+        case (P.Event.Location.Physical(id), venue) =>
+          <.div(
+            MaterialIcon("place"),
+            venue
+              .map { v =>
+                <.div(
+                  ^.cls := "venue-address",
+                  <.span(v.name),
+                  <.span(","),
+                  <.span(v.address.head),
+                )
+              }
+              .getOrElse(<.span(^.cls := "placeholder venue-address"))
+          )
+      }
+      .build
+  }
 
   object event {
 
@@ -153,7 +133,7 @@ object home {
             ^.href := s"/events/${start.format(format)}",
             <.header(
               <.h1(EventTime(now, start, end)),
-              EventLocation(venue)
+              EventLocation((venue, venue.getId.flatMap(venues.get)))
             ),
             <.div(
               ^.cls := "event-content",
@@ -195,17 +175,19 @@ object home {
       upcoming: Option[List[PEventSummary]],
       past: Option[List[PEventSummary]],
       speakers: Map[P.Speaker.Id, P.Speaker.Profile],
-      locations: Map[P.Venue.Id, P.Venue.Summary]
+      venues: Map[P.Venue.Id, P.Venue.Summary]
   )
 
   object State {
 
     val initial = State(Tab.Upcoming, none, none, Map.empty, Map.empty)
     val _speakers = GenLens[State](_.speakers)
+    val _venues = GenLens[State](_.venues)
     val _upcoming = GenLens[State](_.upcoming)
     val _past = GenLens[State](_.past)
     val _tab = GenLens[State](_.tab)
     def _speaker(s: P.Speaker.Id) = _speakers ^|-> _at(s)
+    def _venue(v: P.Venue.Id) = _venues ^|-> _at(v)
 
   }
 
@@ -308,8 +290,8 @@ object home {
 
         val pass = ().pure[AsyncCallback]
 
-        def loadEvent(event: PEventSummary): AsyncCallback[Unit] =
-          event.events
+        def loadEvent(event: PEventSummary): AsyncCallback[Unit] = {
+          val loadSpeakers = event.events
             .flatMap(_.speakers)
             .traverse { id =>
               for {
@@ -326,6 +308,25 @@ object home {
               } yield ()
             }
             .void
+
+          val loadVenues = event.location match {
+            case P.Event.Location.Physical(id) =>
+              for {
+                resource <- Resource[P.Venue.Summary](
+                  s"venues/${id.show}/summary"
+                ).value
+                _ <- resource
+                  .bimap(
+                    const(pass),
+                    venue => $.modState(State._venue(id).set(venue.some)).async
+                  )
+                  .merge
+              } yield ()
+            case _ => pass
+          }
+
+          loadSpeakers >> loadVenues
+        }
 
         (for {
           upcomingResource <- Resource[List[PEventSummary]]("events").value

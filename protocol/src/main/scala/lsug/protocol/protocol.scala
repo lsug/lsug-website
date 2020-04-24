@@ -319,7 +319,12 @@ object Event {
 
   }
 
-  sealed trait Location
+  sealed trait Location {
+    def getId: Option[Venue.Id] = this match {
+      case Location.Virtual => none
+      case Location.Physical(id) => id.some
+    }
+  }
 
   object Location {
 

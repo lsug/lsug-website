@@ -28,6 +28,7 @@ object event {
     Footer
   }
 
+
   type PEvent = P.Event[P.Event.Item]
 
   val Schedule = {

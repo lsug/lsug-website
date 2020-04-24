@@ -33,6 +33,12 @@ div[role=tablist] {
 
 .event {
 
+    .venue-address {
+	span {
+	    padding: 0.1rem;
+	}
+    }
+
     display: block;
     text-decoration: none;
 

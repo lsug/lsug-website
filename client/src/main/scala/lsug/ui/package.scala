@@ -27,25 +27,6 @@ package object ui {
 
   import common.{Spinner, Banner, Markup, MaterialIcon, markup}
 
-  val EventLocation = {
-    ScalaComponent
-      .builder[P.Event.Location]("EventLocation")
-      .render_P {
-        case P.Event.Location.Virtual =>
-          <.div(
-            ^.cls := "event-location",
-            MaterialIcon("cloud"),
-            <.span("online")
-          )
-        case P.Event.Location.Physical(id) =>
-          <.div(
-            MaterialIcon("place"),
-            <.span(id.value)
-          )
-      }
-      .build
-  }
-
   val EventTime = {
 
     def pattern(s: String) = DateTimeFormatter.ofPattern(s)
@@ -172,88 +153,6 @@ package object ui {
       .renderBackend[Backend]
       .componentDidMount(_.backend.load)
       .configure(Reusability.shouldComponentUpdate)
-      .build
-  }
-
-  val EventSummary = {
-
-    val Blurb = ScalaComponent
-      .builder[protocol.Event.Blurb]("EventBlurb")
-      .render_P {
-        case protocol.Event.Blurb(event, desc, speakers, tags) =>
-          <.section(
-            ^.cls := "event-blurb",
-            <.h2(event),
-            <.div(
-              ^.cls := "text-content",
-              desc.headOption.map { m =>
-                React.Fragment(
-                  markup.Markup(m, markup.Options(false)),
-                  desc.tail.headOption.map(const(<.p("..."))).getOrElse(None)
-                )
-              }.toTagMod
-              // desc.zipWithIndex.map {
-              //   case (d, i) =>
-              //     Markup.withKey(i)(d)
-              // }.toTagMod
-            ),
-            EventSummarySpeakers(speakers)
-          )
-      }
-      .build
-
-    val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-    ScalaComponent
-      .builder[
-        (RouterCtl[Page.Event], LocalDateTime, P.Event.Summary[P.Event.Blurb])
-      ](
-        "EventSummary"
-      )
-      .render_P {
-        case (
-            router,
-            now,
-            P.Event.Summary(id, P.Event.Time(start, end), location, events)
-            ) =>
-          <.a(
-            ^.cls := "event",
-            ^.href := s"/events/${start.format(format)}",
-            <.section(
-              ^.cls := "event-summary",
-              ^.tabIndex := 0,
-              <.h1(
-                EventTime(now, start, end),
-                EventLocation(location)
-              ),
-              <.div(
-                ^.cls := "event-content",
-                events.map {
-                  case b @ protocol.Event.Blurb(e, _, _, _) =>
-                    Blurb.withKey(e)(b)
-                }.toTagMod,
-                <.ul(
-                  ^.cls := "event-tags",
-                  events
-                    .flatMap(_.tags)
-                    .distinct
-                    .map { t =>
-                      <.li(
-                        TagBadge(t)
-                      )
-                    }
-                    .toTagMod
-                ),
-                <.div(
-                  ^.cls := "event-more",
-                  <.span(
-                    "read more"
-                  )
-                )
-              )
-            )
-          )
-      }
       .build
   }
 

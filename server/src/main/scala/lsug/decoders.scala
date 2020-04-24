@@ -27,6 +27,23 @@ object decoders {
   implicit def optionToDecoderOptionOps[A](a: Option[A]): DecoderOptionOps[A] =
     new DecoderOptionOps(a)
 
+  object venue {
+    val summary: Decoder[Venue.Id => Venue.Summary] = {
+      val _name =
+        Yaml._objKey("name") ^|-? Yaml._strValue
+      val _address =
+        Yaml._objKey("address") ^|->> Yaml._arrItems ^|-? Yaml._strValue
+
+      Decoder.meta { yaml =>
+        for {
+          name <- _name.getOption(yaml).result("missing name")
+          address <- _address.getAll(yaml).toNel.result("missing address")
+        } yield id => Venue.Summary(id, name, address)
+      }
+    }
+
+  }
+
   object speaker {
     val profile: Decoder[Speaker.Id => Speaker.Profile] = {
 
@@ -294,115 +311,4 @@ object decoders {
     }
   }
 
-  // val eventSummary: Decoder[Event.Id => Event.Summary[Event.Blurb]] = {
-  //   val _time = Yaml._objKey("time") ^<-? Yaml._obj
-  //   val _startTime =
-  //     Yaml._objKey("start") ^|-? Yaml._strValue ^|-? _localDateTime
-  //   val _endTime = Yaml._objKey("end") ^|-? Yaml._strValue ^|-? _localDateTime
-  //   val _location = Yaml._objKey("location") ^|-? Yaml._strValue
-  //   val _events = Yaml._objKey("events") ^|->> Yaml._arrItems ^<-? Yaml._obj
-  //   val _tags = Yaml._objKey("tags") ^|->> Yaml._arrItems ^|-? Yaml._strValue
-  //   val _name = Yaml._objKey("name") ^|-? Yaml._strValue
-  //   val _speakers =
-  //     Yaml.Obj._values ^|-> at("speakers") ^<-? _some ^<-? Yaml._arr ^|-> Yaml.Arr._items ^|->> _eachl[
-  //       Yaml
-  //     ] ^<-? Yaml._str ^|-> Yaml.Str._value
-  //   val _speaker =
-  //     (Yaml.Obj._values ^|-> at("speaker") ^<-? _some ^|-? Yaml._strValue).asTraversal
-
-  //   def _blurb(ev: String) =
-  //     _nsection(ev) ^|-> section._content composeFold _nsection("Blurb") ^|-> section._content ^|-? _headl[
-  //       Markup
-  //     ]
-
-  //   Decoder.decoder { (meta, m) =>
-  //     for {
-  //       yml <- meta.result("missing metadata")
-  //       events = _events.getAll(yml)
-  //       loc <- _location
-  //         .getOption(yml)
-  //         .map { l =>
-  //           (if (l === "virtual")
-  //              Event.Location.Virtual
-  //            else
-  //              Event.Location.Physical(new Venue.Id(l))),
-
-  //         }
-  //         .result("missing location")
-  //       t <- _time.getOption(yml).result("missing time")
-  //       st <- _startTime.getOption(t).result("missing start time")
-  //       et <- _endTime.getOption(t).result("missing end time")
-  //       blurbs <- events.traverse { ev =>
-  //         for {
-  //           n <- _name.getOption(ev).result(s"missing entry for $ev")
-  //         } yield (Event.Blurb(
-  //           n,
-  //           _blurb(n).getAll(m),
-  //           (_speakers.getAll(ev) |+| _speaker.getAll(ev))
-  //             .map(new Speaker.Id(_)),
-  //           _tags.getAll(ev)
-  //         ))
-  //       }
-  //     } yield { (id: Event.Id) =>
-  //       Event.Summary(
-  //         id,
-  //         Event.Time(st, et),
-  //         loc,
-  //         blurbs
-  //       )
-  //     }
-  //   }
-  // }
-
-  // val eventd: Decoder[Event.Id => Event[Event.Item]] = {
-
-  //   val _schedule = _nsection("Schedule") ^|-> section._content
-
-  //   // Decoder.decoder { (meta, m) =>
-  //   //   (for {
-  //   //     yml <- meta
-  //   //     summary <- eventSummary(meta, m).toOption
-  //   //     schedule <- (
-  //   //       for {
-  //   //         tbl <- _schedule.headOption(m)
-  //   //         _start <- table
-  //   //           ._columnIndex("Start")
-  //   //           .get(tbl)
-  //   //           .map(_indexNel[Markup.Text])
-  //   //           .map(_ ^|-? text._plainValue ^|-? _localTime)
-  //   //         _item <- table
-  //   //           ._columnIndex("Item")
-  //   //           .get(tbl)
-  //   //           .map(_indexNel[Markup.Text])
-  //   //           .map(_ ^|-? text._plainValue)
-  //   //         _end <- table
-  //   //           ._columnIndex("End")
-  //   //           .get(tbl)
-  //   //           .map(_indexNel[Markup.Text])
-  //   //           .map(_ ^|-? text._plainValue ^|-? _localTime)
-  //   //         items <- tbl.rows.map(_.columns).traverse { tr =>
-  //   //           (_start.getOption(tr), _end.getOption(tr), _item.getOption(tr))
-  //   //             .mapN { (st, et, ev) =>
-  //   //               Event.Schedule.Item(
-  //   //                 ev,
-  //   //                 st,
-  //   //                 et
-  //   //               )
-  //   //             }
-  //   //         }
-  //   //         itemsNel <- items.headOption.map(NonEmptyList(_, items.tail))
-  //   //       } yield Event.Schedule(itemsNel)
-  //   //     )
-  //   //   } yield (id: Event.Id) =>
-  //   //     Event(
-  //   //       ???,
-  //   //       ???,
-  //   //       ???,
-  //   //       schedule,
-  //   //     ))
-  //   //     .map(Decoder.Result.Success(_))
-  //   //     .getOrElse(Decoder.Result.Failure("failed"))
-  //   // }
-  //   ???
-  // }
 }
