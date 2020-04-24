@@ -19,7 +19,7 @@ object event {
 
   import common.{
     Spinner,
-    PersonBadge,
+    ProfilePicture,
     Markup,
     panel,
     MaterialIcon,
@@ -27,7 +27,6 @@ object event {
     NavBar,
     Footer
   }
-
 
   type PEvent = P.Event[P.Event.Item]
 
@@ -166,25 +165,35 @@ object event {
     ScalaComponent
       .builder[Option[P.Speaker]]("Speaker")
       .render_P { speaker =>
-        speaker
-          .map {
-            case P.Speaker(
-                P.Speaker.Profile(_, name, photo),
-                bio,
-                socialMedia
-                ) =>
-              <.section(
-                <.h3(name),
-                PersonBadge(photo),
-                <.div(
-                  ^.cls := "speaker-bio",
-                  bio.zipWithIndex.map {
-                    case (markup, index) => Markup.withKey(index)(markup)
-                  }.toTagMod
+        <.section(
+          ^.cls := "speaker",
+          speaker
+            .map {
+              case P.Speaker(
+                  p @ P.Speaker.Profile(_, name, _),
+                  bio,
+                  socialMedia
+                  ) =>
+                React.Fragment(
+                  <.header(
+                    <.h3(name),
+                    <.div(
+                      ProfilePicture(p.some),
+                      SocialMedia(socialMedia)
+                    )
+                  ),
+                  <.div(
+                    ^.cls := "bio",
+                    bio.zipWithIndex.map {
+                      case (markup, index) => Markup.withKey(index)(markup)
+                    }.toTagMod
+                  )
                 )
-              )
-          }
-          .getOrElse(Spinner())
+            }
+            .getOrElse {
+              <.div(^.cls := "placeholder")
+            }
+        )
       }
       .build
   }
@@ -227,8 +236,8 @@ object event {
           s: State,
           props: (RouterCtl[Page.Home.type], String)
       ): VdomNode = {
-        <.div(
-          NavBar(),
+        <.main(
+          ^.cls := "event-page",
           s.event
             .map {
               case P.Event(
@@ -238,74 +247,73 @@ object event {
                   P.Event.Summary(id, time, _, blurbs),
                   schedule
                   ) =>
-                <.main(
-                  ^.cls := "event",
-                  <.div(
-                    ^.cls := "event-article",
-                    <.h1(time.start.format(pattern("E, dd MMM"))),
+                <.div(
+                  ^.cls := "event-article",
+                    <.header(
+                        <.h1(time.start.format(pattern("E, dd MMM"))),
+                    ),
                     <.section(
-                      ^.cls := "welcome",
-                      welcome.zipWithIndex.map {
-                        case (m, i) => Markup.withKey(i.toLong)(m)
-                      }.toTagMod
-                    ),
-                    <.ul(
-                      ^.cls := "event-hosts",
-                      hosts
-                        .map { id =>
-                          //TODO: move out
-                          _speaker(id)
-                            .get(s)
-                            .map { host =>
-                              <.li(
-                                <.div(
-                                  <.span(host.profile.name),
-                                  PersonBadge(host.profile.photo)
-                                )
-                              )
-                            }
-                            .getOrElse {
-                              <.li(
-                                <.div()
-                              )
-                            }
-                        }
-                        .toList
-                        .toTagMod
-                    ),
-                    blurbs.map {
-                      case P.Event.Item(
-                          P.Event.Blurb(event, desc, speakers, tags),
-                          _,
-                          _,
-                          _,
-                          _
-                          ) =>
-                        <.section(
-                          ^.cls := "event-item",
-                          <.h2(^.cls := "event-item-name", event),
-                          <.ul(
-                            ^.cls := "event-tags",
-                            tags.map(t => <.li(TagBadge(t))).toTagMod
-                          ),
-                          <.div(
-                            ^.cls := "event-item-abstract",
-                            desc.zipWithIndex.map {
-                              case (d, i) =>
-                                Markup.withKey(i)(d)
-                            }.toTagMod
-                          ),
-                          <.div(
-                            ^.cls := "event-speakers",
-                            speakers.map { speaker =>
-                              Speaker.withKey(speaker.show)(
-                                _speaker(speaker).get(s)
-                              )
-                            }.toTagMod
-                          )
-                        )
+                    ^.cls := "welcome",
+                    welcome.zipWithIndex.map {
+                      case (m, i) => Markup.withKey(i.toLong)(m)
                     }.toTagMod
                   ),
+                  <.ul(
+                    ^.cls := "event-hosts",
+                    hosts
+                      .map { id =>
+                        //TODO: move out
+                        _speaker(id)
+                          .get(s)
+                          .map { host =>
+                            <.li(
+                              <.div(
+                                <.span(host.profile.name),
+                                ProfilePicture(host.profile.some)
+                              )
+                            )
+                          }
+                          .getOrElse {
+                            <.li(
+                              <.div(^.cls := "placeholder")
+                            )
+                          }
+                      }
+                      .toList
+                      .toTagMod
+                  ),
+                  blurbs.map {
+                    case P.Event.Item(
+                        P.Event.Blurb(event, desc, speakers, tags),
+                        _,
+                        _,
+                        _,
+                        _
+                        ) =>
+                      <.section(
+                        ^.cls := "event-item",
+                        <.h2(^.cls := "event-item-name", event),
+                        <.ul(
+                          ^.cls := "event-tags",
+                          tags.map(t => <.li(TagBadge(t))).toTagMod
+                        ),
+                        <.div(
+                          ^.cls := "event-item-abstract",
+                          desc.zipWithIndex.map {
+                            case (d, i) =>
+                              Markup.withKey(i)(d)
+                          }.toTagMod
+                        ),
+                        <.div(
+                          ^.cls := "event-speakers",
+                          speakers.map { speaker =>
+                            Speaker.withKey(speaker.show)(
+                              _speaker(speaker).get(s)
+                            )
+                          }.toTagMod
+                        )
+                      )
+                  }.toTagMod,
                   sidesheet.SideSheet.withChildren(
                     panel.Panel.withChildren(
                       panel.Summary.withChildren(
@@ -323,8 +331,7 @@ object event {
                   )()
                 )
             }
-            .getOrElse(Spinner()),
-          Footer(LocalDateTime.now(Clock.systemUTC()).toLocalDate)
+            .getOrElse(<.div(^.cls := "placeholder"))
         )
       }
 

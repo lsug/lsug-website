@@ -1,0 +1,96 @@
+@use "color";
+@use "font";
+@use "icon";
+
+.event-page {
+
+    .meetup {
+
+	max-width: 400px;
+
+	a {
+	    text-decoration: none;
+	    color: black;
+	}
+
+	h2 {
+	    display: flex;
+	    font: {
+		size: 18px;
+		weight: 400;
+	    }
+	    align-items: center;
+	    margin: 0px;
+	}
+
+	&:hover {
+	    background-color: darken(color.$background, 2%);
+	}
+	.logo {
+	    height: icon.$standard-size;
+	    padding-right: 10px;
+	}
+	div {
+	    display: flex;
+	    flex-direction: row-reverse;
+	    .sign-up {
+		text-transform: uppercase;
+		padding: 10px;
+		font-size: font.$normal-size;
+	    }
+	}
+    }
+
+    .panel {
+	max-width: 400px;
+    }
+
+    .panel-summary {
+
+	display: flex;
+
+	.event-time {
+	    font-size: 18px;
+	    display: flex;
+	    align-items: center;
+	    .material-icons {
+		padding-right: 8px;
+	    }
+	}
+	align-items: center;
+	justify-content: space-between;
+
+	&:hover {
+	    background-color: darken(color.$background, 2%);
+	}
+    }
+
+    .panel-toggle-on {
+	.panel-toggle-icon {
+	    transform: rotate(180deg);
+	}
+    }
+
+    .panel-toggle-icon {
+	transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .event-schedule {
+	display: grid;
+	list-style: none;
+	li {
+	    display: contents;
+	    .event-name {
+		grid-column: 1;
+	    }
+	    .event-start {
+		grid-column: 2;
+	    }
+	    .event-end {
+		grid-column: 3;
+	    }
+	}
+	padding: 0px;
+    }
+
+}
