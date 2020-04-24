@@ -9,7 +9,9 @@ import cats.implicits._
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
+import org.scalajs.dom.html
 import lsug.ui.implicits._
+import japgolly.scalajs.react.CatsReact._
 
 object common {
 
@@ -170,48 +172,87 @@ object common {
       .build
   }
 
-  object tabbed {
+  object tabs {
+
+    //TODO: need id
+
+    // val Tab = {
+    //   final class Backend($: BackendScope[()])
+    // }
+
+    case class TabProps(
+        label: String,
+        selected: Boolean,
+        onSelect: Callback
+    )
 
     val Tab = ScalaComponent
-      .builder[(Int, Boolean, Callback)]("Tab")
-      .render_P {
-        case (width, selected, onSelect) =>
-          <.div(
-            ^.width := width.px,
-            ^.cls := ("tab".cls |+| (if (selected)
-                                       "tab-selected".cls
-                                     else "tab-unselected".cls)).show,
-            ^.onClick --> onSelect
+      .builder[(String, Boolean, Callback)]("Tab")
+      .render_PC {
+        case ((label, selected, onSelect), children) =>
+          <.button(
+            ^.role := "tab",
+            ^.aria.selected := selected,
+            ^.aria.controls := label,
+            ^.onClick --> onSelect,
+            children
           )
       }
       .build
 
-    // val Tabs = ScalaComponent
-    //   .builder[(Int, Int)]("Tabs")
-    //   .render_PC {
-    //     case ((width, selected), children) =>
-    //       <.div(
-    //         ^.cls := "tabs",
-    //         <.div(children),
-    //         <.span(
-    //           ^.cls := "tab-indicator",
-    //           ^.width := s"${width.show}px",
-    //           ^.left := s"${selected * width}px"
-    //         )
-    //       )
-    //   }
-    //   .build
+    case class TabsProps(
+        minWidth: Int,
+        tabs: NonEmptyList[Tab.type]
+    )
 
-    // val TabContent = ScalaComponent
-    //   .builder[Boolean]("TabContent")
-    //   .render_PC {
-    //     case (selected, children) =>
-    //       <.div(
-    //         ^.cls := ("tab-content".cls |+| if(selected) ),
-    //         children
-    //       )
-    //   }
-    //   .build
+    val Tabs = {
+
+      final class Backend($ : BackendScope[Int, Int]) {
+
+        private val ref = Ref[html.Div]
+
+        def render(props: Int, state: Int, children: PropsChildren) = {
+          val width = state
+          <.div(
+            <.div.withRef(ref)(
+              ^.role := "tablist",
+              children
+            ),
+            <.span(
+              ^.cls := "tab-indicator",
+              ^.width := s"${width.show}px",
+              ^.left := s"${props * width}px"
+            )
+          ),
+        }
+
+        def init: Callback =
+          ref.get.flatMap { el =>
+            val width = el.firstElementChild.domAsHtml.offsetWidth
+            $.setState(width.toInt)
+          }.void
+        }
+
+      ScalaComponent
+        .builder[Int]("Tabs")
+        .initialState[Int](0)
+        .renderBackendWithChildren[Backend]
+        .componentDidMount(_.backend.init)
+        .build
+    }
+
+    val TabPanel = ScalaComponent
+      .builder[(String, Boolean)]("TabPanel")
+      .render_PC {
+        case ((label, selected), children) =>
+          <.div(
+            ^.id := label,
+            ^.role := "tabpanel",
+            ^.hidden := !selected,
+            children
+          )
+      }
+      .build
 
   }
 

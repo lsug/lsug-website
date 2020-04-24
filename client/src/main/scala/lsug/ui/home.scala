@@ -4,6 +4,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.extra.Ajax
 import japgolly.scalajs.react.CatsReact._
+import cats._
 import cats.implicits._
 import cats.data._
 import lsug.protocol
@@ -17,7 +18,7 @@ import io.circe.parser._
 
 object home {
 
-  import common.Tabbed
+  import common.{Tabbed, tabs}
 
   type PEventSummary = P.Event.Summary[P.Event.Blurb]
 
@@ -73,28 +74,69 @@ object home {
 
     sealed trait State
 
+    sealed trait Tab
+
+    object Tab {
+
+      case object Upcoming extends Tab
+      case object Past extends Tab
+
+      val upcoming: Tab = Upcoming
+      val past: Tab = Past
+
+      implicit val show: Show[Tab] = Show.fromToString[Tab]
+      implicit val eq: Eq[Tab] = Eq.fromUniversalEquals[Tab]
+    }
+
     object State {
+
       case object Loading extends State
       case object Error extends State
-      case class Loaded(blurbs: List[PEventSummary]) extends State
+      case class Loaded(tab: Tab, blurbs: List[PEventSummary]) extends State
     }
 
     final class Backend(
         $ : BackendScope[(RouterCtl[Page], LocalDateTime), State]
     ) {
+
+      def tab(tab: Tab)(curr: Tab) =
+        tabs.Tab
+          .withKey(tab.show)
+          .withChildren(
+            <.span(tab.show)
+          )((tab.show, curr === tab, $.modState {
+            case State.Loaded(_, blurbs) =>
+              State.Loaded(tab, blurbs)
+            case s => s
+          }))
+
+      val UpcomingTab = tab(Tab.Upcoming) _
+      val PastTab = tab(Tab.Past) _
+
+      val labels = List(Tab.Upcoming, Tab.Past)
+
       def render(s: State, p: (RouterCtl[Page], LocalDateTime)): VdomNode = {
         s match {
           case State.Loading =>
             common.Spinner()
           case State.Error =>
             <.div("oops")
-          case State.Loaded(blurbs) =>
+          case State.Loaded(tab, blurbs) =>
             <.main(
-              Tabbed
+              tabs.Tabs.withChildren(
+                UpcomingTab(tab),
+                PastTab(tab)
+              )(labels.indexOf(tab)),
+              tabs.TabPanel
+                .withKey(Tab.upcoming.show)
                 .withChildren(
-                  EventSummary(p._1.narrow, p._2, blurbs.head),
+                  EventSummary(p._1.narrow, p._2, blurbs.head)
+                )(Tab.upcoming.show, tab === Tab.upcoming),
+              tabs.TabPanel
+                .withKey(Tab.past.show)
+                .withChildren(
                   EventSearch(p._1.narrow, p._2, blurbs)
-                )(NonEmptyList("upcoming", List("previous")))
+                )(Tab.past.show, tab === Tab.past)
             )
         }
       }
@@ -103,7 +145,7 @@ object home {
         Resource[List[PEventSummary]]("events")
           .bimap(
             const(State.Error),
-            State.Loaded(_)
+            State.Loaded(Tab.Upcoming, _)
           )
           .merge[State]
           .flatMap($.setState(_).async)
