@@ -223,13 +223,16 @@ object event {
       event: Option[PEvent],
       meetup: Option[P.Event.Meetup.Event],
       showSchedule: Boolean,
-      speakers: Speakers
+      speakers: Speakers,
+      tabs: Map[String, Item.Tab]
   )
 
   object State {
     val _showSchedule = GenLens[State](_.showSchedule)
     val _speakers = GenLens[State](_.speakers)
     def _speaker(s: P.Speaker.Id) = _speakers ^|-> _at(s)
+    val _tabs = GenLens[State](_.tabs)
+    def _tab(s: String) = _tabs ^|-> _at(s)
     val _meetup = GenLens[State](_.meetup)
     val _event = GenLens[State](_.event)
   }
@@ -315,6 +318,11 @@ object event {
       case object Video extends Tab
       case object Slides extends Tab
 
+      val about: Tab = About
+      val setup: Tab = Setup
+      val video: Tab = Video
+      val slides: Tab = Slides
+
       implicit val tabShow: Show[Tab] = Show.fromToString[Tab]
       implicit val tabEq: Eq[Tab] = Eq.fromUniversalEquals[Tab]
 
@@ -346,11 +354,11 @@ object event {
               ) =>
             val existingTabs =
               List(
-                Tab.About.some,
-                setup.headOption.map(const(Tab.Setup)),
-                slides.map(const(Tab.Slides)),
-                recording.map(const(Tab.Video))
-              ).mapFilter[Tab](identity)
+                Tab.about.some,
+                setup.headOption.map(const(Tab.setup)),
+                slides.map(const(Tab.slides)),
+                recording.map(const(Tab.video))
+              ).mapFilter(identity)
 
             <.article(
               ^.cls := "item",
@@ -367,17 +375,30 @@ object event {
                     .vdomElement
                 }: _*
               )(existingTabs.indexOf(tab)),
-              <.div(
-                ^.cls := "abstract",
-                desc.zipWithIndex.map {
-                  case (d, i) =>
-                    Markup.withKey(i)(d)
-                }.toTagMod
-              ),
-              <.ul(
-                ^.cls := "tags",
-                tags.map(t => <.li(TagBadge(t))).toTagMod
-              ),
+              tabs.TabPanel.withChildren(
+                <.div(
+                  <.div(
+                    ^.cls := "abstract",
+                    desc.zipWithIndex.map {
+                      case (d, i) =>
+                        Markup.withKey(i)(d)
+                    }.toTagMod
+                  ),
+                  <.ul(
+                    ^.cls := "tags",
+                    tags.map(t => <.li(TagBadge(t))).toTagMod
+                  )
+                )
+              )(Tab.about.show, tab === Tab.about),
+              tabs.TabPanel.withChildren(
+                <.div(
+                  ^.cls := "setup",
+                  setup.zipWithIndex.map {
+                    case (d, i) =>
+                      Markup.withKey(i)(d)
+                  }.toTagMod
+                )
+              )(Tab.setup.show, tab === Tab.setup),
               <.div(
                 ^.cls := "speakers",
                 speakerIds.map { id =>
@@ -433,10 +454,10 @@ object event {
                         ) =>
                       Item.Item.withKey(id.show)(
                         Item.Props(
-                          Item.Tab.About,
+                          s.tabs.get(id.show).getOrElse(Item.Tab.About),
                           item,
-                          tab => Callback.empty,
-                          s.speakers // TODO: reduce
+                          tab => $.modState(_tab(id.show).set(tab.some)),
+                          s.speakers.view.filterKeys(speakers.contains(_)).toMap
                         )
                       )
                   }.toTagMod
@@ -532,7 +553,7 @@ object event {
 
     ScalaComponent
       .builder[(RouterCtl[Page.Home.type], String)]("Event")
-      .initialState[State](State(none, none, false, Map()))
+      .initialState[State](State(none, none, false, Map(), Map()))
       .renderBackend[Backend]
       .componentDidMount(_.backend.load)
       .build

@@ -96,7 +96,7 @@ object common {
         case P.Markup.Text.Styled.Strong(text) =>
           <.strong(text.map(renderText).toList.toTagMod)
         case P.Markup.Text.Styled.Code(code) =>
-          <.pre(<.code(code))
+          <.code(code)
         case P.Markup.Text.Link(text, loc) =>
           <.a(^.href := loc, text)
       }
@@ -172,11 +172,6 @@ object common {
 
   object tabs {
 
-    //TODO: need id
-
-    // val Tab = {
-    //   final class Backend($: BackendScope[()])
-    // }
 
     case class TabProps(
         label: String,

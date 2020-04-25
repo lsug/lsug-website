@@ -132,7 +132,7 @@ object decoders {
         } yield (s: String) =>
           Event.Item(
             b(s),
-            _nsection("Setup").getAll(m),
+            (_nsection("Setup") ^|-> section._content ^|->> _eachl).getAll(m),
             meta.flatMap(_slides.getOption).map(new Link(_)),
             meta.flatMap(_recording.getOption).map(new Link(_)),
             meta
