@@ -20,6 +20,21 @@
 
 .event-page {
 
+    .tabs {
+	padding-top: 0.5rem;
+    }
+
+    div[role=tablist] {
+	button[role=tab] {
+	    min-width: 100px;
+	    text-transform: uppercase;
+	    font: {
+		size: font.$normal-size;
+		weight: 800;
+	    }
+	}
+    }
+
     display: grid;
 
     .item {
@@ -38,8 +53,22 @@
     }
 
     .hosts {
+
 	list-style: none;
+	display: flex;
 	padding: 0px;
+
+	.host {
+	    display: flex;
+	    align-items: center;
+	    font: {
+		style: italic;
+	    }
+	    span {
+		padding-right: 0.25rem;
+	    }
+	    padding-right: 0.5rem;
+	}
     }
 
     .side-sheet {
@@ -140,6 +169,18 @@
 	    }
 	}
 	padding: 0px;
+    }
+
+    .speaker {
+	.social-media {
+	    display: flex;
+	    align-items: center;
+
+	    .social-media-icon {
+		padding-right: 0.5rem;
+		padding-left: 0.5rem;
+	    }
+	}
     }
 
 }

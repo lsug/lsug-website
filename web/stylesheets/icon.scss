@@ -16,15 +16,23 @@ $standard-size: 2.25rem;
 }
 
 .profile-picture {
+
     padding: 0rem;
+
     img {
 	border-radius: 50%;
 	height: 4.25rem;
+    }
+
+    .material-icons {
+	border-radius: 50%;
+	font-size: 4.25rem;
     }
 }
 
 
 .social-media-icon {
+    padding: 0rem;
     img {
 	width: $standard-size;
     }

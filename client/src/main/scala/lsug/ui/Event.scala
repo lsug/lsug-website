@@ -8,6 +8,7 @@ import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.extra.Ajax
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.CatsReact._
+import cats._
 import cats.implicits._
 import cats.data.NonEmptyList
 import java.time.format.DateTimeFormatter
@@ -173,14 +174,26 @@ object event {
               case P.Speaker(
                   p @ P.Speaker.Profile(_, name, _),
                   bio,
-                  socialMedia
+                  P.Speaker.SocialMedia(
+                    blog,
+                    twitter,
+                    xxx
+                  )
                   ) =>
                 React.Fragment(
                   <.header(
                     <.h3(name),
                     <.div(
-                      ProfilePicture(p.some),
-                      SocialMedia(socialMedia)
+                      ^.cls := "social-media",
+                      blog
+                        .map { link =>
+                          <.a(
+                            ^.href := link.show,
+                            ProfilePicture(p.some)
+                          )
+                        }
+                        .getOrElse(ProfilePicture(p.some)),
+                      twitter.map(Twitter(_))
                     )
                   ),
                   <.div(
@@ -230,12 +243,20 @@ object event {
             ^.cls := "hosts",
             speakers
               .map { host =>
+                val name = host.profile.name.split(" ")
                 <.li(
                   ^.cls := "host",
-                  <.div(
-                    <.span(host.profile.name),
-                    ProfilePicture(host.profile.some)
-                  )
+                  name.headOption.map(n =>
+                    React.Fragment(
+                      <.span(
+                        s"${n(0)}."
+                      ),
+                      <.span(
+                        name.tail.mkString(" ")
+                      )
+                    )
+                  ),
+                  ProfilePicture(host.profile.some)
                 )
               }
               .toList
@@ -282,11 +303,99 @@ object event {
 
   }
 
+  object Item {
+
+    import common.tabs
+
+    sealed trait Tab
+
+    object Tab {
+      case object About extends Tab
+      case object Setup extends Tab
+      case object Video extends Tab
+      case object Slides extends Tab
+
+      implicit val tabShow: Show[Tab] = Show.fromToString[Tab]
+      implicit val tabEq: Eq[Tab] = Eq.fromUniversalEquals[Tab]
+
+    }
+
+    case class Props(
+        tab: Tab,
+        item: P.Event.Item,
+        onToggle: Tab => Callback,
+        speakers: Speakers
+    )
+
+    val Item = {
+
+      ScalaComponent
+        .builder[Props]("Item")
+        .render_P {
+          case Props(
+              tab,
+              P.Event.Item(
+                P.Event.Blurb(event, desc, speakerIds, tags),
+                setup,
+                slides,
+                recording,
+                _
+              ),
+              onToggle,
+              speakers
+              ) =>
+            val existingTabs =
+              List(
+                Tab.About.some,
+                setup.headOption.map(const(Tab.Setup)),
+                slides.map(const(Tab.Slides)),
+                recording.map(const(Tab.Video))
+              ).mapFilter[Tab](identity)
+
+            <.article(
+              ^.cls := "item",
+              <.header(
+                <.h2(^.cls := "item-header", event)
+              ),
+              tabs.Tabs.withChildren(
+                existingTabs.map { t =>
+                  tabs.Tab
+                    .withKey(t.show)
+                    .withChildren(
+                      <.span(t.show)
+                    )((t.show, tab === t, onToggle(t)))
+                    .vdomElement
+                }: _*
+              )(existingTabs.indexOf(tab)),
+              <.div(
+                ^.cls := "abstract",
+                desc.zipWithIndex.map {
+                  case (d, i) =>
+                    Markup.withKey(i)(d)
+                }.toTagMod
+              ),
+              <.ul(
+                ^.cls := "tags",
+                tags.map(t => <.li(TagBadge(t))).toTagMod
+              ),
+              <.div(
+                ^.cls := "speakers",
+                speakerIds.map { id =>
+                  Speaker.withKey(id.show)(
+                    speakers.get(id)
+                  )
+                }.toTagMod
+              )
+            )
+        }
+        .build
+    }
+
+  }
+
   import State._
 
   val Event = {
-
-    def pattern(s: String) = DateTimeFormatter.ofPattern(s)
 
     final class Backend(
         $ : BackendScope[(RouterCtl[Page.Home.type], String), State]
@@ -315,36 +424,19 @@ object event {
                 <.section(
                   ^.cls := "items",
                   blurbs.map {
-                    case P.Event.Item(
-                        P.Event.Blurb(event, desc, speakers, tags),
-                        _,
-                        _,
-                        _,
-                        _
+                    case item @ P.Event.Item(
+                          P.Event.Blurb(id, _, speakers, tags),
+                          _,
+                          _,
+                          _,
+                          _
                         ) =>
-                      <.article(
-                        ^.cls := "item",
-                        <.header(
-                          <.h2(^.cls := "item-header", event),
-                        ),
-                        <.ul(
-                          ^.cls := "tags",
-                          tags.map(t => <.li(TagBadge(t))).toTagMod
-                        ),
-                        <.div(
-                          ^.cls := "abstract",
-                          desc.zipWithIndex.map {
-                            case (d, i) =>
-                              Markup.withKey(i)(d)
-                          }.toTagMod
-                        ),
-                        <.div(
-                          ^.cls := "speakers",
-                          speakers.map { speaker =>
-                            Speaker.withKey(speaker.show)(
-                              _speaker(speaker).get(s)
-                            )
-                          }.toTagMod
+                      Item.Item.withKey(id.show)(
+                        Item.Props(
+                          Item.Tab.About,
+                          item,
+                          tab => Callback.empty,
+                          s.speakers // TODO: reduce
                         )
                       )
                   }.toTagMod

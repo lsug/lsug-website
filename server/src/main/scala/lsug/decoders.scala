@@ -68,7 +68,7 @@ object decoders {
     val speaker: Decoder[Speaker.Id => Speaker] = {
 
       def _social(media: String) =
-        Yaml._objKey("social") ^<-? Yaml._obj ^|-? Yaml._objKey("twitter") ^|-? Yaml._strValue
+        Yaml._objKey("social") ^<-? Yaml._obj ^|-? Yaml._objKey(media) ^|-? Yaml._strValue
 
       Decoder.instance { (yaml, markup) =>
         for {

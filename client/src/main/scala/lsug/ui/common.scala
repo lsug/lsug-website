@@ -381,7 +381,7 @@ object common {
     .render_P(now =>
       <.div(
         ^.cls := "footer",
-        Disclaimer(("123240125", now))
+        Disclaimer(("12325025", now))
       )
     )
     .configure(Reusability.shouldComponentUpdate)
