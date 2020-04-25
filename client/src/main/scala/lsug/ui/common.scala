@@ -137,9 +137,7 @@ object common {
       .render_PC {
         case (expanded, children) =>
           <.div(
-            ^.cls := ("panel-details".cls |+| (if (expanded)
-                                                 "panel-expanded".cls
-                                               else "panel-hidden".cls)).show,
+            ^.cls := (if(expanded) "panel-details" else "panel-details hidden"),
             children
           )
       }

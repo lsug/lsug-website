@@ -37,7 +37,13 @@ object App extends IOApp {
       dynamicRouteCT(
         root / "events" / string("[0-9\\-]+").caseClass[Page.Event]
       ) ~> dynRenderR {
-        case (Page.Event(ev), ctl) => ui.event.Event((ctl.narrow, ev))
+        case (Page.Event(ev), ctl) =>
+          val now = LocalDateTime.now(Clock.systemUTC())
+          React.Fragment(
+            lui.common.NavBar(),
+            lui.event.Event((ctl.narrow, ev)),
+            lui.common.Footer(now.toLocalDate)
+          )
       }
 
     (homeRoute | eventRoute).notFound(

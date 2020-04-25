@@ -9,6 +9,7 @@ import japgolly.scalajs.react.extra.Ajax
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.CatsReact._
 import cats.implicits._
+import cats.data.NonEmptyList
 import java.time.format.DateTimeFormatter
 import monocle.macros.{GenLens}
 import monocle.std.option.{some => _some}
@@ -203,11 +204,13 @@ object event {
       showSchedule: Boolean
   )
 
+  type Speakers = Map[P.Speaker.Id, P.Speaker]
+
   case class State(
       event: Option[PEvent],
       meetup: Option[P.Event.Meetup.Event],
       showSchedule: Boolean,
-      speakers: Map[P.Speaker.Id, P.Speaker]
+      speakers: Speakers
   )
 
   object State {
@@ -216,6 +219,67 @@ object event {
     def _speaker(s: P.Speaker.Id) = _speakers ^|-> _at(s)
     val _meetup = GenLens[State](_.meetup)
     val _event = GenLens[State](_.event)
+  }
+
+  val EventHosts =
+    ScalaComponent
+      .builder[Option[NonEmptyList[P.Speaker]]]("EventHosts")
+      .render_P {
+        _.map { speakers =>
+          <.ul(
+            ^.cls := "hosts",
+            speakers
+              .map { host =>
+                <.li(
+                  ^.cls := "host",
+                  <.div(
+                    <.span(host.profile.name),
+                    ProfilePicture(host.profile.some)
+                  )
+                )
+              }
+              .toList
+              .toTagMod
+          )
+        }.getOrElse(<.ul("hosts placeholder"))
+      }
+      .build
+
+  val EventWelcome = {
+
+    val pattern = DateTimeFormatter.ofPattern("E, dd MMM")
+
+    ScalaComponent
+      .builder[(Option[PEvent], Speakers)]("EventWelcome")
+      .render_P {
+        case (event, speakers) =>
+          event
+            .map {
+              case P.Event(
+                  hosts,
+                  welcome,
+                  _,
+                  P.Event.Summary(_, time, _, blurbs),
+                  _
+                  ) =>
+                <.header(
+                  ^.cls := "welcome",
+                  <.h1(time.start.format(pattern)),
+                  <.section(
+                    ^.cls := "message",
+                    welcome.zipWithIndex.map {
+                      case (m, i) => Markup.withKey(i.toLong)(m)
+                    }.toTagMod
+                  ),
+                  EventHosts(hosts.traverse(speakers.get))
+                ),
+            }
+            .getOrElse(
+              <.header(^.cls := "event-header placeholder")
+            )
+      }
+      .build
+
   }
 
   import State._
@@ -238,6 +302,7 @@ object event {
       ): VdomNode = {
         <.main(
           ^.cls := "event-page",
+          EventWelcome((s.event, s.speakers)),
           s.event
             .map {
               case P.Event(
@@ -247,41 +312,8 @@ object event {
                   P.Event.Summary(id, time, _, blurbs),
                   schedule
                   ) =>
-                <.div(
-                  ^.cls := "event-article",
-                    <.header(
-                        <.h1(time.start.format(pattern("E, dd MMM"))),
-                    ),
-                    <.section(
-                    ^.cls := "welcome",
-                    welcome.zipWithIndex.map {
-                      case (m, i) => Markup.withKey(i.toLong)(m)
-                    }.toTagMod
-                  ),
-                  <.ul(
-                    ^.cls := "event-hosts",
-                    hosts
-                      .map { id =>
-                        //TODO: move out
-                        _speaker(id)
-                          .get(s)
-                          .map { host =>
-                            <.li(
-                              <.div(
-                                <.span(host.profile.name),
-                                ProfilePicture(host.profile.some)
-                              )
-                            )
-                          }
-                          .getOrElse {
-                            <.li(
-                              <.div(^.cls := "placeholder")
-                            )
-                          }
-                      }
-                      .toList
-                      .toTagMod
-                  ),
+                <.section(
+                  ^.cls := "items",
                   blurbs.map {
                     case P.Event.Item(
                         P.Event.Blurb(event, desc, speakers, tags),
@@ -290,22 +322,24 @@ object event {
                         _,
                         _
                         ) =>
-                      <.section(
-                        ^.cls := "event-item",
-                        <.h2(^.cls := "event-item-name", event),
+                      <.article(
+                        ^.cls := "item",
+                        <.header(
+                          <.h2(^.cls := "item-header", event),
+                        ),
                         <.ul(
-                          ^.cls := "event-tags",
+                          ^.cls := "tags",
                           tags.map(t => <.li(TagBadge(t))).toTagMod
                         ),
                         <.div(
-                          ^.cls := "event-item-abstract",
+                          ^.cls := "abstract",
                           desc.zipWithIndex.map {
                             case (d, i) =>
                               Markup.withKey(i)(d)
                           }.toTagMod
                         ),
                         <.div(
-                          ^.cls := "event-speakers",
+                          ^.cls := "speakers",
                           speakers.map { speaker =>
                             Speaker.withKey(speaker.show)(
                               _speaker(speaker).get(s)
@@ -313,9 +347,22 @@ object event {
                           }.toTagMod
                         )
                       )
-                  }.toTagMod,
-                  sidesheet.SideSheet.withChildren(
-                    panel.Panel.withChildren(
+                  }.toTagMod
+                )
+            }
+            .getOrElse(<.div(^.cls := "placeholder")),
+          sidesheet.SideSheet.withChildren(
+            panel.Panel.withChildren(
+              s.event
+                .map {
+                  case P.Event(
+                      _,
+                      _,
+                      _,
+                      P.Event.Summary(id, time, _, blurbs),
+                      schedule
+                      ) =>
+                    React.Fragment(
                       panel.Summary.withChildren(
                         Time(time.start, time.end),
                         <.div(
@@ -326,13 +373,16 @@ object event {
                       panel.Details.withChildren(
                         Schedule(schedule)
                       )(s.showSchedule)
-                    )(),
-                    Meetup(_meetup.get(s))
-                  )()
-                )
-            }
-            .getOrElse(<.div(^.cls := "placeholder"))
+                    )
+                }
+                .getOrElse {
+                  <.div(^.cls := "placeholder")
+                }
+            )(),
+            Meetup(_meetup.get(s))
+          )()
         )
+
       }
 
       def load: Callback = {

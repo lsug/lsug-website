@@ -2,21 +2,73 @@
 @use "font";
 @use "icon";
 
+@media screen and (min-width: 320px) {
+    .event-page {
+	grid: {
+	    template-areas:  "heading" "sidebar" "content";
+	}
+    }
+}
+
+@media screen and (min-width: 800px) {
+    .event-page {
+	grid: {
+	    template-areas: "heading heading" "content sidebar";
+	}
+    }
+}
+
 .event-page {
+
+    display: grid;
+
+    .item {
+	.tags {
+
+	    list-style: none;
+
+	    li {
+		padding-right: 0.5rem;
+		display: inline-block;
+	    }
+
+	    padding: 0rem;
+	    margin-bottom: 1rem;
+	}
+    }
+
+    .hosts {
+	list-style: none;
+	padding: 0px;
+    }
+
+    .side-sheet {
+	grid-area: sidebar;
+	min-width: 360px;
+    }
+
+    .items {
+	grid-area: content;
+	min-width: 360px;
+	max-width: 800px;
+    }
+
+    .welcome {
+	grid-area: heading;
+    }
 
     .meetup {
 
-	max-width: 400px;
-
 	a {
 	    text-decoration: none;
-	    color: black;
+	    color: color.$foreground;
+	    padding: 0rem;
 	}
 
 	h2 {
 	    display: flex;
 	    font: {
-		size: 18px;
+		size: font.$large-size;
 		weight: 400;
 	    }
 	    align-items: center;
@@ -42,7 +94,7 @@
     }
 
     .panel {
-	max-width: 400px;
+	// max-width: 600px;
     }
 
     .panel-summary {
@@ -80,14 +132,11 @@
 	list-style: none;
 	li {
 	    display: contents;
-	    .event-name {
+	    .event-time {
 		grid-column: 1;
 	    }
-	    .event-start {
+	    .event-name {
 		grid-column: 2;
-	    }
-	    .event-end {
-		grid-column: 3;
 	    }
 	}
 	padding: 0px;
