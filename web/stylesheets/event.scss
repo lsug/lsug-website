@@ -24,6 +24,10 @@
 	padding-top: 0.5rem;
     }
 
+    .abstract {
+	line-height: font.$block-line-height;
+    }
+
     div[role=tablist] {
 	button[role=tab] {
 	    min-width: 100px;
