@@ -26,11 +26,27 @@ object event {
     panel,
     MaterialIcon,
     sidesheet,
+    modal,
     NavBar,
     Footer
   }
 
   type PEvent = P.Event[P.Event.Item]
+
+  val Youtube =
+    ScalaComponent
+      .builder[(Int, Int, P.Link)]("Youtube")
+      .render_P {
+        case (width, height, link) =>
+          <.iframe(
+            ^.width := s"${width.show}px",
+            ^.height := s"${height.show}px",
+            ^.src := s"https://www.youtube.com/embed/${link.show}?modestbranding=1",
+            ^.frameBorder := "0",
+            ^.allowFullScreen := true
+          )
+      }
+      .build
 
   val Schedule = {
     //TODO colour current
@@ -224,7 +240,8 @@ object event {
       meetup: Option[P.Event.Meetup.Event],
       showSchedule: Boolean,
       speakers: Speakers,
-      tabs: Map[String, Item.Tab]
+      tabs: Map[String, Item.Tab],
+      modal: Option[(String, Item.Tab)]
   )
 
   object State {
@@ -233,6 +250,7 @@ object event {
     def _speaker(s: P.Speaker.Id) = _speakers ^|-> _at(s)
     val _tabs = GenLens[State](_.tabs)
     def _tab(s: String) = _tabs ^|-> _at(s)
+    val _modal = GenLens[State](_.modal)
     val _meetup = GenLens[State](_.meetup)
     val _event = GenLens[State](_.event)
   }
@@ -332,7 +350,10 @@ object event {
         tab: Tab,
         item: P.Event.Item,
         onToggle: Tab => Callback,
-        speakers: Speakers
+        speakers: Speakers,
+        modal: Option[Tab],
+        onOpen: Tab => Callback,
+        onClose: Tab => Callback
     )
 
     val Item = {
@@ -350,7 +371,10 @@ object event {
                 _
               ),
               onToggle,
-              speakers
+              speakers,
+              openModal,
+              onOpen,
+              onClose
               ) =>
             val existingTabs =
               List(
@@ -399,6 +423,39 @@ object event {
                   }.toTagMod
                 )
               )(Tab.setup.show, tab === Tab.setup),
+              tabs.TabPanel.withChildren(
+                <.div(
+                  ^.cls := "video",
+                  <.button(
+                    ^.cls := "expand",
+                    ^.onClick --> onOpen(Tab.video),
+                    <.p(
+                      "MOOOO"
+                    )
+                  ),
+                  recording.map(Youtube(800, 800, _))
+                ),
+                modal.Modal.withChildren(
+                  <.div(
+                    ^.cls := "video",
+                    recording.map(Youtube(800, 800, _))
+                  )
+                )(
+                  openModal.map(_ === Tab.video).getOrElse(false),
+                  onClose(Tab.video)
+                )
+              )(Tab.video.show, tab === Tab.video),
+              tabs.TabPanel.withChildren(
+                <.div(
+                  ^.cls := "slides",
+                  slides.map { link =>
+                    <.iframe(
+                      ^.src := link.show,
+                      ^.allowFullScreen := true
+                    )
+                  }
+                )
+              )(Tab.slides.show, tab === Tab.slides),
               <.div(
                 ^.cls := "speakers",
                 speakerIds.map { id =>
@@ -457,7 +514,12 @@ object event {
                           s.tabs.get(id.show).getOrElse(Item.Tab.About),
                           item,
                           tab => $.modState(_tab(id.show).set(tab.some)),
-                          s.speakers.view.filterKeys(speakers.contains(_)).toMap
+                          s.speakers.view
+                            .filterKeys(speakers.contains(_))
+                            .toMap,
+                          s.modal.filter(_._1 === id.show).map(_._2),
+                          tab => $.modState(_modal.set((id.show, tab).some)),
+                          _ => $.modState(_modal.set(none))
                         )
                       )
                   }.toTagMod
@@ -553,7 +615,7 @@ object event {
 
     ScalaComponent
       .builder[(RouterCtl[Page.Home.type], String)]("Event")
-      .initialState[State](State(none, none, false, Map(), Map()))
+      .initialState[State](State(none, none, false, Map(), Map(), none))
       .renderBackend[Backend]
       .componentDidMount(_.backend.load)
       .build

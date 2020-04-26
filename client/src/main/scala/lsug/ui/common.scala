@@ -137,7 +137,8 @@ object common {
       .render_PC {
         case (expanded, children) =>
           <.div(
-            ^.cls := (if(expanded) "panel-details" else "panel-details hidden"),
+            ^.cls := (if (expanded) "panel-details"
+                      else "panel-details hidden"),
             children
           )
       }
@@ -171,7 +172,6 @@ object common {
   }
 
   object tabs {
-
 
     case class TabProps(
         label: String,
@@ -252,70 +252,43 @@ object common {
 
   }
 
-  val Tabbed = {
+  object modal {
 
-    final class Backend(
-        $ : BackendScope[NonEmptyList[String], String]
-    ) {
-
-      def render(
-          current: String,
-          children: PropsChildren,
-          names: NonEmptyList[String]
-      ): VdomNode = {
-
-        val width = 120
-        val index = names.zipWithIndex
-          .collectFirst {
-            case (n, i) if n === current => i
-          }
-          .getOrElse(0)
-
+    val Overlay = ScalaComponent
+      .builder[Unit]("ModalOverlay")
+      .renderStatic(
         <.div(
-          <.div(
-            ^.cls := "tab-menu",
-            <.ul(
-              names.map { n =>
-                <.li(
-                  <.button(
-                    ^.width := s"${width.show}px",
-                    ^.cls := (if (current === n) "tab-btn tab-current"
-                              else "tab-btn"),
-                    ^.onClick --> $.setState(n),
-                    n
-                  )
-                )
-              }.toList: _*
-            ),
-            <.span(
-              ^.cls := "tab-indicator",
-              ^.width := s"${width.show}px",
-              ^.left := s"${index * width}px"
-            )
-          ),
-          <.div(
-            ^.cls := "tab-content",
-            children.iterator
-              .zip(names.toList)
-              .map {
-                case (child, name) => child.when(name === current)
-              }
-              .toTagMod
-          )
+          ^.cls := "modal-overlay"
         )
+      )
+      .build
+
+    val Modal = ScalaComponent
+      .builder[(Boolean, Callback)]("Modal")
+      .render_PC {
+        case ((open, onClose), children) =>
+          <.div(
+            ^.cls := "modal",
+            Overlay(),
+            <.div(
+              ^.cls := "dialog",
+              <.div(
+                ^.cls := "header",
+                <.button(
+                  ^.cls := "close",
+                  MaterialIcon("close"),
+                  ^.onClick --> onClose
+                )
+              ),
+              children.when(open)
+            )
+          )
       }
-
-    }
-
-    ScalaComponent
-      .builder[NonEmptyList[String]]("Tabbed")
-      .initialStateFromProps(_.head)
-      .renderBackendWithChildren[Backend]
       .build
   }
 
   val NavBar = ScalaComponent
-    .builder[Unit]("nav-bar")
+    .builder[Unit]("NavBar")
     .renderStatic(
       <.nav(
         <.div(

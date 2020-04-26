@@ -21,7 +21,7 @@ import java.time.format.{DateTimeFormatter, TextStyle}
 
 object home {
 
-  import common.{Tabbed, tabs}
+  import common.tabs
 
   type PEventSummary = P.Event.Summary[P.Event.Blurb]
 
