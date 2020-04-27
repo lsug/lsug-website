@@ -255,10 +255,10 @@ object common {
   object modal {
 
     val Overlay = ScalaComponent
-      .builder[Unit]("ModalOverlay")
-      .renderStatic(
+      .builder[Boolean]("ModalOverlay")
+      .render_P(open =>
         <.div(
-          ^.cls := "modal-overlay"
+          ^.cls := (if (open) "modal-overlay" else "hidden modal-overlay")
         )
       )
       .build
@@ -269,9 +269,10 @@ object common {
         case ((open, onClose), children) =>
           <.div(
             ^.cls := "modal",
-            Overlay(),
+            Overlay(open),
             <.div(
-              ^.cls := "dialog",
+              ^.role := "dialog",
+              ^.cls := (if (open) "open" else "hidden"),
               <.div(
                 ^.cls := "header",
                 <.button(
@@ -280,6 +281,7 @@ object common {
                   ^.onClick --> onClose
                 )
               ),
+              // delay loading of children
               children.when(open)
             )
           )
@@ -354,12 +356,5 @@ object common {
     )
     .configure(Reusability.shouldComponentUpdate)
     .build
-
-// <iframe
-//   width="450"
-//   height="250"
-//   frameborder="0" style="border:0"
-//   src="https://www.google.com/maps/embed/v1/search?key=YOUR_API_KEY&q=record+stores+in+Seattle" allowfullscreen>
-// </iframe>
 
 }

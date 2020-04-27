@@ -35,12 +35,10 @@ object event {
 
   val Youtube =
     ScalaComponent
-      .builder[(Int, Int, P.Link)]("Youtube")
+      .builder[P.Link]("Youtube")
       .render_P {
-        case (width, height, link) =>
+        case link =>
           <.iframe(
-            ^.width := s"${width.show}px",
-            ^.height := s"${height.show}px",
             ^.src := s"https://www.youtube.com/embed/${link.show}?modestbranding=1",
             ^.frameBorder := "0",
             ^.allowFullScreen := true
@@ -358,6 +356,34 @@ object event {
 
     val Item = {
 
+      def ModalTab(
+          tab: Tab,
+          onOpen: Tab => Callback,
+          openModal: Option[Tab],
+          onClose: Tab => Callback,
+          content: TagMod
+      )(currTab: Tab) =
+        tabs.TabPanel.withChildren(
+          <.div(
+            ^.cls := tab.show.toLowerCase,
+            <.button(
+              ^.cls := "expand-modal",
+              ^.onClick --> onOpen(tab),
+              s"open ${tab.show}"
+            ),
+            content
+          ),
+          modal.Modal.withChildren(
+            <.div(
+              ^.cls := tab.show.toLowerCase,
+              content
+            )
+          )(
+            openModal.map(_ === tab).getOrElse(false),
+            onClose(tab)
+          )
+        )(tab.show, tab === currTab)
+
       ScalaComponent
         .builder[Props]("Item")
         .render_P {
@@ -423,39 +449,25 @@ object event {
                   }.toTagMod
                 )
               )(Tab.setup.show, tab === Tab.setup),
-              tabs.TabPanel.withChildren(
-                <.div(
-                  ^.cls := "video",
-                  <.button(
-                    ^.cls := "expand",
-                    ^.onClick --> onOpen(Tab.video),
-                    <.p(
-                      "MOOOO"
-                    )
-                  ),
-                  recording.map(Youtube(800, 800, _))
-                ),
-                modal.Modal.withChildren(
-                  <.div(
-                    ^.cls := "video",
-                    recording.map(Youtube(800, 800, _))
+              ModalTab(
+                Tab.video,
+                onOpen,
+                openModal,
+                onClose,
+                recording.map(Youtube(_))
+              )(tab),
+              ModalTab(
+                Tab.slides,
+                onOpen,
+                openModal,
+                onClose,
+                slides.map { link =>
+                  <.iframe(
+                    ^.src := link.show,
+                    ^.allowFullScreen := true
                   )
-                )(
-                  openModal.map(_ === Tab.video).getOrElse(false),
-                  onClose(Tab.video)
-                )
-              )(Tab.video.show, tab === Tab.video),
-              tabs.TabPanel.withChildren(
-                <.div(
-                  ^.cls := "slides",
-                  slides.map { link =>
-                    <.iframe(
-                      ^.src := link.show,
-                      ^.allowFullScreen := true
-                    )
-                  }
-                )
-              )(Tab.slides.show, tab === Tab.slides),
+                }
+              )(tab),
               <.div(
                 ^.cls := "speakers",
                 speakerIds.map { id =>

@@ -1,6 +1,7 @@
 @use "color";
 @use "font";
 @use "home";
+@use "common";
 @use "event";
 @use "icon";
 
@@ -11,11 +12,6 @@ body {
 	family: font.$family;
 	size: font.$normal-size;
     }
-}
-
-
-.hidden {
-    display: none;
 }
 
 nav {
