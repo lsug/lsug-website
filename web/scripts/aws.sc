@@ -37,7 +37,7 @@ object Vpc {
       maxAzs: Int
   ): Resource[ec2.IVpc] =
     scope => {
-      ec2.Vpc.Builder.create(scope, id).cidr(cidr).maxAzs(maxAzs).build
+      ec2.Vpc.Builder.create(scope, id).cidr(cidr).maxAzs(maxAzs).natGateways(0).build
     }
 }
 
