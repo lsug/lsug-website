@@ -48,6 +48,7 @@ object Vpc {
               .builder
               .cidrMask(24)
               .subnetType(ec2.SubnetType.PUBLIC)
+              .name("egress")
               .build
           ).asJava
         )
