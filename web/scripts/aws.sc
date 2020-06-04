@@ -43,11 +43,13 @@ object Vpc {
         .maxAzs(maxAzs)
         .natGateways(0)
         .subnetConfiguration(
-          ec2.SubnetConfiguration
-            .builder
-            .cidrMask(24)
-            .subnetType(ec2.SubnetType.PUBLIC)
-            .build
+          List(
+            ec2.SubnetConfiguration
+              .builder
+              .cidrMask(24)
+              .subnetType(ec2.SubnetType.PUBLIC)
+              .build
+          ).asJava
         )
         .build
     }
