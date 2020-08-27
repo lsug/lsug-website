@@ -263,7 +263,7 @@ object Venue {
 }
 
 case class Event[A](
-    host: NonEmptyList[Speaker.Id],
+    hosts: NonEmptyList[Speaker.Id],
     welcome: List[Markup],
     virtual: Option[Event.Virtual],
     summary: Event.Summary[A],
