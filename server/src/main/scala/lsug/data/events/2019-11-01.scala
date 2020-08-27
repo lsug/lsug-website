@@ -21,7 +21,7 @@ object E2019_11_01 {
       Markup.Paragraph(
         Nel.of(
           Markup.Text.Plain(
-            """Sometimes called "The JQuery of DataTypes"; Lenses and other Optics
+            """Sometimes called “The JQuery of DataTypes”; Lenses and other Optics
    | provide a clean functional interface to the common task of modifying 
    | complex data structures. Brushing over any practical use cases, this talk
    | takes a magnifying glass to one particular Optics representation; van
@@ -50,7 +50,7 @@ object E2019_11_01 {
       ),
       Markup.Paragraph(
         Nel.of(
-          Markup.Text.Plain("""But since nobody is perfect"""),
+          Markup.Text.Plain("""But since nobody is perfect """),
           Markup.Text.Styled.Strong(Nel.of(Markup.Text.Plain("not even FP"))),
           Markup.Text.Plain(
             """, you are also going to see its bad and ugly
