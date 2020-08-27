@@ -33,6 +33,16 @@ object App extends IOApp {
         )
       }
 
+    def sponsorsRoute =
+      staticRoute(root / "sponsors", Page.Sponsors) ~> renderR{ ctl =>
+        val now = LocalDateTime.now(Clock.systemUTC())
+        React.Fragment(
+          lui.common.NavBar(),
+          lui.sponsors.Sponsors(),
+          lui.common.Footer(now.toLocalDate)
+        )
+      }
+
     def eventRoute =
       dynamicRouteCT(
         root / "events" / string("[0-9\\-]+").caseClass[Page.Event]
@@ -46,7 +56,7 @@ object App extends IOApp {
           )
       }
 
-    (homeRoute | eventRoute).notFound(
+    (homeRoute | eventRoute | sponsorsRoute).notFound(
       redirectToPage(Page.Home)(SetRouteVia.HistoryReplace)
     )
   }

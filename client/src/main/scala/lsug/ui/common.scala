@@ -294,11 +294,15 @@ object common {
     .renderStatic(
       <.nav(
         <.div(
-          <.span(^.cls := "abbrev-name", "LSUG")
+          <.a(
+            ^.cls := "abbrev-name",
+            MaterialIcon("home"),
+            <.span("LSUG"),
+            ^.href := "/")
         ),
         <.div(
           <.a("About"),
-          <.a("Sponsors")
+          <.a("Sponsors", ^.href :="/sponsors")
         )
       )
     )

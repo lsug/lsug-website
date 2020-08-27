@@ -4,6 +4,7 @@
 @use "common";
 @use "event";
 @use "icon";
+@use "sponsors";
 
 body {
     background-color: color.$background;
@@ -32,9 +33,18 @@ nav {
 
     .abbrev-name {
 	font-weight: 800;
+	display: flex;
+	align-items: center;
+
+	.material-icons {
+	    font-size: 1.75rem;
+	    padding: 0 0.25rem 0 0.25rem;
+	}
+
     }
 
     a {
+	text-decoration: none;
 	border-radius: 1rem;
 	display: block;
 	margin: 0.5rem;
@@ -43,6 +53,9 @@ nav {
 	    border: 0.5rem solid color.$primary;
 	    background-color: color.$primary;
 	    cursor: pointer;
+	}
+	&:visited {
+	    color: color.$background;
 	}
     }
 
