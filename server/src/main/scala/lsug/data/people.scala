@@ -44,6 +44,25 @@ object people {
     )
   )
 
+  val YilinWei = Speaker(
+    profile = Speaker.Profile(
+      id = new Id("yilinwei"),
+      name = "Yilin Wei",
+      photo = Some(new Asset("yilinwei.jpg"))
+    ),
+    bio = List(
+      Markup.Paragraph(
+        NonEmptyList.of(
+          Markup.Text.Plain("Yilin is a software developer")
+        )
+      )),
+    socialMedia = Speaker.SocialMedia(
+      blog = None,
+      twitter = Some(new Twitter.Handle("_YilinWei_")),
+      github = Some(new Github.User("yilinwei"))
+    )
+  )
+
   val ZainabAli = Speaker(
     profile = Speaker.Profile(
       id = new Id("zainabali"),
@@ -58,9 +77,40 @@ object people {
     )
   )
 
+  val BrunoBonnano = Speaker(
+    profile = Speaker.Profile(
+      id = new Id("brunobonnano"),
+      name = "Bruno Bonnano",
+      photo = None
+    ),
+    bio = Nil,
+    socialMedia = Speaker.SocialMedia(
+      blog = None,
+      twitter = None,
+      github = None
+    )
+  )
+
+  val TamerAbdulradi = Speaker(
+    profile = Speaker.Profile(
+      id = new Id("tamerabdulradi"),
+      name = "Tamer Abdulradi",
+      photo = None
+    ),
+    bio = Nil,
+    socialMedia = Speaker.SocialMedia(
+      blog = None,
+      twitter = None,
+      github = None
+    )
+  )
+
   val all: NonEmptyList[Speaker] = NonEmptyList.of(
     DanielaSfregola,
     JoeWarren,
-    ZainabAli
+    ZainabAli,
+    YilinWei,
+    BrunoBonnano,
+    TamerAbdulradi
   )
 }

@@ -120,6 +120,7 @@ object event {
               case P.Event.Meetup.Event(link, attendees) =>
                 <.a(
                   ^.href := link.show,
+                  ^.target := "_blank",
                   <.h2(Logo(), <.span(s"${attendees} attendees")),
                   <.div(<.span(^.cls := "sign-up", "sign up"))
                 )
@@ -268,7 +269,7 @@ object event {
                   name.headOption.map(n =>
                     React.Fragment(
                       <.span(
-                        s"${n(0)}."
+                        n
                       ),
                       <.span(
                         name.tail.mkString(" ")

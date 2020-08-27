@@ -13,7 +13,7 @@
 @media screen and (min-width: 992px) {
     .event-page {
 	grid: {
-	    template-areas: "heading heading" "content sidebar";
+	    template-areas: "heading sidebar" "content sidebar";
 	}
     }
 }
@@ -86,6 +86,7 @@
 
 	list-style: none;
 	display: flex;
+	flex-direction: row-reverse;
 	padding: 0px;
 
 	.host {
@@ -103,6 +104,12 @@
 
     .side-sheet {
 	grid-area: sidebar;
+	max-width: 600px;
+
+	.side-sheet-content > * {
+	    padding-top: 1rem;
+	    padding-bottom: 1rem;
+	}
     }
 
     .items {
@@ -112,6 +119,7 @@
 
     .welcome {
 	grid-area: heading;
+	max-width: 800px;
     }
 
     .meetup {
@@ -120,6 +128,8 @@
 	    text-decoration: none;
 	    color: color.$foreground;
 	    padding: 0rem;
+	    display: flex;
+	    justify-content: space-between;
 	}
 
 	h2 {
@@ -151,7 +161,9 @@
     }
 
     .panel {
-	// max-width: 600px;
+	width: 600px;
+	max-width: 600px;
+	padding: 2rem 0 1rem 0;
     }
 
     .panel-summary {
@@ -188,6 +200,10 @@
 	display: grid;
 	list-style: none;
 	li {
+
+	    > * {
+		padding: 0.25rem;
+	    }
 	    display: contents;
 	    .event-time {
 		grid-column: 1;

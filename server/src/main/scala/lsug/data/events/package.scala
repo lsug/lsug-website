@@ -40,7 +40,7 @@ package object events {
 
     def itemEvent: p.Event[p.Event.Item] = p.Event(
       hosts = hosts.map(_.profile.id),
-      welcome = Nil,
+      welcome = welcome,
       virtual = location match {
         case Ior.Right(virtual) => Some(virtual)
         case _ => None
@@ -84,5 +84,8 @@ package object events {
   }
 
   val all: NonEmptyList[Event] =
-    NonEmptyList.of(E2019_11_01.event)
+    NonEmptyList.of(
+      E2019_08_21.event,
+      E2019_11_01.event
+    ).sortBy(_.date).reverse
 }

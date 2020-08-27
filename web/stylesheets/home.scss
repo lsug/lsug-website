@@ -96,9 +96,6 @@ div[role=tablist] {
 	background-color: darken(color.$background, 2%);
 	box-shadow: color.$box-shadow-action;
 	cursor: pointer;
-	.event-more {
-	    text-decoration: underline;
-	}
     }
 
     &:focus {
@@ -227,16 +224,5 @@ div[role=tablist] {
 		padding: $padding;
 	    }
 	}
-    }
-
-    .event-more {
-	display: flex;
-	padding-top: 0.5rem;
-	font: {
-	    weight: bold;
-	    size: 1rem;
-	}
-	flex-direction: row-reverse;
-	text-transform: uppercase;
     }
 }

@@ -152,12 +152,6 @@ object home {
                     )
                   }
                   .toTagMod
-              ),
-              <.div(
-                ^.cls := "event-more",
-                <.span(
-                  "read more"
-                )
               )
             )
           )
