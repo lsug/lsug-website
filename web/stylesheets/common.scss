@@ -6,7 +6,7 @@
 }
 
 .modal-overlay {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.5);
     position: fixed;
     top: 0;
     left: 0;
@@ -17,17 +17,26 @@
 
 .modal {
 
+    .header {
+	background-color: color.$secondary;
+	display: flex;
+	flex-direction: row-reverse;
+    }
+
     .close {
 	display: inherit;
 	z-index: inherit;
+	background-color: inherit;
+	border: none;
+	color: color.$background
     }
 
     div[role=dialog] {
-	top: 10vw;
-	left: 10vh;
+	top: 5vh;
+	left: 10vw;
 	position: fixed;
 	width: 80vw;
-	height: 80vh;
+	height: 90vh;
 	z-index: 2;
     }
 }

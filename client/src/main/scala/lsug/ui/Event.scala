@@ -240,7 +240,7 @@ object event {
       showSchedule: Boolean,
       speakers: Speakers,
       tabs: Map[String, Item.Tab],
-      modal: Option[(String, Item.Tab)]
+      modal: Option[(String, Item.Media)]
   )
 
   object State {
@@ -332,17 +332,28 @@ object event {
     object Tab {
       case object About extends Tab
       case object Setup extends Tab
-      case object Video extends Tab
-      case object Slides extends Tab
+      case object Media extends Tab
 
       val about: Tab = About
       val setup: Tab = Setup
-      val video: Tab = Video
-      val slides: Tab = Slides
+      val media: Tab = Media
 
       implicit val tabShow: Show[Tab] = Show.fromToString[Tab]
       implicit val tabEq: Eq[Tab] = Eq.fromUniversalEquals[Tab]
 
+    }
+
+    sealed trait Media
+
+    object Media {
+      case object Slides extends Media
+      case object Video extends Media
+
+      val slides: Media = Slides
+      val video: Media = Video
+
+      implicit val mediaShow: Show[Media] = Show.fromToString[Media]
+      implicit val mediaEq: Eq[Media] = Eq.fromUniversalEquals[Media]
     }
 
     case class Props(
@@ -350,40 +361,64 @@ object event {
         item: P.Event.Item,
         onToggle: Tab => Callback,
         speakers: Speakers,
-        modal: Option[Tab],
-        onOpen: Tab => Callback,
-        onClose: Tab => Callback
+        modal: Option[Media],
+        onOpen: Media => Callback,
+        onClose: Media => Callback
     )
 
     val Item = {
 
-      def ModalTab(
-          tab: Tab,
-          onOpen: Tab => Callback,
-          openModal: Option[Tab],
-          onClose: Tab => Callback,
-          content: TagMod
+      def MediaTab(
+          onOpen: Media => Callback,
+          openModal: Option[Media],
+        onClose: Media => Callback,
+        recording: Option[P.Link],
+        slides: Option[P.Link]
       )(currTab: Tab) =
         tabs.TabPanel.withChildren(
-          <.div(
-            ^.cls := tab.show.toLowerCase,
-            <.button(
+          <.ol(
+            ^.cls := Tab.media.show.toLowerCase,
+            <.li(
+              <.button(
               ^.cls := "expand-modal",
-              ^.onClick --> onOpen(tab),
-              s"open ${tab.show}"
-            ),
-            content
-          ),
+              ^.onClick --> onOpen(Media.slides),
+                MaterialIcon("description"),
+                <.span("slides")
+              ),
           modal.Modal.withChildren(
             <.div(
-              ^.cls := tab.show.toLowerCase,
-              content
+              ^.cls := openModal.show.toLowerCase,
+              slides.map { link =>
+                <.iframe(
+                  ^.src := link.show,
+                  ^.allowFullScreen := true
+                  )
+                }
             )
           )(
-            openModal.map(_ === tab).getOrElse(false),
-            onClose(tab)
+            openModal.map(_ === Media.slides).getOrElse(false),
+            onClose(Media.slides)
+          ),
+            ),
+            <.li(
+              <.button(
+              ^.cls := "expand-modal",
+                ^.onClick --> onOpen(Media.video),
+                MaterialIcon("video_library"),
+                <.span("video")
+              ),
+          modal.Modal.withChildren(
+            <.div(
+              ^.cls := openModal.show.toLowerCase,
+              recording.map(Youtube(_))
+            )
+          )(
+            openModal.map(_ === Media.video).getOrElse(false),
+            onClose(Media.video)
           )
-        )(tab.show, tab === currTab)
+            )
+          )
+        )(Tab.media.show, Tab.media === currTab)
 
       ScalaComponent
         .builder[Props]("Item")
@@ -407,8 +442,7 @@ object event {
               List(
                 Tab.about.some,
                 setup.headOption.map(const(Tab.setup)),
-                slides.map(const(Tab.slides)),
-                recording.map(const(Tab.video))
+                slides.orElse(recording).map(const(Tab.media))
               ).mapFilter(identity)
 
             <.article(
@@ -450,24 +484,12 @@ object event {
                   }.toTagMod
                 )
               )(Tab.setup.show, tab === Tab.setup),
-              ModalTab(
-                Tab.video,
+              MediaTab(
                 onOpen,
                 openModal,
                 onClose,
-                recording.map(Youtube(_))
-              )(tab),
-              ModalTab(
-                Tab.slides,
-                onOpen,
-                openModal,
-                onClose,
-                slides.map { link =>
-                  <.iframe(
-                    ^.src := link.show,
-                    ^.allowFullScreen := true
-                  )
-                }
+                recording,
+                slides
               )(tab),
               <.div(
                 ^.cls := "speakers",
@@ -531,7 +553,7 @@ object event {
                             .filterKeys(speakers.contains(_))
                             .toMap,
                           s.modal.filter(_._1 === id.show).map(_._2),
-                          tab => $.modState(_modal.set((id.show, tab).some)),
+                          media => $.modState(_modal.set((id.show, media).some)),
                           _ => $.modState(_modal.set(none))
                         )
                       )

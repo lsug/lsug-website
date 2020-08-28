@@ -28,6 +28,7 @@
 		iframe {
 		    width: 80vw;
 		    height: 80vh;
+		    border: none;
 		}
 	    }
 	}
@@ -41,6 +42,29 @@
 	    iframe {
 		width: 100%;
 		height: 100%;
+	    }
+	}
+	.media {
+	    list-style: none;
+	    width: 100%;
+
+	    button.expand-modal {
+		display: flex;
+		align-items: center;
+		background-color: inherit;
+		border: none;
+		text-transform: uppercase;
+		cursor: pointer;
+		width: 100%;
+		padding: 0.25rem 0 0.25rem 0;
+
+	        &:hover {
+	            background-color: color.$background-1;
+	        }
+
+		> * {
+		    padding: 0 1rem 0 1rem;
+		}
 	    }
 	}
     }
@@ -68,6 +92,7 @@
     display: grid;
 
     .item {
+	padding-top: 3rem;
 	.tags {
 
 	    list-style: none;
@@ -124,6 +149,10 @@
 
     .meetup {
 
+
+	padding-left: 1rem;
+	padding-right: 1rem;
+
 	a {
 	    text-decoration: none;
 	    color: color.$foreground;
@@ -143,7 +172,7 @@
 	}
 
 	&:hover {
-	    background-color: darken(color.$background, 2%);
+	    background-color: color.$background-1;
 	}
 	.logo {
 	    height: icon.$standard-size;
@@ -169,6 +198,11 @@
     .panel-summary {
 
 	display: flex;
+	cursor: pointer;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+	padding-left: 1rem;
+	padding-right: 1rem;
 
 	.event-time {
 	    font-size: 18px;
@@ -182,7 +216,7 @@
 	justify-content: space-between;
 
 	&:hover {
-	    background-color: darken(color.$background, 2%);
+	    background-color: color.$background-1;
 	}
     }
 
