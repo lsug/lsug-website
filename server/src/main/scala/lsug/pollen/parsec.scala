@@ -1,5 +1,5 @@
 package lsug
-package parsec
+package pollen
 
 import Function.const
 import monocle.function.Cons.cons
@@ -870,24 +870,25 @@ object Text {
 
 }
 
-object Pollen {
+object PollenParsers {
   import Text._
-  import lsug.markup.Pollen
-  import lsug.markup.Pollen._
+  import Pollen._
 
-  val lozenge = char('◊').void
-  val command = whileNoneOf1('{')
-  val open = char('{').void
-  val close = char('}').void
+  private val lozenge = char('◊').void
+  private val command = whileNoneOf1('{')
+  private val open = char('{').void
+  private val close = char('}').void
 
-  val contents: Parser[Pollen] = whileNoneOf1('◊', '}').map(Contents)
+  private val contents: Parser[Pollen] = whileNoneOf1('◊', '}').map(Contents(_))
 
-  def tag: Parser[Pollen] = for {
+  private[pollen] def tag: Parser[Pollen.Tag] = for {
     command <- lozenge *> command
     _ <- open
     contents <- contents
-    .combineK(tag)
+    .combineK(tag.map(identity))
     .list
     _ <- close
   } yield Tag(command, contents)
+
+  private[pollen] def tags: Parser[NonEmptyList[Pollen.Tag]] = tag.nel
 }

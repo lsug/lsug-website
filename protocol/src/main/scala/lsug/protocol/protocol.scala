@@ -81,23 +81,7 @@ sealed trait Markup
 
 object Markup {
 
-  sealed trait Text extends Markup { self =>
-    def string: String = self match {
-      case Text.Plain(value)        => value
-      case Text.Styled.Code(text)   => text
-      case Text.Styled.Strong(text) => text.map(_.string).fold
-      case Text.Styled.Italic(text) => text.map(_.string).fold
-      case Text.Link(text, _)       => text
-    }
-
-    def trim: Text = self match {
-      case Text.Plain(value)          => Text.Plain(value.trim)
-      case Text.Link(text, location)  => Text.Link(text.trim, location)
-      case code @ Text.Styled.Code(_) => code
-      case styled                     => styled
-      //TODO: finish this off
-    }
-  }
+  sealed trait Text extends Markup
 
   object Text {
 
@@ -109,7 +93,6 @@ object Markup {
 
       case class Code(text: String) extends Styled
       case class Strong(text: NonEmptyList[Text]) extends Styled
-      case class Italic(text: NonEmptyList[Text]) extends Styled
 
       implicit val codec: Codec[Styled] = deriveCodec[Styled]
 
@@ -124,29 +107,6 @@ object Markup {
     implicit val codec: Codec[Text] = deriveCodec[Text]
 
   }
-
-  case class Table(headings: NonEmptyList[Text], rows: List[Table.Row])
-      extends Markup
-
-  object Table {
-
-    case class Row(columns: NonEmptyList[Text]) extends Markup
-
-    object Row {
-      implicit val codec: Codec[Row] = deriveCodec[Row]
-    }
-
-    implicit val codec: Codec[Table] = deriveCodec[Table]
-
-  }
-
-  case class Section(heading: Text, content: List[Markup]) extends Markup
-
-  object Section {
-    implicit val codec: Codec[Section] = deriveCodec[Section]
-  }
-
-  case class CodeBlock(lang: String, code: NonEmptyList[String]) extends Markup
 
   case class Paragraph(text: NonEmptyList[Text]) extends Markup
 
