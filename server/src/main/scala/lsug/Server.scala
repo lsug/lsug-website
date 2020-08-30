@@ -28,7 +28,7 @@ final class Server[F[_]: Sync: ContextShift: Logger](
     blocker: Blocker
 ) extends PathImplicits {
 
-  def content(path: Path): F[Option[String]] = {
+  private def content(path: Path): F[Option[String]] = {
     Logger[F].debug(s"request for: ${path}") *> io.file
       .exists(blocker, path)
       .flatMap { exists =>
@@ -45,7 +45,7 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       }
   }
 
-  def read[A](
+  private def read[A](
       path: Path,
       f: String => Either[Read.ReadError, A]
   ): F[Option[A]] = {
