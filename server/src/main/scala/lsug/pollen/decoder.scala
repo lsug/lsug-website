@@ -145,7 +145,7 @@ object PollenDecoders {
           case t: Pollen.Tag => f(t)
           case o => Left(Failure(Error.Message(s"Unexpected content [$o]"), Nil))
         }.flatMap(_.toNel
-          .toRight(Failure(Error.Message("Element has no child tags"), Nil)))
+          .toRight(Failure(Error.Message(s"Element has no child tags [$t]"), Nil)))
     }
 
 
@@ -224,7 +224,7 @@ object PollenDecoders {
     fromEither[Pollen.Tag, List[Markup.Paragraph]](tag =>
       parse(tag.children).flatMap(_.traverse {
         case m: Markup.Paragraph => Right(m)
-        case o                   => Left("Encountered non-paragraph root element in markup [$o]")
+        case o                   => Left(s"Encountered non-paragraph root element in markup [$o]")
       })
     )
   }
@@ -326,5 +326,4 @@ object ContentDecoders {
         )
     }
   }
-
 }

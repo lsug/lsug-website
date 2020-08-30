@@ -58,8 +58,6 @@ object common {
     private def toTagMod(markup: P.Markup.Text, options: Options): TagMod = {
       markup match {
         case P.Markup.Text.Plain(s) => s
-        case P.Markup.Text.Styled.Italic(text) =>
-          <.em(text.map(toTagMod(_, options)).toList.toTagMod)
         case P.Markup.Text.Styled.Strong(text) =>
           <.strong(text.map((toTagMod(_, options))).toList.toTagMod)
         case P.Markup.Text.Styled.Code(code) =>
@@ -91,8 +89,6 @@ object common {
     def renderText(markup: P.Markup.Text): TagMod = {
       markup match {
         case P.Markup.Text.Plain(s) => s
-        case P.Markup.Text.Styled.Italic(text) =>
-          <.em(text.map(renderText).toList.toTagMod)
         case P.Markup.Text.Styled.Strong(text) =>
           <.strong(text.map(renderText).toList.toTagMod)
         case P.Markup.Text.Styled.Code(code) =>

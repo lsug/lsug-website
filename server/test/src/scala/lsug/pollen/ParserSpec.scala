@@ -64,4 +64,10 @@ class ParserSpec extends FunSuite {
       NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil))
     )
   }
+
+  test("newlines") {
+    assertParseResult("◊foo{}\n◊bar{}",
+      NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil))
+    )
+  }
 }

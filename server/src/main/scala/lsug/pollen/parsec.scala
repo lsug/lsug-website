@@ -888,7 +888,11 @@ object PollenParsers {
     .combineK(tag.map(identity))
     .list
     _ <- close
-  } yield Tag(command, contents)
+    _ <- newline.kleene
+  } yield Tag(command, contents.filterNot {
+    case Pollen.Contents(c) => c.trim.isEmpty
+    case _ => false
+  })
 
-  private[pollen] def tags: Parser[NonEmptyList[Pollen.Tag]] = tag.nel
+  def tags: Parser[NonEmptyList[Pollen.Tag]] = tag.nel
 }
