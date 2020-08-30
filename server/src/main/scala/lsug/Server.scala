@@ -72,10 +72,11 @@ final class Server[F[_]: Sync: ContextShift: Logger](
   ): F[Option[NonEmptyList[Pollen.Tag]]] = {
     OptionT(content(root.resolve(path))).flatMapF { c =>
       parse(c)
-      .bimap(err =>
+        .bimap(
+          err =>
             Logger[F]
               .error(s"could not parse ${path}, ${err}") *> none[
-                NonEmptyList[Pollen.Tag]
+              NonEmptyList[Pollen.Tag]
             ].pure[F],
           _.some.pure[F]
         )
@@ -102,7 +103,7 @@ final class Server[F[_]: Sync: ContextShift: Logger](
             p
           }
           .map(decoder.apply)
-          .subflatMap{ either =>
+          .subflatMap { either =>
             println(either)
             either.toOption
           }
@@ -134,21 +135,21 @@ final class Server[F[_]: Sync: ContextShift: Logger](
 
   def speakerProfile(id: Speaker.Id): F[Option[Speaker.Profile]] =
     decodeMarkup(ContentDecoders.speaker, "people")(id)
-  .map(_.map(_.profile))
+      .map(_.map(_.profile))
 
   def speaker(id: Speaker.Id): F[Option[Speaker]] =
     decodeMarkup(ContentDecoders.speaker, "people")(id)
 
   def event(id: Event.Id): F[Option[Event[Event.Item]]] =
     decodeMarkup(ContentDecoders.event, "events")(id)
-  .map(_.map(_.itemEvent))
+      .map(_.map(_.itemEvent))
 
   def venue(id: Venue.Id): F[Option[Venue.Summary]] =
     decodeMarkup(ContentDecoders.venue, "venues")(id)
 
   def eventMeetup(id: Event.Id): F[Option[Event.Meetup.Event]] = {
     decodeMarkup(ContentDecoders.event, "events")(id)
-    .map(_.map(_.meetup))
-    .flatMap(_.flatTraverse(meetup.event))
+      .map(_.map(_.meetup))
+      .flatMap(_.flatTraverse(meetup.event))
   }
 }

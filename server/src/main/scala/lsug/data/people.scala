@@ -30,10 +30,10 @@ object people {
       Markup.Paragraph(
         NonEmptyList.of(
           Markup.Text.Plain(
-        """Joe Warren is a software developer at Deliveroo. He likes
+            """Joe Warren is a software developer at Deliveroo. He likes
     | functional programming in Scala and Haskell, learning about new types of
     | Functors, and makes his own shirts.""".stripMargin
-        )
+          )
         )
       )
     ),
@@ -55,7 +55,8 @@ object people {
         NonEmptyList.of(
           Markup.Text.Plain("Yilin is a software developer")
         )
-      )),
+      )
+    ),
     socialMedia = Speaker.SocialMedia(
       blog = None,
       twitter = Some(new Twitter.Handle("_YilinWei_")),

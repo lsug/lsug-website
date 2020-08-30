@@ -881,18 +881,19 @@ object PollenParsers {
 
   private val contents: Parser[Pollen] = whileNoneOf1('◊', '}').map(Contents(_))
 
-  private[pollen] def tag: Parser[Pollen.Tag] = for {
-    command <- lozenge *> command
-    _ <- open
-    contents <- contents
-    .combineK(tag.map(identity))
-    .list
-    _ <- close
-    _ <- newline.kleene
-  } yield Tag(command, contents.filterNot {
-    case Pollen.Contents(c) => c.trim.isEmpty
-    case _ => false
-  })
+  private[pollen] def tag: Parser[Pollen.Tag] =
+    for {
+      command <- lozenge *> command
+      _ <- open
+      contents <- contents
+        .combineK(tag.map(identity))
+        .list
+      _ <- close
+      _ <- newline.kleene
+    } yield Tag(command, contents.filterNot {
+      case Pollen.Contents(c) => c.trim.isEmpty
+      case _                  => false
+    })
 
   def tags: Parser[NonEmptyList[Pollen.Tag]] = tag.nel
 }

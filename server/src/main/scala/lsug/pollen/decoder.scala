@@ -137,17 +137,25 @@ object PollenDecoders {
   ): Decoder[NonEmptyList[Pollen.Tag], Option[Pollen.Tag]] =
     make(name)(_.find(_.name === name).pure[Either[Error, ?]])
 
-  def children[A](f: Decoder[Pollen.Tag, A]): Decoder[Pollen.Tag, NonEmptyList[A]] =
+  def children[A](
+      f: Decoder[Pollen.Tag, A]
+  ): Decoder[Pollen.Tag, NonEmptyList[A]] =
     new Decoder[Pollen.Tag, NonEmptyList[A]] {
       val history: List[String] = Nil
       def apply(t: Pollen.Tag): Either[Failure, NonEmptyList[A]] =
-        t.children.traverse {
-          case t: Pollen.Tag => f(t)
-          case o => Left(Failure(Error.Message(s"Unexpected content [$o]"), Nil))
-        }.flatMap(_.toNel
-          .toRight(Failure(Error.Message(s"Element has no child tags [$t]"), Nil)))
+        t.children
+          .traverse {
+            case t: Pollen.Tag => f(t)
+            case o =>
+              Left(Failure(Error.Message(s"Unexpected content [$o]"), Nil))
+          }
+          .flatMap(
+            _.toNel
+              .toRight(
+                Failure(Error.Message(s"Element has no child tags [$t]"), Nil)
+              )
+          )
     }
-
 
   def contents: Decoder[Tag, String] =
     fromEither[Tag, String](tag =>
@@ -313,17 +321,18 @@ object ContentDecoders {
       root("items") >>> children(item)
     ).mapN {
       case (meetup, venue, hosts, date, (start, end), welcome, items) =>
-        id => lsug.data.events.Event(
-          id,
-          new Event.Meetup.Event.Id(meetup),
-          venue.map(new Venue.Id(_)),
-          hosts.map(new Speaker.Id(_)),
-          date,
-          start,
-          end,
-          welcome.toList.flatten,
-          items
-        )
+        id =>
+          lsug.data.events.Event(
+            id,
+            new Event.Meetup.Event.Id(meetup),
+            venue.map(new Venue.Id(_)),
+            hosts.map(new Speaker.Id(_)),
+            date,
+            start,
+            end,
+            welcome.toList.flatten,
+            items
+          )
     }
   }
 }

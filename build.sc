@@ -3,8 +3,12 @@ import $file.webpack
 
 import mill._
 import scalalib._
+import scalafmt._
 import mill.scalajslib._
 import webpack.{WebpackModule, NpmDependency}
+
+import $ivy.`com.goyeau::mill-scalafix:9433263`
+import com.goyeau.mill.scalafix.ScalafixModule
 
 val catsEffectDep = ivy"org.typelevel::cats-effect::2.1.0"
 
@@ -18,9 +22,10 @@ val commonScalacOptions =
     "-language:implicitConversions",
     "-feature",
     "-deprecation",
-    "-Xfatal-warnings",
+    // "-Xfatal-warnings",
     "-language:higherKinds",
     "-language:existentials",
+    "-Wunused",
     "-encoding",
     "UTF-8"
   )
@@ -47,7 +52,7 @@ object protocolJs extends ProtocolModule with ScalaJSModule {
 
 object protocolJvm extends ProtocolModule
 
-object server extends ScalaModule {
+object server extends ScalaModule with ScalafixModule with ScalafmtModule {
 
   def scalaVersion = "2.13.1"
   def moduleDeps = Seq(protocolJvm)

@@ -13,21 +13,23 @@ import cats.data.NonEmptyList
 package object events {
 
   case class Event(
-    id: p.Event.Id,
-    meetup: p.Event.Meetup.Event.Id,
-    venue: Option[p.Venue.Id],
-    hosts: NonEmptyList[p.Speaker.Id],
-    date: LocalDate,
-    start: LocalTime,
-    end: LocalTime,
-    welcome: List[p.Markup] = Nil,
-    items: NonEmptyList[Item],
-    breaks: List[p.Event.Schedule.Item] = Nil
+      id: p.Event.Id,
+      meetup: p.Event.Meetup.Event.Id,
+      venue: Option[p.Venue.Id],
+      hosts: NonEmptyList[p.Speaker.Id],
+      date: LocalDate,
+      start: LocalTime,
+      end: LocalTime,
+      welcome: List[p.Markup] = Nil,
+      items: NonEmptyList[Item],
+      breaks: List[p.Event.Schedule.Item] = Nil
   ) {
     private def summary[A](f: Item => A): p.Event.Summary[A] = p.Event.Summary(
       id = id,
-      time = p.Event.Time(LocalDateTime.of(date, start), LocalDateTime.of(date, end)),
-      location = venue.map(p.Event.Location.Physical(_))
+      time = p.Event
+        .Time(LocalDateTime.of(date, start), LocalDateTime.of(date, end)),
+      location = venue
+        .map(p.Event.Location.Physical(_))
         .getOrElse(p.Event.Location.Virtual),
       events = items.map(f).toList
     )
@@ -41,21 +43,23 @@ package object events {
       // TODO: Virtual details
       virtual = None,
       summary = itemSummary,
-      schedule = p.Event.Schedule((items.map(_.scheduleItem) ++ breaks).sortBy(_.start))
+      schedule =
+        p.Event.Schedule((items.map(_.scheduleItem) ++ breaks).sortBy(_.start))
     )
   }
 
   case class Item(
-    name: String,
-    speakers: NonEmptyList[p.Speaker.Id],
-    tags: List[String],
-    start: LocalTime,
-    end: LocalTime,
-    description: List[p.Markup],
-    setup: List[p.Markup] = Nil,
-    slides: Option[p.Link],
-    recording: Option[p.Link],
-    photos: List[p.Asset] = Nil) {
+      name: String,
+      speakers: NonEmptyList[p.Speaker.Id],
+      tags: List[String],
+      start: LocalTime,
+      end: LocalTime,
+      description: List[p.Markup],
+      setup: List[p.Markup] = Nil,
+      slides: Option[p.Link],
+      recording: Option[p.Link],
+      photos: List[p.Asset] = Nil
+  ) {
     def blurb: p.Event.Blurb = p.Event.Blurb(
       event = name,
       description = description.toList,
@@ -68,7 +72,7 @@ package object events {
       setup = setup,
       slides = slides,
       recording = recording,
-      photos = photos,
+      photos = photos
     )
 
     def scheduleItem: p.Event.Schedule.Item = p.Event.Schedule.Item(
