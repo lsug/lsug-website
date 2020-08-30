@@ -1,24 +1,30 @@
 package lsug
-package pollen
+package markup
 
 import java.time._
 import scala.util.Try
 
+import cats._
 import cats.data._
 import cats.implicits._
 import cats.arrow._
 import monocle.macros.GenLens
-import cats.Functor
-import cats.FlatMap
-import cats.Traverse
-import lsug.protocol.Venue
-import cats.Semigroupal
-import lsug.protocol._
+import lsug.protocol.{Event => PEvent, _}
 
-trait Decoder[A, B] {
+sealed trait Decoder[A, B] { self =>
   val history: List[String]
 
   def apply(a: A): Either[Decoder.Failure, B]
+
+  def optional: Decoder[A, Option[B]] = new Decoder[A, Option[B]] {
+    val history: List[String] = self.history
+    
+    def apply(a: A): Either[Decoder.Failure, Option[B]] =
+      self.apply(a)
+        .bimap(_ => Option.empty[B], _.pure[Option])
+        .merge
+        .pure[Either[Decoder.Failure, ?]]
+  }
 
 }
 
@@ -87,13 +93,13 @@ object Decoder {
     }
   }
 
-  def make[A, B](name: String)(f: A => Either[Error, B]): Decoder[A, B] =
+  private[markup] def make[A, B](name: String)(f: A => Either[Error, B]): Decoder[A, B] =
     new Decoder[A, B] {
       val history = List(name)
       def apply(a: A): Either[Failure, B] = f(a).leftMap(Failure(_, Nil))
     }
 
-  def fromEither[A, B](f: A => Either[String, B]): Decoder[A, B] =
+  private[markup] def fromEither[A, B](f: A => Either[String, B]): Decoder[A, B] =
     new Decoder[A, B] {
       val history = Nil
       def apply(a: A): Either[Failure, B] =
@@ -101,51 +107,36 @@ object Decoder {
           .leftMap(Error.Message)
           .leftMap(Failure(_, Nil))
     }
-
-  def decode[A, B](a: A)(implicit D: Decoder[A, B]): Either[Failure, B] = D(a)
 }
 
-object PollenDecoders {
+private object PollenDecoders {
 
-  import lsug.pollen.Decoder._
-  import lsug.pollen.Pollen._
+  import Decoder._
+  import Pollen._
 
-  def child(name: String): Decoder[Pollen.Tag, Pollen.Tag] =
+  def child(name: String): Decoder[Tag, Tag] =
     make(name)(
       _.children
-        .mapFilter(Pollen._tag.getOption)
+        .mapFilter(_tag.getOption)
         .find(_.name === name)
         .toRight(Error.TagNotFound(name))
     )
 
-  def maybeChild(name: String): Decoder[Pollen.Tag, Option[Pollen.Tag]] =
-    make(name)(
-      _.children
-        .mapFilter(Pollen._tag.getOption)
-        .find(_.name === name)
-        .pure[Either[Error, ?]]
-    )
-
-  def root(name: String): Decoder[NonEmptyList[Pollen.Tag], Pollen.Tag] =
+  def root(name: String): Decoder[NonEmptyList[Tag], Tag] =
     make(name)(
       _.find(_.name === name)
         .toRight(Error.TagNotFound(name))
     )
 
-  def maybeRoot(
-      name: String
-  ): Decoder[NonEmptyList[Pollen.Tag], Option[Pollen.Tag]] =
-    make(name)(_.find(_.name === name).pure[Either[Error, ?]])
-
   def children[A](
-      f: Decoder[Pollen.Tag, A]
-  ): Decoder[Pollen.Tag, NonEmptyList[A]] =
-    new Decoder[Pollen.Tag, NonEmptyList[A]] {
+      f: Decoder[Tag, A]
+  ): Decoder[Tag, NonEmptyList[A]] =
+    new Decoder[Tag, NonEmptyList[A]] {
       val history: List[String] = Nil
-      def apply(t: Pollen.Tag): Either[Failure, NonEmptyList[A]] =
+      def apply(t: Tag): Either[Failure, NonEmptyList[A]] =
         t.children
           .traverse {
-            case t: Pollen.Tag => f(t)
+            case t: Tag => f(t)
             case o =>
               Left(Failure(Error.Message(s"Unexpected content [$o]"), Nil))
           }
@@ -201,10 +192,10 @@ object PollenDecoders {
     }
   }
 
-  def markup: Decoder[Pollen.Tag, List[Markup.Paragraph]] = {
+  def markup: Decoder[Tag, List[Markup.Paragraph]] = {
     def parse(pollen: List[Pollen]): Either[String, List[Markup]] =
       pollen.traverse {
-        case Pollen.Tag("p", children) =>
+        case Tag("p", children) =>
           parse(children)
             .flatMap(_.toNel.toRight("Encountered empty paragraph in markup"))
             .flatMap(_.traverse {
@@ -212,11 +203,11 @@ object PollenDecoders {
               case _              => Left("Encountered non-text element in paragraph markup")
             })
             .map(Markup.Paragraph(_))
-        case tag @ Pollen.Tag("code", _) =>
+        case tag @ Tag("code", _) =>
           contents(tag)
             .leftMap(_ => "Unexpected contents in inline code element")
             .map(Markup.Text.Styled.Code(_))
-        case tag @ Pollen.Tag("em", children) =>
+        case Tag("em", children) =>
           parse(children)
             .flatMap(_.toNel.toRight("Encountered empty em in markup"))
             .flatMap(_.traverse {
@@ -224,12 +215,12 @@ object PollenDecoders {
               case _              => Left("Encountered non-text element in em markup")
             })
             .map(Markup.Text.Styled.Strong(_))
-        case Pollen.Tag(name, _) =>
+        case Tag(name, _) =>
           Left(s"Encountered unexpected tag in markup [$name]")
-        case Pollen.Contents(text) =>
+        case Contents(text) =>
           Markup.Text.Plain(text).pure[Either[String, ?]]
       }
-    fromEither[Pollen.Tag, List[Markup.Paragraph]](tag =>
+    fromEither[Tag, List[Markup.Paragraph]](tag =>
       parse(tag.children).flatMap(_.traverse {
         case m: Markup.Paragraph => Right(m)
         case o                   => Left(s"Encountered non-paragraph root element in markup [$o]")
@@ -245,9 +236,9 @@ object ContentDecoders {
 
   def speaker: Decoder[NonEmptyList[Tag], Speaker.Id => Speaker] = {
     val social = (
-      maybeChild("blog").composeF(contents),
-      maybeChild("twitter").composeF(contents),
-      maybeChild("github").composeF(contents)
+      child("blog").optional.composeF(contents),
+      child("twitter").optional.composeF(contents),
+      child("github").optional.composeF(contents)
     ).mapN {
       case (blog, twitter, github) =>
         Speaker.SocialMedia(
@@ -259,9 +250,9 @@ object ContentDecoders {
 
     (
       root("name") >>> contents,
-      maybeRoot("photo").composeF(contents),
-      maybeRoot("social").composeF(social),
-      maybeRoot("bio").composeF(markup)
+      root("photo").optional.composeF(contents),
+      root("social").optional.composeF(social),
+      root("bio").optional.composeF(markup)
     ).mapN {
       case (name, photo, social, bio) =>
         id =>
@@ -280,15 +271,15 @@ object ContentDecoders {
       }
   }
 
-  def event: Decoder[NonEmptyList[Tag], Event.Id => data.events.Event] = {
-    val item: Decoder[Tag, data.events.Item] = (
+  def event: Decoder[NonEmptyList[Tag], PEvent.Id => Event] = {
+    val item: Decoder[Tag, Item] = (
       child("name") >>> contents,
       child("speakers") >>> contents >>> nel,
       child("tags") >>> contents,
       child("time") >>> contents >>> timeRange,
       child("description") >>> markup,
-      maybeChild("slides").composeF(contents),
-      maybeChild("recording").composeF(contents)
+      child("slides").optional.composeF(contents),
+      child("recording").optional.composeF(contents)
     ).mapN {
       case (
           name,
@@ -299,7 +290,7 @@ object ContentDecoders {
           slides,
           recording
           ) =>
-        lsug.data.events.Item(
+        Item(
           name = name,
           speakers = speakers.map(new Speaker.Id(_)),
           tags = tagList.split(",").toList,
@@ -313,18 +304,18 @@ object ContentDecoders {
 
     (
       root("meetup") >>> contents,
-      maybeRoot("venue").composeF(contents),
+      root("venue").optional.composeF(contents),
       root("hosts") >>> contents >>> nel,
       root("date") >>> contents >>> date,
       root("time") >>> contents >>> timeRange,
-      maybeRoot("welcome").composeF(markup),
+      root("welcome").optional.composeF(markup),
       root("items") >>> children(item)
     ).mapN {
       case (meetup, venue, hosts, date, (start, end), welcome, items) =>
         id =>
-          lsug.data.events.Event(
+          Event(
             id,
-            new Event.Meetup.Event.Id(meetup),
+            new PEvent.Meetup.Event.Id(meetup),
             venue.map(new Venue.Id(_)),
             hosts.map(new Speaker.Id(_)),
             date,

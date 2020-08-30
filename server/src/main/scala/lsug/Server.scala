@@ -1,8 +1,5 @@
 package lsug
 
-import Function.const
-import scala.annotation
-import java.time.LocalDateTime
 import io.chrisdavenport.log4cats.Logger
 import fs2._
 import fs2.io
@@ -13,11 +10,7 @@ import cats.data._
 import cats._
 import cats.effect._
 import cats.implicits._
-import pollen.{Text, Parse, Pollen, ContentDecoders, Decoder}
-
-import monocle.{Lens, Prism, Traversal, Getter, Optional}
-import monocle.macros.{GenLens, GenPrism}
-import monocle.std.option.{some => _some}
+import markup.Read
 
 object Server {
 
@@ -34,21 +27,6 @@ final class Server[F[_]: Sync: ContextShift: Logger](
     meetup: Meetup[F],
     blocker: Blocker
 ) extends PathImplicits {
-
-  private def monoid[F[_]: Applicative, A: Monoid]: Monoid[F[A]] =
-    new Monoid[F[A]] {
-      val empty = Monoid[A].empty.pure[F]
-      def combine(x: F[A], y: F[A]): F[A] = x.map2(y)(_ |+| _)
-    }
-
-  val parser = lsug.pollen.PollenParsers.tags.compile
-
-  def parse(s: String) =
-    parser
-      .runA(Parse.State(s))
-      .runA(Text.Source())
-      .value
-      .result
 
   def content(path: Path): F[Option[String]] = {
     Logger[F].debug(s"request for: ${path}") *> io.file
@@ -67,17 +45,16 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       }
   }
 
-  def markup(
-      path: Path
-  ): F[Option[NonEmptyList[Pollen.Tag]]] = {
-    OptionT(content(root.resolve(path))).flatMapF { c =>
-      parse(c)
+  def read[A](
+      path: Path,
+      f: String => Either[Read.ReadError, A]
+  ): F[Option[A]] = {
+    OptionT(content(root.resolve(path))).flatMapF { contents =>
+      f(contents)
         .bimap(
-          err =>
-            Logger[F]
-              .error(s"could not parse ${path}, ${err}") *> none[
-              NonEmptyList[Pollen.Tag]
-            ].pure[F],
+          error =>
+            Logger[F].error(s"Could not read contents $error") *> none[A]
+              .pure[F],
           _.some.pure[F]
         )
         .merge
@@ -85,8 +62,6 @@ final class Server[F[_]: Sync: ContextShift: Logger](
   }
 
   def blurbs: Stream[F, Event.Summary[Event.Blurb]] = {
-
-    val decoder = ContentDecoders.event
 
     Stream.eval(Logger[F].debug(s"reading directory ${root}/events")) *> io.file
       .directoryStream(
@@ -97,59 +72,38 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       .evalMap { p =>
         val id =
           new Event.Id(p.getFileName.baseName)
-        OptionT(markup(p))
-          .map { p =>
-            println(p)
-            p
-          }
-          .map(decoder.apply)
-          .subflatMap { either =>
-            println(either)
-            either.toOption
-          }
+        OptionT(read(p, Read.blurb))
           .map(_(id))
           .value
       }
-      .collect {
-        case Some(ev) => ev.blurbSummary
-      }
+      .mapFilter(identity)
   }
 
-  private def decodeMarkup[A: Show, B](
-      decoder: Decoder[NonEmptyList[Pollen.Tag], A => B],
-      path: String
-  )(id: A): F[Option[B]] =
-    OptionT(markup(Paths.get(s"$path/${id.show}.pm"))).flatMapF {
-      case markup =>
-        decoder(markup)
-          .map(_(id))
-          .bimap(
-            err =>
-              Logger[F]
-                .error(s"could not decode resource ${id.show}, $err") *> none[B]
-                .pure[F],
-            _.some.pure[F]
-          )
-          .merge
-    }.value
+  private def decodeMarkup[A: Show, B](id: A)(
+      path: String,
+      f: String => Either[Read.ReadError, A => B]
+  ): F[Option[B]] =
+    OptionT(read(Paths.get(s"$path/${id.show}.pm"), f))
+      .map(_.apply(id))
+      .value
 
   def speakerProfile(id: Speaker.Id): F[Option[Speaker.Profile]] =
-    decodeMarkup(ContentDecoders.speaker, "people")(id)
-      .map(_.map(_.profile))
+    decodeMarkup(id)(
+      "people",
+      (Read.speaker _).andThen(_.map(_.andThen(_.profile)))
+    )
 
   def speaker(id: Speaker.Id): F[Option[Speaker]] =
-    decodeMarkup(ContentDecoders.speaker, "people")(id)
+    decodeMarkup(id)("people", (Read.speaker _))
 
   def event(id: Event.Id): F[Option[Event[Event.Item]]] =
-    decodeMarkup(ContentDecoders.event, "events")(id)
-      .map(_.map(_.itemEvent))
+    decodeMarkup(id)("events", (Read.event _))
 
   def venue(id: Venue.Id): F[Option[Venue.Summary]] =
-    decodeMarkup(ContentDecoders.venue, "venues")(id)
+    decodeMarkup(id)("venues", (Read.venue _))
 
   def eventMeetup(id: Event.Id): F[Option[Event.Meetup.Event]] = {
-    decodeMarkup(ContentDecoders.event, "events")(id)
-      .map(_.map(_.meetup))
+    decodeMarkup(id)("events", (Read.meetup _))
       .flatMap(_.flatTraverse(meetup.event))
   }
 }

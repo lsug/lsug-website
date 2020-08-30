@@ -1,5 +1,5 @@
 package lsug
-package pollen
+package markup
 
 import java.time._
 import munit.{Tag => _, _}
@@ -15,14 +15,14 @@ class DecoderSpec extends FunSuite {
     decoder: Decoder[A, B],
     input: A,
     expected: B): Unit = {
-    assert(clue(Decoder.decode(input)(decoder)) == Right(expected))
+    assert(clue(decoder(input)) == Right(expected))
   }
 
   def assertFailure[A, B](
     decoder: Decoder[A, B],
     input: A,
     expected: Decoder.Failure): Unit = {
-    assert(clue(Decoder.decode(input)(decoder)) == Left(expected))
+    assert(clue(decoder(input)) == Left(expected))
   }
 
   test("root tag") {
@@ -104,7 +104,7 @@ class DecoderSpec extends FunSuite {
   }
 
   test("optional tag") {
-    assertSuccess(maybeChild("bar").composeF(contents),
+    assertSuccess(child("bar").optional.composeF(contents),
       Tag("foo", Nil),
       None
     )

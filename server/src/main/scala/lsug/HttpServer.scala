@@ -98,8 +98,6 @@ object HttpServer extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
 
-    //TODO: fix this please
-
     val assetDir = Paths.get(args(0))
     val resourceDir = Paths.get(args(1))
 

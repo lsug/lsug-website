@@ -1,5 +1,5 @@
 package lsug
-package pollen
+package markup
 
 import Function.const
 import monocle.function.Cons.cons
@@ -12,37 +12,39 @@ import cats.data.NonEmptyList
 import cats.arrow.FunctionK
 import cats.data.Const
 
-object Parse {
+import markup.{ParseError => Error}
 
-  case class Error(
-      offset: Int,
-      token: Option[Error.Item],
-      expected: Set[Error.Item]
-  )
+case class ParseError(
+    offset: Int,
+    token: Option[Error.Item],
+    expected: Set[Error.Item]
+)
 
-  object Error {
+object ParseError {
 
-    val _expected = GenLens[Error](_.expected)
+  val _expected = GenLens[ParseError](_.expected)
 
-    implicit val errorOrder: Semigroup[Error] = Semigroup.instance { (x, y) =>
-      if (x.offset > y.offset) {
-        x
-      } else {
-        y
-      }
+  implicit val errorOrder: Semigroup[Error] = Semigroup.instance { (x, y) =>
+    if (x.offset > y.offset) {
+      x
+    } else {
+      y
     }
-
-    sealed trait Item
-
-    object Item {
-      case object EndOfInput extends Item
-      case class Label(s: String) extends Item
-      case class Tokens(tokens: String) extends Item
-      case class Token(token: Char) extends Item
-      case class Message(s: String) extends Item
-    }
-
   }
+
+  sealed trait Item
+
+  object Item {
+    case object EndOfInput extends Item
+    case class Label(s: String) extends Item
+    case class Tokens(tokens: String) extends Item
+    case class Token(token: Char) extends Item
+    case class Message(s: String) extends Item
+  }
+
+}
+
+private object Parse {
 
   sealed trait Consumption
 
@@ -53,15 +55,15 @@ object Parse {
 
   case class Reply[+A](
       consumption: Consumption,
-      result: Either[Parse.Error, A]
+      result: Either[Error, A]
   )
 
   object Reply {
 
-    def consumed[A](result: Either[Parse.Error, A]): Reply[A] =
+    def consumed[A](result: Either[Error, A]): Reply[A] =
       Parse.Reply(Parse.Consumption.Consumed, result)
 
-    def untouched[A](result: Either[Parse.Error, A]): Reply[A] =
+    def untouched[A](result: Either[Error, A]): Reply[A] =
       Parse.Reply(Parse.Consumption.Untouched, result)
   }
 
@@ -108,7 +110,7 @@ object Parse {
   }
 
   type ContOk[F[_], A, B] = (A, Parse.State, Parse.Hints) => F[B]
-  type ContErr[F[_], B] = (Parse.Error, Parse.State) => F[B]
+  type ContErr[F[_], B] = (Error, Parse.State) => F[B]
   type Cont[F[_], A] = FunctionK[λ[
     B => (
         Parse.State,
@@ -122,7 +124,7 @@ object Parse {
   val listToOption = λ[FunctionK[List, Option]](_.headOption)
 }
 
-object ParsecT {
+private object ParsecT {
 
   def pure[F[_], A](a: A): ParsecT[F, A] =
     ParsecT(
@@ -180,11 +182,11 @@ object ParsecT {
             .map {
               case (c, _) =>
                 eerr(
-                  Parse.Error(
+                  Error(
                     Parse.State._offset.get(state),
-                    Parse.Error.Item.Token(c).some,
+                    Error.Item.Token(c).some,
                     Set(
-                      Parse.Error.Item.EndOfInput
+                      Error.Item.EndOfInput
                     )
                   ),
                   state
@@ -232,12 +234,12 @@ object ParsecT {
         ], F]
       ] {
         case (state, _, _, _, eerr) =>
-          eerr(Parse.Error(state.offset, none, Set()), state)
+          eerr(Error(state.offset, none, Set()), state)
       }
     )
 
   def token[F[_], A](
-      expected: Set[Parse.Error.Item]
+      expected: Set[Error.Item]
   )(f: Char => Option[A]): ParsecT[F, A] = {
     val _take = Parse.State._input ^<-? cons[String, Char]
     ParsecT(
@@ -259,7 +261,7 @@ object ParsecT {
               case (c, s) =>
                 val g = (Parse.State._input.set(s) andThen Parse.State._offset
                   .modify(_ + 1))
-                val eitems = Parse.Error.Item.Token(c)
+                val eitems = Error.Item.Token(c)
                 f(c)
                   .map {
                     ok(
@@ -272,7 +274,7 @@ object ParsecT {
                   }
                   .getOrElse {
                     eerr(
-                      Parse.Error(
+                      Error(
                         Parse.State._offset.get(state),
                         eitems.some,
                         expected
@@ -283,9 +285,9 @@ object ParsecT {
             }
             .getOrElse {
               eerr(
-                Parse.Error(
+                Error(
                   Parse.State._offset.get(state),
-                  Parse.Error.Item.EndOfInput.some,
+                  Error.Item.EndOfInput.some,
                   expected
                 ),
                 state
@@ -314,7 +316,7 @@ object ParsecT {
       ] {
         case (state, ok, err, eok, eerr) =>
           val expected =
-            Set[Parse.Error.Item](Parse.Error.Item.Label(tokens))
+            Set[Error.Item](Error.Item.Label(tokens))
           _tokens
             .get(state)
             .map {
@@ -340,10 +342,9 @@ object ParsecT {
                   }
                 } else {
                   eerr(
-                    Parse
-                      .Error(
+                    Error(
                         state.offset,
-                        Parse.Error.Item
+                        Error.Item
                           .Tokens(ts)
                           .some,
                         expected
@@ -354,9 +355,9 @@ object ParsecT {
             }
             .getOrElse {
               eerr(
-                Parse.Error(
+                Error(
                   state.offset,
-                  Parse.Error.Item.EndOfInput.some,
+                  Error.Item.EndOfInput.some,
                   expected
                 ),
                 state
@@ -386,7 +387,7 @@ object ParsecT {
         case (state, ok, _, eok, _) =>
           val (c, s) = _split.get(state)
           val hs = label
-            .map(l => new Parse.Hints(Set(Parse.Error.Item.Label(l))))
+            .map(l => new Parse.Hints(Set(Error.Item.Label(l))))
             .getOrElse(Parse.Hints.empty)
           val g =
             (Parse.State._input.set(s) andThen Parse.State._offset
@@ -423,7 +424,7 @@ object ParsecT {
         case (state, ok, _, eok, eerr) =>
           val (c, s) = _split.get(state)
           val hs = label
-            .map(l => new Parse.Hints(Set(Parse.Error.Item.Label(l))))
+            .map(l => new Parse.Hints(Set(Error.Item.Label(l))))
             .getOrElse(Parse.Hints.empty)
           val g =
             (Parse.State._input.set(s) andThen Parse.State._offset
@@ -433,11 +434,11 @@ object ParsecT {
           Parse.State._input composeGetter Parse.State._split(f)
           if (c.isEmpty) {
             eerr(
-              Parse.Error(
+              Error(
                 Parse.State._offset.get(state),
-                Parse.Error.Item.EndOfInput.some,
+                Error.Item.EndOfInput.some,
                 label
-                  .map(l => Set[Parse.Error.Item](Parse.Error.Item.Label(l)))
+                  .map(l => Set[Error.Item](Error.Item.Label(l)))
                   .getOrElse(Set())
               ),
               g(state)
@@ -484,9 +485,9 @@ object ParsecT {
                 fa: (
                     Parse.State,
                     (B, Parse.State, Parse.Hints) => F[AA],
-                    (Parse.Error, Parse.State) => F[AA],
+                    (Error, Parse.State) => F[AA],
                     (B, Parse.State, Parse.Hints) => F[AA],
-                    (Parse.Error, Parse.State) => F[AA]
+                    (Error, Parse.State) => F[AA]
                 )
             ): F[AA] = {
               fa match {
@@ -524,13 +525,12 @@ object ParsecT {
     ParsecT.token(Set()) { c => if (f(c)) c.some else None }
 
   def single[F[_]](c: Char): ParsecT[F, Char] =
-    ParsecT.token(Set(Parse.Error.Item.Token(c))) { cc =>
+    ParsecT.token(Set(Error.Item.Token(c))) { cc =>
       if (c === cc) c.some else none
     }
-
 }
 
-case class ParsecT[F[_], A](
+private case class ParsecT[F[_], A](
     unParser: Parse.Cont[F, A]
 ) { self =>
 
@@ -582,7 +582,7 @@ case class ParsecT[F[_], A](
         ], F]
       ] {
         case (state, ok, err, eok, eerr) =>
-          val eitem = Parse.Error.Item.Label(l)
+          val eitem = Error.Item.Label(l)
           unParser(
             state,
             (a, s, h) => ok(a, s, Parse.Hints(eitem)),
@@ -671,7 +671,7 @@ case class ParsecT[F[_], A](
       hints: Parse.Hints,
       f: Parse.ContErr[F, B]
   ): Parse.ContErr[F, B] =
-    (err, s) => f(Parse.Error._expected.modify(_ |+| hints.items)(err), s)
+    (err, s) => f(Error._expected.modify(_ |+| hints.items)(err), s)
 
   def map[B](f: A => B): ParsecT[F, B] =
     ParsecT(
@@ -773,7 +773,7 @@ case class ParsecT[F[_], A](
 
 }
 
-object Text {
+private object Text {
 
   type Parser[A] = ParsecT[State[Source, ?], A]
 
@@ -868,6 +868,12 @@ object Text {
       )
     )
 
+  def parse[A](s: String)(implicit parser: Parser[A]): Either[Error, A] =
+    parser.compile
+      .runA(Parse.State(s))
+      .runA(Text.Source())
+      .value
+      .result
 }
 
 object PollenParsers {
@@ -881,7 +887,7 @@ object PollenParsers {
 
   private val contents: Parser[Pollen] = whileNoneOf1('◊', '}').map(Contents(_))
 
-  private[pollen] def tag: Parser[Pollen.Tag] =
+  private def tag: Parser[Tag] =
     for {
       command <- lozenge *> command
       _ <- open
@@ -891,9 +897,12 @@ object PollenParsers {
       _ <- close
       _ <- newline.kleene
     } yield Tag(command, contents.filterNot {
-      case Pollen.Contents(c) => c.trim.isEmpty
-      case _                  => false
+      case Contents(c) => c.trim.isEmpty
+      case _           => false
     })
 
-  def tags: Parser[NonEmptyList[Pollen.Tag]] = tag.nel
+  private def tags: Parser[NonEmptyList[Tag]] = tag.nel
+
+  def parse(s: String): Either[Error, NonEmptyList[Tag]] =
+    Text.parse(s)(tags)
 }
