@@ -205,7 +205,18 @@
 	width: 600px;
 	max-width: 600px;
 	padding: 2rem 0 1rem 0;
+
+	.date {
+	    padding: 1rem;
+	    display: flex;
+	    align-items: center;
+
+	    .material-icons {
+		padding-right: 8px;
+	    }
+	}
     }
+
 
     .panel-summary {
 

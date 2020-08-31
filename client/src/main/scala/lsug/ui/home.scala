@@ -125,7 +125,6 @@ object home {
             venues
             ) =>
           <.a(
-            ^.role := "article",
             ^.cls := "event",
             ^.href := s"/events/${start.format(format)}",
             <.header(
@@ -215,6 +214,7 @@ object home {
       def render(state: State, props: Props): VdomNode = {
         val State(tab, upcoming, past, speakers, venues) = state
         <.main(
+          <.h1(^.cls := "screenreader-only", "Events at the London Scala User Group"),
           tabs.Tabs.withChildren(
             UpcomingTab(tab),
             PastTab(tab)

@@ -105,7 +105,8 @@ object event {
       .static("MeetupLogo") {
         <.img(
           ^.cls := "logo",
-          ^.src := "https://secure.meetup.com/s/img/0/logo/svg/logo--mSwarm.svg"
+          ^.src := "https://secure.meetup.com/s/img/0/logo/svg/logo--mSwarm.svg",
+          ^.alt := "",
         )
       }
       .build
@@ -161,8 +162,10 @@ object event {
         <.a(
           ^.cls := "social-media-icon",
           ^.href := s"https://www.twitter.com/${handle.show}",
+          ^.aria.label := "Twitter profile",
           <.img(
-            ^.src := P.Asset.twitter.show
+            ^.src := P.Asset.twitter.show,
+            ^.alt := ""
           )
         )
       }
@@ -305,7 +308,7 @@ object event {
                   ) =>
                 <.header(
                   ^.cls := "welcome",
-                  <.h1(time.start.format(pattern)),
+                  <.h1(^.cls := "screenreader-only", time.start.format(pattern)),
                   <.section(
                     ^.cls := "message",
                     welcome.zipWithIndex.map {
@@ -368,57 +371,63 @@ object event {
 
     val Item = {
 
+      def tabId(event: String, tab: Tab): String = {
+        val eventId = event.replaceAll("\\s", "-")
+        s"${eventId}-${tab.show}"
+      }
+
       def MediaTab(
+        event: String,
           onOpen: Media => Callback,
           openModal: Option[Media],
-        onClose: Media => Callback,
-        recording: Option[P.Link],
-        slides: Option[P.Link]
+          onClose: Media => Callback,
+          recording: Option[P.Link],
+          slides: Option[P.Link]
       )(currTab: Tab) =
         tabs.TabPanel.withChildren(
           <.ol(
             ^.cls := Tab.media.show.toLowerCase,
             <.li(
               <.button(
-              ^.cls := "expand-modal",
-              ^.onClick --> onOpen(Media.slides),
+                ^.cls := "expand-modal",
+                ^.onClick --> onOpen(Media.slides),
                 MaterialIcon("description"),
                 <.span("slides")
               ),
-          modal.Modal.withChildren(
-            <.div(
-              ^.cls := openModal.show.toLowerCase,
-              slides.map { link =>
-                <.iframe(
-                  ^.src := link.show,
-                  ^.allowFullScreen := true
-                  )
-                }
-            )
-          )(
-            openModal.map(_ === Media.slides).getOrElse(false),
-            onClose(Media.slides)
-          ),
+              modal.Modal.withChildren(
+                <.div(
+                  ^.cls := openModal.show.toLowerCase,
+                  slides.map { link =>
+                    <.iframe(
+                      ^.src := link.show,
+                      ^.allowFullScreen := true
+                    )
+                  }
+                )
+              )(
+                openModal.map(_ === Media.slides).getOrElse(false),
+                onClose(Media.slides)
+              )
             ),
             <.li(
               <.button(
-              ^.cls := "expand-modal",
+                ^.cls := "expand-modal",
                 ^.onClick --> onOpen(Media.video),
                 MaterialIcon("video_library"),
                 <.span("video")
               ),
-          modal.Modal.withChildren(
-            <.div(
-              ^.cls := openModal.show.toLowerCase,
-              recording.map(Youtube(_))
+              modal.Modal.withChildren(
+                <.div(
+                  ^.cls := openModal.show.toLowerCase,
+                  recording.map(Youtube(_))
+                )
+              )(
+                openModal.map(_ === Media.video).getOrElse(false),
+                onClose(Media.video)
+              )
             )
-          )(
-            openModal.map(_ === Media.video).getOrElse(false),
-            onClose(Media.video)
           )
-            )
-          )
-        )(Tab.media.show, Tab.media === currTab)
+        )(tabId(event, Tab.media), Tab.media === currTab)
 
       ScalaComponent
         .builder[Props]("Item")
@@ -456,7 +465,7 @@ object event {
                     .withKey(t.show)
                     .withChildren(
                       <.span(t.show)
-                    )((t.show, tab === t, onToggle(t)))
+                    )((tabId(event, t), tab === t, onToggle(t)))
                     .vdomElement
                 }: _*
               )(existingTabs.indexOf(tab)),
@@ -474,7 +483,7 @@ object event {
                     tags.map(t => <.li(TagBadge(t))).toTagMod
                   )
                 )
-              )(Tab.about.show, tab === Tab.about),
+              )(tabId(event, Tab.about), tab === Tab.about),
               tabs.TabPanel.withChildren(
                 <.div(
                   ^.cls := "setup",
@@ -483,8 +492,9 @@ object event {
                       Markup.withKey(i)(d)
                   }.toTagMod
                 )
-              )(Tab.setup.show, tab === Tab.setup),
+              )(tabId(event, Tab.setup), tab === Tab.setup),
               MediaTab(
+                event,
                 onOpen,
                 openModal,
                 onClose,
@@ -517,6 +527,8 @@ object event {
       val toggleSchedule: Boolean => Callback = { b =>
         $.modState(_showSchedule.set(b)).toCallback
       }
+
+      val pattern = DateTimeFormatter.ofPattern("E, dd MMM")
 
       def render(
           s: State,
@@ -553,7 +565,8 @@ object event {
                             .filterKeys(speakers.contains(_))
                             .toMap,
                           s.modal.filter(_._1 === id.show).map(_._2),
-                          media => $.modState(_modal.set((id.show, media).some)),
+                          media =>
+                            $.modState(_modal.set((id.show, media).some)),
                           _ => $.modState(_modal.set(none))
                         )
                       )
@@ -573,6 +586,11 @@ object event {
                       schedule
                       ) =>
                     React.Fragment(
+                      <.div(
+                        ^.cls := "date",
+                        <.span(^.cls := "material-icons", "event"),
+                        <.span(time.start.format(pattern))
+                      ),
                       panel.Summary.withChildren(
                         Time(time.start, time.end),
                         <.div(

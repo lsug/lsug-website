@@ -35,7 +35,7 @@ object common {
       <.div(
         ^.cls := "person-badge",
         pic
-          .map(asset => <.img(^.src := asset.show))
+          .map(asset => <.img(^.src := asset.show, ^.alt := ""))
           .getOrElse(
             MaterialIcon("person")
           )
@@ -330,7 +330,7 @@ object common {
           (for {
             P.Speaker.Profile(_, _, asset) <- profile
           } yield asset
-            .map { pic => <.img(^.src := pic.show) }
+            .map { pic => <.img(^.src := pic.show, ^.alt := "") }
             .getOrElse[TagMod](MaterialIcon("person"))).getOrElse(
             <.div(^.cls := "placeholder")
           )
@@ -342,7 +342,7 @@ object common {
   val Footer = ScalaComponent
     .builder[LocalDate]("Footer")
     .render_P(now =>
-      <.div(
+      <.footer(
         ^.cls := "footer",
         Disclaimer(("12325025", now))
       )
