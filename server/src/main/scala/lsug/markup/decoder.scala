@@ -216,7 +216,7 @@ private object PollenDecoders {
             .mapN {
               case (url, text) =>
                 Markup.Text.Link(
-                  text = text,
+                  text = text.replaceAll("\\s", " "),
                   location = url
                 )
             }.apply(tag)

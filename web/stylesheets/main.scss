@@ -50,7 +50,7 @@ nav {
 	border: 0.5rem solid color.$secondary;
 	color: color.$background;
 
-	&:hover {
+	&:hover, &:focus {
 	    border: 0.5rem solid color.$primary;
 	    background-color: color.$primary;
 	    cursor: pointer;

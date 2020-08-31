@@ -48,7 +48,7 @@ div[role=tablist] {
 	    color: color.$primary;
 	}
 
-	&:hover {
+	&:hover, &:focus {
 	    color: color.$primary;
 	    cursor: pointer;
 	}
@@ -100,7 +100,7 @@ div[role=tablist] {
     border-radius: 0.5rem;
     max-width: 45rem;
 
-    &:hover {
+    &:hover, &:focus {
 	background-color: darken(color.$background, 2%);
 	box-shadow: color.$box-shadow-action;
 	cursor: pointer;
