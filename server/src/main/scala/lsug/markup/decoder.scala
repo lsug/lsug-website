@@ -211,6 +211,16 @@ private object PollenDecoders {
           contents(tag)
             .leftMap(_ => "Unexpected contents in inline code element")
             .map(Markup.Text.Styled.Strong(_))
+        case tag @ Tag("link", _) =>
+          (child("url") >>> contents, child("text") >>> contents)
+            .mapN {
+              case (url, text) =>
+                Markup.Text.Link(
+                  text = text,
+                  location = url
+                )
+            }.apply(tag)
+          .leftMap(_ => "Unexpected contents in link element")
         case Tag(name, _) =>
           Left(s"Encountered unexpected tag in markup [$name]")
         case Contents(text) =>
@@ -274,6 +284,7 @@ object ContentDecoders {
       child("tags") >>> contents,
       child("time") >>> contents >>> timeRange,
       child("description") >>> markup,
+      child("setup").optional.composeF(markup),
       child("slides").optional.composeF(contents),
       child("recording").optional.composeF(contents)
     ).mapN {
@@ -283,6 +294,7 @@ object ContentDecoders {
           tagList,
           (start, end),
           description,
+          setup,
           slides,
           recording
           ) =>
@@ -294,7 +306,8 @@ object ContentDecoders {
           end = end,
           description = description,
           slides = slides.map(new Link(_)),
-          recording = recording.map(new Link(_))
+          recording = recording.map(new Link(_)),
+          setup = setup.getOrElse(Nil)
         )
     }
 

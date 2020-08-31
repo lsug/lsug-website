@@ -15,7 +15,7 @@ We look forward to seeing you at another round of London Scala Talks.
 ◊tags{types, functional}
 ◊time{18:30-19:40}
 ◊slides{https://yilinwei.gitlab.io/domain-for-all/#1}
-◊recording{MARrVJOXyc4}
+◊recording{F9Ah8Cx4RkM}
 ◊description{
 ◊p{
 As backend developers, we often need to expose functionality to frontend UIs. Frontend developers demand that APIs are simple and extensible, leading to either constant upkeep or unsound, complex code.
@@ -31,6 +31,7 @@ We will walk through a case study of creating an API in Scala for searches throu
 ◊speakers{brunobonnano}
 ◊tags{testing}
 ◊time{19:50-20:30}
+◊recording{MARrVJOXyc4}
 ◊description{
 ◊p{
 mockito‑scala started as a simple wrapper of mockito-core to provide a more usable API and solve some Java-Scala interop issues, but since then it has evolved to become a full blown Scala mocking framework that encourages Scala best practices, provides integration with major Scala libraries and allows us to write more declarative, clearer and concise tests. In this talk we’ll go over some of the most popular fixes/additions over the Java API and also the new features that will make our tests better and simpler

@@ -3,7 +3,6 @@ package markup
 
 import io.chrisdavenport.cats.time._
 import cats.data.NonEmptyList
-import cats.implicits._
 import java.time.{LocalDate, LocalTime}
 import java.time.LocalDateTime
 import lsug.{protocol => p}
@@ -53,7 +52,7 @@ case class Item(
     start: LocalTime,
     end: LocalTime,
     description: List[p.Markup],
-    setup: List[p.Markup] = Nil,
+    setup: List[p.Markup],
     slides: Option[p.Link],
     recording: Option[p.Link],
     photos: List[p.Asset] = Nil
