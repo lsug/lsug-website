@@ -27,7 +27,10 @@
 		iframe {
 		    width: 80vw;
 		    height: 80vh;
-		    border: none;
+		    border: 3px solid color.$foreground;
+		    border-top: none;
+		    border-radius: 0 0 3px 3px;
+		    background-color: color.$shadow;
 		}
 	    }
 	}

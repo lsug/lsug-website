@@ -123,7 +123,7 @@ object event {
                   ^.href := link.show,
                   ^.target := "_blank",
                   <.h2(Logo(), <.span(s"${attendees} attendees")),
-                  <.div(<.span(^.cls := "sign-up", "sign up"))
+                  <.div(<.span(^.cls := "sign-up", "view"))
                 )
             }
             .getOrElse {

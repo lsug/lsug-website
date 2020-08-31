@@ -18,9 +18,13 @@
 .modal {
 
     .header {
-	background-color: color.$secondary;
+	background-color: color.$foreground;
 	display: flex;
 	flex-direction: row-reverse;
+	width: 80vw;
+	border: 3px solid color.$foreground;
+	border-radius: 3px 3px 0 0;
+	border-bottom: none;
     }
 
     .close {
@@ -28,7 +32,16 @@
 	z-index: inherit;
 	background-color: inherit;
 	border: none;
-	color: color.$background
+	border-radius: 3px 3px 0 0;
+	color: color.$background;
+
+	cursor: pointer;
+
+	&:hover, &:focus {
+	    color: color.$foreground;
+	    background-color: color.$background;
+	}
+
     }
 
     div[role=dialog] {
