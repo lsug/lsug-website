@@ -2,22 +2,19 @@ package lsug.ui
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.extra.Ajax
 import japgolly.scalajs.react.CatsReact._
 import cats._
 import cats.implicits._
-import cats.data._
-import lsug.protocol
 import lsug.{protocol => P}
 import Function.const
 import java.time.LocalDateTime
-import japgolly.scalajs.react.extra.router.{Router, RouterCtl}
+import japgolly.scalajs.react.extra.router.RouterCtl
 import cats.implicits._
-import io.circe._
-import io.circe.parser._
+import monocle.Lens
 import monocle.macros.{GenLens}
 import monocle.function.At.{at => _at}
-import java.time.format.{DateTimeFormatter, TextStyle}
+import java.time.format.DateTimeFormatter
+import java.time.ZoneOffset
 
 object home {
 
@@ -25,7 +22,7 @@ object home {
 
   type PEventSummary = P.Event.Summary[P.Event.Blurb]
 
-  import common.{Spinner, Banner, Markup, MaterialIcon, markup, ProfilePicture}
+  import common.{MaterialIcon, markup, ProfilePicture}
 
   type Speakers = Map[P.Speaker.Id, P.Speaker.Profile]
   type Venues = Map[P.Venue.Id, P.Venue.Summary]
@@ -40,7 +37,7 @@ object home {
             MaterialIcon("cloud"),
             <.span("Virtual only")
           )
-        case (P.Event.Location.Physical(id), venue) =>
+        case (P.Event.Location.Physical(_), venue) =>
           <.div(
             MaterialIcon("place"),
             venue
@@ -49,7 +46,7 @@ object home {
                   ^.cls := "venue-address",
                   <.span(v.name),
                   <.span(","),
-                  <.span(v.address.head),
+                  <.span(v.address.head)
                 )
               }
               .getOrElse(<.span(^.cls := "placeholder venue-address"))
@@ -89,7 +86,7 @@ object home {
     val Item = ScalaComponent
       .builder[(P.Event.Blurb, Speakers)]("EventItem")
       .render_P {
-        case (P.Event.Blurb(event, desc, speakerIds, tags), speakers) =>
+        case (P.Event.Blurb(event, desc, speakerIds, _), speakers) =>
           <.section(
             ^.cls := "event-item",
             <.header(
@@ -123,7 +120,7 @@ object home {
       .render_P {
         case Props(
             now,
-            P.Event.Summary(id, P.Event.Time(start, end), venue, events),
+            P.Event.Summary(_, P.Event.Time(start, end), venue, events),
             speakers,
             venues
             ) =>
@@ -217,7 +214,6 @@ object home {
 
       def render(state: State, props: Props): VdomNode = {
         val State(tab, upcoming, past, speakers, venues) = state
-        val now = props.now
         <.main(
           tabs.Tabs.withChildren(
             UpcomingTab(tab),
@@ -226,29 +222,37 @@ object home {
           tabs.TabPanel
             .withKey(Tab.upcoming.show)
             .withChildren(
-              <.ul(
-                ^.cls := "events",
-                upcoming
-                  .map {
-                    _.map { e =>
-                      <.li(
-                        event.Event.withKey(e.id.show)(
-                          event.Props(
-                            props.now,
-                            e,
-                            speakers,
-                            venues
-                          )
-                        )
+              upcoming
+                .map {
+                  _.toNel
+                    .map { events =>
+                      <.ul(
+                        ^.cls := "events",
+                        events
+                          .map { e =>
+                            <.li(
+                              event.Event.withKey(e.id.show)(
+                                event.Props(
+                                  props.now,
+                                  e,
+                                  speakers,
+                                  venues
+                                )
+                              )
+                            )
+                          }
+                          .toList
+                          .toTagMod
                       )
-                    }.toTagMod
-                  }
-                  .getOrElse {
-                    <.li(
-                      <.div(^.cls := "placeholder")
+                    }
+                    .getOrElse(
+                      <.div(
+                        ^.cls := "placeholder",
+                        <.span("There are no upcoming events.")
+                      )
                     )
-                  }
-              )
+                }
+                .getOrElse(<.div(^.cls := "placeholder"))
             )(Tab.upcoming.show, tab === Tab.upcoming),
           tabs.TabPanel
             .withKey(Tab.past.show)
@@ -322,30 +326,27 @@ object home {
           loadSpeakers >> loadVenues
         }
 
-        (for {
-          upcomingResource <- Resource[List[PEventSummary]]("events").value
-          _ <- upcomingResource
-            .bimap(
-              const(pass),
-              upcoming =>
-                //TODO: remove take
-                $.modState(State._upcoming.set(upcoming.take(1).some)).async >> upcoming
-                  .traverse(loadEvent(_))
-                  .void
-            )
-            .merge
-          pastResource <- Resource[List[PEventSummary]]("events").value
-          _ <- pastResource
-            .bimap(
-              const(pass),
-              past =>
-                $.modState(State._past.set(past.some)).async >> past
-                  .traverse(loadEvent(_))
-                  .void
-            )
-            .merge
-        } yield ()).toCallback
+        def loadEvents(
+            param: String,
+            lens: Lens[State, Option[List[PEventSummary]]]
+        ): AsyncCallback[Unit] = {
+          Resource[List[PEventSummary]](s"events?$param").value >>= (_.bimap(
+            AsyncCallback.throwException,
+            events =>
+              $.modState(lens.set(events.some)).async >> events
+                .traverse(loadEvent(_))
+                .void
+          ).merge)
+        }
 
+        (for {
+          now <- $.props.async.map(_.now)
+          instant <- AsyncCallback.point(
+            now.atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT)
+          )
+          _ <- loadEvents(s"after=$instant", State._upcoming)
+          _ <- loadEvents(s"before=$instant", State._past)
+        } yield ()).toCallback
       }
     }
 

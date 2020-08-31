@@ -207,13 +207,9 @@ private object PollenDecoders {
           contents(tag)
             .leftMap(_ => "Unexpected contents in inline code element")
             .map(Markup.Text.Styled.Code(_))
-        case Tag("em", children) =>
-          parse(children)
-            .flatMap(_.toNel.toRight("Encountered empty em in markup"))
-            .flatMap(_.traverse {
-              case t: Markup.Text => Right(t)
-              case _              => Left("Encountered non-text element in em markup")
-            })
+        case tag @ Tag("em", _) =>
+          contents(tag)
+            .leftMap(_ => "Unexpected contents in inline code element")
             .map(Markup.Text.Styled.Strong(_))
         case Tag(name, _) =>
           Left(s"Encountered unexpected tag in markup [$name]")
@@ -234,7 +230,7 @@ object ContentDecoders {
   import Pollen._
   import PollenDecoders._
 
-  def speaker: Decoder[NonEmptyList[Tag], Speaker.Id => Speaker] = {
+  private[markup] def speaker: Decoder[NonEmptyList[Tag], Speaker.Id => Speaker] = {
     val social = (
       child("blog").optional.composeF(contents),
       child("twitter").optional.composeF(contents),
@@ -264,14 +260,14 @@ object ContentDecoders {
     }
   }
 
-  def venue: Decoder[NonEmptyList[Tag], (Venue.Id => Venue.Summary)] = {
+  private[markup] def venue: Decoder[NonEmptyList[Tag], (Venue.Id => Venue.Summary)] = {
     (root("name") >>> contents, root("address") >>> contents >>> nel)
       .mapN {
         case (name, address) => Venue.Summary(_, name, address)
       }
   }
 
-  def event: Decoder[NonEmptyList[Tag], PEvent.Id => Event] = {
+  private[markup] def event: Decoder[NonEmptyList[Tag], PEvent.Id => Event] = {
     val item: Decoder[Tag, Item] = (
       child("name") >>> contents,
       child("speakers") >>> contents >>> nel,

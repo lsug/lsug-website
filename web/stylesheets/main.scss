@@ -49,6 +49,8 @@ nav {
 	display: block;
 	margin: 0.5rem;
 	border: 0.5rem solid color.$secondary;
+	color: color.$background;
+
 	&:hover {
 	    border: 0.5rem solid color.$primary;
 	    background-color: color.$primary;

@@ -11,6 +11,10 @@ import cats._
 import cats.effect._
 import cats.implicits._
 import markup.Read
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 
 object Server {
 
@@ -59,6 +63,20 @@ final class Server[F[_]: Sync: ContextShift: Logger](
         )
         .merge
     }.value
+  }
+
+  val BST: ZoneId = ZoneId.of("Europe/London")
+
+  def after(time: ZonedDateTime): Stream[F, Event.Summary[Event.Blurb]] = {
+    blurbs.filter { blurb =>
+      ZonedDateTime.of(blurb.time.end, BST).isAfter(time)
+    }
+  }
+
+  def before(time: ZonedDateTime): Stream[F, Event.Summary[Event.Blurb]] = {
+    blurbs.filter { blurb =>
+      ZonedDateTime.of(blurb.time.end, BST).isBefore(time)
+    }
   }
 
   def blurbs: Stream[F, Event.Summary[Event.Blurb]] = {

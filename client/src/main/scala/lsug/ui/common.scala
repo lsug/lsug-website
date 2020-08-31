@@ -3,7 +3,6 @@ package ui
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import cats._
 import cats.data._
 import cats.implicits._
 import lsug.{protocol => P}
@@ -11,7 +10,6 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom.html
 import lsug.ui.implicits._
-import japgolly.scalajs.react.CatsReact._
 
 object common {
 
@@ -58,8 +56,7 @@ object common {
     private def toTagMod(markup: P.Markup.Text, options: Options): TagMod = {
       markup match {
         case P.Markup.Text.Plain(s) => s
-        case P.Markup.Text.Styled.Strong(text) =>
-          <.strong(text.map((toTagMod(_, options))).toList.toTagMod)
+        case P.Markup.Text.Styled.Strong(s) => <.strong(s)
         case P.Markup.Text.Styled.Code(code) =>
           <.pre(<.code(code))
         case P.Markup.Text.Link(text, loc) =>
@@ -83,14 +80,12 @@ object common {
       .build
   }
 
-  //TODO: Need props for header
   val Markup = {
 
     def renderText(markup: P.Markup.Text): TagMod = {
       markup match {
         case P.Markup.Text.Plain(s) => s
-        case P.Markup.Text.Styled.Strong(text) =>
-          <.strong(text.map(renderText).toList.toTagMod)
+        case P.Markup.Text.Styled.Strong(s) => <.strong(s)
         case P.Markup.Text.Styled.Code(code) =>
           <.code(code)
         case P.Markup.Text.Link(text, loc) =>
@@ -103,9 +98,7 @@ object common {
       .render_P {
         case P.Markup.Paragraph(text) =>
           <.p(text.map(renderText).toList.toTagMod)
-        case m =>
-          println(m)
-          ???
+        case t: P.Markup.Text => <.span(renderText(t))
       }
       .build
 

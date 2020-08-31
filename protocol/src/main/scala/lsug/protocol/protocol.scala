@@ -92,7 +92,7 @@ object Markup {
     object Styled {
 
       case class Code(text: String) extends Styled
-      case class Strong(text: NonEmptyList[Text]) extends Styled
+      case class Strong(text: String) extends Styled
 
       implicit val codec: Codec[Styled] = deriveCodec[Styled]
 

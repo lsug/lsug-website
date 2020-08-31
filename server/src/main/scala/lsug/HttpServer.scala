@@ -9,7 +9,10 @@ import cats.data._
 import cats.implicits._
 import cats.effect._
 import io.circe.syntax._
+import io.circe.Json
 import java.nio.file.{Paths, Path}
+import java.time._
+import java.time.format.DateTimeFormatter
 
 object Routes {
 
@@ -20,8 +23,15 @@ object Routes {
     val dsl = Http4sDsl[F]
 
     import dsl._
-    import java.time.ZonedDateTime
     import cats.data._
+
+    implicit val isoInstantCodec: QueryParamCodec[Instant] =
+      QueryParamCodec.instantQueryParamCodec(DateTimeFormatter.ISO_INSTANT)
+
+    object BeforeParamMatcher
+        extends OptionalQueryParamDecoderMatcher[Instant]("before")
+    object AfterParamMatcher
+        extends OptionalQueryParamDecoderMatcher[Instant]("after")
 
     HttpRoutes.of[F] {
       case GET -> Root / "events" / id =>
@@ -62,8 +72,22 @@ object Routes {
         ).map(_.asJson)
           .semiflatMap(Ok(_))
           .getOrElseF(NotFound())
-      case GET -> Root / "events" =>
-        Ok(server.blurbs.map(List(_)).compile.foldMonoid.map(_.asJson))
+      case GET -> Root / "events"
+            :? BeforeParamMatcher(before)
+              +& AfterParamMatcher(after) =>
+        def events(
+            at: Instant,
+            f: ZonedDateTime => fs2.Stream[F, Event.Summary[Event.Blurb]]
+        ): F[Json] =
+          f(ZonedDateTime.ofInstant(at, ZoneOffset.UTC))
+            .map(List(_))
+            .compile
+            .foldMonoid
+            .map(_.asJson)
+        before
+          .map(events(_, server.before))
+          .orElse(after.map(events(_, server.after)))
+          .fold(BadRequest())(Ok(_))
     }
   }
 
