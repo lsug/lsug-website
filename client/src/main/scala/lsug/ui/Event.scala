@@ -106,7 +106,7 @@ object event {
         <.img(
           ^.cls := "logo",
           ^.src := "https://secure.meetup.com/s/img/0/logo/svg/logo--mSwarm.svg",
-          ^.alt := "",
+          ^.alt := ""
         )
       }
       .build
@@ -162,7 +162,7 @@ object event {
         <.a(
           ^.cls := "social-media-icon",
           ^.href := s"https://www.twitter.com/${handle.show}",
-          ^.aria.label := "Twitter profile",
+          ^.aria.label := s"See tweets by ${handle.show}",
           <.img(
             ^.src := P.Asset.twitter.show,
             ^.alt := ""
@@ -207,6 +207,8 @@ object event {
                         .map { link =>
                           <.a(
                             ^.href := link.show,
+                            ^.target := "_blank",
+                            ^.aria.label := s"Read ${name}'s blog",
                             ProfilePicture(p.some)
                           )
                         }
@@ -308,7 +310,10 @@ object event {
                   ) =>
                 <.header(
                   ^.cls := "welcome",
-                  <.h1(^.cls := "screenreader-only", time.start.format(pattern)),
+                  <.h1(
+                    ^.cls := "screenreader-only",
+                    time.start.format(pattern)
+                  ),
                   <.section(
                     ^.cls := "message",
                     welcome.zipWithIndex.map {
@@ -377,57 +382,71 @@ object event {
       }
 
       def MediaTab(
-        event: String,
+          event: String,
           onOpen: Media => Callback,
           openModal: Option[Media],
           onClose: Media => Callback,
           recording: Option[P.Link],
-          slides: Option[P.Link]
+          slides: Option[P.Event.Media]
       )(currTab: Tab) =
         tabs.TabPanel.withChildren(
           <.ol(
             ^.cls := Tab.media.show.toLowerCase,
             slides.map { link =>
-            <.li(
-              <.button(
-                ^.cls := "expand-modal",
-                ^.onClick --> onOpen(Media.slides),
-                MaterialIcon("description"),
-                <.span("slides")
-              ),
-              modal.Modal.withChildren(
-                <.div(
-                  ^.cls := openModal.show.toLowerCase,
-                  slides.map { link =>
-                    <.iframe(
-                      ^.src := link.show,
-                      ^.allowFullScreen := true
+              if (!link.openInNew) {
+                <.li(
+                  <.button(
+                    ^.cls := "open-media",
+                    ^.onClick --> onOpen(Media.slides),
+                    MaterialIcon("description"),
+                    <.span("slides")
+                  ),
+                  modal.Modal.withChildren(
+                    <.div(
+                      ^.cls := openModal.show.toLowerCase,
+                      <.iframe(
+                        ^.src := link.link.show,
+                        ^.allowFullScreen := true
+                      )
                     )
-                  }
+                  )(
+                    openModal.map(_ === Media.slides).getOrElse(false),
+                    onClose(Media.slides)
+                  )
                 )
-              )(
-                openModal.map(_ === Media.slides).getOrElse(false),
-                onClose(Media.slides)
-              )
-            )},
+              } else {
+                <.li(
+                  <.a(
+                    ^.cls := "open-media",
+                    ^.href := link.link.show,
+                    ^.target := "_blank",
+                    MaterialIcon("description"),
+                    <.div(
+                      <.span("slides"),
+                      MaterialIcon("open_in_new")
+                    )
+                  )
+                )
+              }
+            },
             recording.map { recording =>
               <.li(
-              <.button(
-                ^.cls := "expand-modal",
-                ^.onClick --> onOpen(Media.video),
-                MaterialIcon("video_library"),
-                <.span("video")
-              ),
-              modal.Modal.withChildren(
-                <.div(
-                  ^.cls := openModal.show.toLowerCase,
-                  Youtube(recording)
+                <.button(
+                  ^.cls := "open-media",
+                  ^.onClick --> onOpen(Media.video),
+                  MaterialIcon("video_library"),
+                  <.span("video")
+                ),
+                modal.Modal.withChildren(
+                  <.div(
+                    ^.cls := openModal.show.toLowerCase,
+                    Youtube(recording)
+                  )
+                )(
+                  openModal.map(_ === Media.video).getOrElse(false),
+                  onClose(Media.video)
                 )
-              )(
-                openModal.map(_ === Media.video).getOrElse(false),
-                onClose(Media.video)
               )
-            )
             }
           )
         )(tabId(event, Tab.media), Tab.media === currTab)

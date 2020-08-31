@@ -14,7 +14,7 @@ We look forward to seeing you at another round of London Scala Talks.
 ◊speakers{yilinwei}
 ◊tags{types, functional}
 ◊time{18:30-19:40}
-◊slides{https://yilinwei.gitlab.io/domain-for-all/#1}
+◊slides{◊url{https://yilinwei.gitlab.io/domain-for-all/#1}}
 ◊recording{F9Ah8Cx4RkM}
 ◊description{
 ◊p{

@@ -47,7 +47,22 @@
 	    list-style: none;
 	    width: 100%;
 
-	    button.expand-modal {
+	    a.open-media {
+		text-decoration: none;
+		color: color.$foreground;
+
+		div {
+		    display: flex;
+		    align-items: center;
+
+		    span.material-icons {
+			font-size: 1rem;
+			padding: 0.5rem;
+		    }
+		}
+	    }
+
+	    button.open-media, a.open-media {
 		display: flex;
 		align-items: center;
 		background-color: inherit;
@@ -103,9 +118,9 @@
 	.item-header {
 	    font-family: font.$body-family;
 	    font-size: font.$body-normal-size;
-	    text-transform: uppercase;
 	    text-align: center;
 	    font-weight: normal;
+	    font-variant: small-caps;
 	}
 	padding-top: 3rem;
 	.tags {
@@ -121,7 +136,7 @@
 	    margin-bottom: 1rem;
 	}
 
-	a {
+	a.external {
 	    border-radius: 10px;
 	    text-decoration: none;
 	    color: color.$foreground;

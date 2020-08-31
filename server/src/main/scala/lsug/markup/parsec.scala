@@ -903,6 +903,6 @@ object PollenParsers {
 
   private def tags: Parser[NonEmptyList[Tag]] = tag.nel
 
-  def parse(s: String): Either[Error, NonEmptyList[Tag]] =
+  private[markup] def parse(s: String): Either[Error, NonEmptyList[Tag]] =
     Text.parse(s)(tags)
 }

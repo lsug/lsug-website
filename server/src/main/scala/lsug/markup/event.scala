@@ -53,7 +53,7 @@ case class Item(
     end: LocalTime,
     description: List[p.Markup],
     setup: List[p.Markup],
-    slides: Option[p.Link],
+    slides: Option[p.Event.Media],
     recording: Option[p.Link],
     photos: List[p.Asset] = Nil
 ) {

@@ -285,7 +285,9 @@ object ContentDecoders {
       child("time") >>> contents >>> timeRange,
       child("description") >>> markup,
       child("setup").optional.composeF(markup),
-      child("slides").optional.composeF(contents),
+      child("slides").optional.composeF(
+        ((child("url") >>> contents).product(child("external").optional))
+      ),
       child("recording").optional.composeF(contents)
     ).mapN {
       case (
@@ -305,7 +307,9 @@ object ContentDecoders {
           start = start,
           end = end,
           description = description,
-          slides = slides.map(new Link(_)),
+          slides = slides.map { case (url, maybeOpen) =>
+            new PEvent.Media(new Link(url), maybeOpen.isDefined)
+          },
           recording = recording.map(new Link(_)),
           setup = setup.getOrElse(Nil)
         )

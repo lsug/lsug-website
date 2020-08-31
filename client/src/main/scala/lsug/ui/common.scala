@@ -89,7 +89,7 @@ object common {
         case P.Markup.Text.Styled.Code(code) =>
           <.code(code)
         case P.Markup.Text.Link(text, loc) =>
-          <.a(^.href := loc, text)
+          <.a(^.cls := "external", ^.href := loc, text)
       }
     }
 

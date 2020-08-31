@@ -324,10 +324,16 @@ object Event {
     implicit val codec: Codec[Blurb] = deriveCodec[Blurb]
   }
 
+  case class Media(link: Link, openInNew: Boolean)
+
+  object Media {
+    implicit val codec: Codec[Media] = deriveCodec[Media]
+  }
+
   case class Item(
       blurb: Blurb,
       setup: List[Markup],
-      slides: Option[Link],
+      slides: Option[Media],
       recording: Option[Link],
       photos: List[Asset]
   )

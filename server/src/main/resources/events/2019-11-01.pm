@@ -25,7 +25,7 @@ Sometimes called “The JQuery of DataTypes”; Lenses and other Optics provide 
 ◊speakers{danielasfregola}
 ◊tags{functional}
 ◊time{20:00-21:00}
-◊slides{https://speakerdeck.com/danielasfregola/lsug-2019-fp-the-good-the-bad-and-the-ugly}
+◊slides{◊url{https://speakerdeck.com/danielasfregola/lsug-2019-fp-the-good-the-bad-and-the-ugly}◊external{t}}
 ◊recording{DqbUYJhO7p0}
 ◊description{
 ◊p{
