@@ -77,16 +77,19 @@ object Routes {
               +& AfterParamMatcher(after) =>
         def events(
             at: Instant,
-            f: ZonedDateTime => fs2.Stream[F, Event.Summary[Event.Blurb]]
+          f: ZonedDateTime => fs2.Stream[F, Event.Summary[Event.Blurb]],
+          order: Ordering[LocalDateTime]
         ): F[Json] =
           f(ZonedDateTime.ofInstant(at, ZoneOffset.UTC))
             .map(List(_))
             .compile
             .foldMonoid
+            .map(_.sortBy(_.time.start)(order))
             .map(_.asJson)
+
         before
-          .map(events(_, server.before))
-          .orElse(after.map(events(_, server.after)))
+          .map(events(_, server.before, Ordering[LocalDateTime].reverse))
+          .orElse(after.map(events(_, server.after, Ordering[LocalDateTime])))
           .fold(BadRequest())(Ok(_))
     }
   }

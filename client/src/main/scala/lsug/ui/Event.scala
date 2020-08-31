@@ -162,6 +162,7 @@ object event {
         <.a(
           ^.cls := "social-media-icon",
           ^.href := s"https://www.twitter.com/${handle.show}",
+          ^.target := "_blank",
           ^.aria.label := s"See tweets by ${handle.show}",
           <.img(
             ^.src := P.Asset.twitter.show,
@@ -171,16 +172,32 @@ object event {
       }
       .build
 
-    val SocialMedia = ScalaComponent
-      .builder[P.Speaker.SocialMedia]("SocialMedia")
-      .render_P {
-        case P.Speaker.SocialMedia(blog, twitter, xxx) =>
-          <.div(
-            ^.cls := "speaker-social-media",
-            twitter.map(Twitter(_))
+    val Github = ScalaComponent
+      .builder[P.Github.User]("GithubUser")
+      .render_P { user =>
+        <.a(
+          ^.cls := "social-media-icon",
+          ^.href := s"https://www.github.com/${user.show}",
+          ^.target := "_blank",
+          ^.aria.label := s"See GitHub profile of ${user.show}",
+          <.img(
+            ^.src := P.Asset.github.show,
+            ^.alt := ""
           )
+        )
       }
       .build
+
+    // val SocialMedia = ScalaComponent
+    //   .builder[P.Speaker.SocialMedia]("SocialMedia")
+    //   .render_P {
+    //     case P.Speaker.SocialMedia(blog, twitter, xxx) =>
+    //       <.div(
+    //         ^.cls := "speaker-social-media",
+    //         twitter.map(Twitter(_))
+    //       )
+    //   }
+    //   .build
 
     ScalaComponent
       .builder[Option[P.Speaker]]("Speaker")
@@ -195,7 +212,7 @@ object event {
                   P.Speaker.SocialMedia(
                     blog,
                     twitter,
-                    xxx
+                    github
                   )
                   ) =>
                 React.Fragment(
@@ -213,6 +230,7 @@ object event {
                           )
                         }
                         .getOrElse(ProfilePicture(p.some)),
+                      github.map(Github(_)),
                       twitter.map(Twitter(_))
                     )
                   ),

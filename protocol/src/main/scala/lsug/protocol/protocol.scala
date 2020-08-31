@@ -37,6 +37,7 @@ object Github {
     implicit val decoder: Decoder[User] = Decoder[String].map(new User(_))
     implicit val encoder: Encoder[User] = Encoder[String].contramap(_.value)
     implicit val eq: Eq[User] = Eq[String].contramap(_.value)
+    implicit val show: Show[User] = Show[String].contramap(_.value)
   }
 
 }
@@ -75,6 +76,7 @@ object Asset {
   }
 
   val twitter = new Asset("twitter.svg")
+  val github = new Asset("github.png")
 }
 
 sealed trait Markup
