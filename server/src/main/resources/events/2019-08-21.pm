@@ -4,18 +4,18 @@
 ◊date{2019-08-21}
 ◊time{18:30-20:30}
 ◊welcome{◊p{
-Join us at Just Eat for another round of London Scala Talks. This month, we'll be hearing from Yilin Wei on type theory in DSLs and Bruno Bonnano on mockito‑scala. We look forward to seeing you.
+We look forward to seeing you at another round of London Scala Talks.
 }
 }
 
 ◊items{
 ◊item{
-◊name{Do fish have legs?: Implementing DSLs}
+◊name{Do fish have legs? Implementing DSLs}
 ◊speakers{yilinwei}
 ◊tags{types, functional}
 ◊time{18:30-19:40}
 ◊slides{https://yilinwei.gitlab.io/domain-for-all/#1}
-◊video{MARrVJOXyc4}
+◊recording{MARrVJOXyc4}
 ◊description{
 ◊p{
 As backend developers, we often need to expose functionality to frontend UIs. Frontend developers demand that APIs are simple and extensible, leading to either constant upkeep or unsound, complex code.

@@ -32,7 +32,6 @@ nav {
     color: color.$background;
 
     .abbrev-name {
-	font-weight: 800;
 	display: flex;
 	align-items: center;
 
@@ -77,4 +76,8 @@ main {
 .footer {
     display: flex;
     justify-content: center;
+    font: {
+	family: font.$body-family;
+	size: font.$body-small-size;
+    }
 }

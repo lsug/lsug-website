@@ -61,6 +61,10 @@ div[role=tablist] {
 
 .placeholder {
     margin: 2rem 0 2rem 0;
+    font: {
+	family: font.$body-family;
+	size: font.$body-normal-size;
+    }
 }
 
 .events {
@@ -154,8 +158,12 @@ div[role=tablist] {
 
 	    h2 {
 		font: {
-		    size: font.$large-size;
+		    size: font.$body-large-size;
+		    family: font.$body-family;
+		    weight: 600;
 		}
+
+		text-transform: uppercase;
 		color: color.$primary;
 		padding: 0rem;
 	    }
@@ -169,6 +177,12 @@ div[role=tablist] {
 
 	.event-item-blurb {
 	    line-height: font.$block-line-height;
+	    font: {
+		family: font.$body-family;
+		size: font.$body-normal-size;
+	    }
+
+
 	}
 
 
@@ -193,11 +207,8 @@ div[role=tablist] {
 	display: flex;
 	align-items: center;
 	font: {
-	    size: font.$normal-size;
-	    style: italic;
-	}
-	font: {
-	    size: 1rem;
+	    family: font.$body-family;
+	    size: font.$body-normal-size;
 	    style: italic;
 	}
     }

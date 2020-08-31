@@ -10,7 +10,7 @@
     }
 }
 
-@media screen and (min-width: 992px) {
+@media screen and (min-width: 1100px) {
     .event-page {
 	grid: {
 	    template-areas: "heading sidebar" "content sidebar";
@@ -20,12 +20,6 @@
 
 
 .event-page {
-
-    p {
-	line-height: 1.3;
-	font-size: 1.2rem;
-    }
-
 
     div[role=tabpanel] {
 	.modal {
@@ -81,6 +75,13 @@
 
     .abstract {
 	line-height: font.$block-line-height;
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
+    }
+
+    .bio {
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
     }
 
     div[role=tablist] {
@@ -88,6 +89,7 @@
 	    min-width: 100px;
 	    text-transform: uppercase;
 	    font: {
+		family: font.$family;
 		size: font.$normal-size;
 		weight: 800;
 	    }
@@ -99,10 +101,11 @@
     .item {
 
 	.item-header {
-	    font-size: 1.2rem;
+	    font-family: font.$body-family;
+	    font-size: font.$body-normal-size;
 	    text-transform: uppercase;
 	    text-align: center;
-	    font-weight: bold;
+	    font-weight: normal;
 	}
 	padding-top: 3rem;
 	.tags {
@@ -131,6 +134,7 @@
 	    align-items: center;
 	    font: {
 		style: italic;
+		size: font.$body-small-size;
 	    }
 	    span {
 		padding-right: 0.25rem;
@@ -157,6 +161,9 @@
     .welcome {
 	grid-area: heading;
 	max-width: 800px;
+	padding-top: 1rem;
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
     }
 
     .meetup {
@@ -202,7 +209,7 @@
     }
 
     .panel {
-	width: 600px;
+	min-width: 600px;
 	max-width: 600px;
 	padding: 2rem 0 1rem 0;
 
@@ -228,7 +235,6 @@
 	padding-right: 1rem;
 
 	.event-time {
-	    font-size: 1rem;
 	    display: flex;
 	    align-items: center;
 	    .material-icons {
@@ -273,6 +279,14 @@
     }
 
     .speaker {
+	header {
+	    font-weight: 600;
+	    font-family: font.$body-family;
+
+	    h3 {
+		font-weight: 600;
+	    }
+	}
 	.social-media {
 	    display: flex;
 	    align-items: center;

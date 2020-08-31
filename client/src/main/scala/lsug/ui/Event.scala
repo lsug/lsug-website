@@ -387,6 +387,7 @@ object event {
         tabs.TabPanel.withChildren(
           <.ol(
             ^.cls := Tab.media.show.toLowerCase,
+            slides.map { link =>
             <.li(
               <.button(
                 ^.cls := "expand-modal",
@@ -408,8 +409,9 @@ object event {
                 openModal.map(_ === Media.slides).getOrElse(false),
                 onClose(Media.slides)
               )
-            ),
-            <.li(
+            )},
+            recording.map { recording =>
+              <.li(
               <.button(
                 ^.cls := "expand-modal",
                 ^.onClick --> onOpen(Media.video),
@@ -419,13 +421,14 @@ object event {
               modal.Modal.withChildren(
                 <.div(
                   ^.cls := openModal.show.toLowerCase,
-                  recording.map(Youtube(_))
+                  Youtube(recording)
                 )
               )(
                 openModal.map(_ === Media.video).getOrElse(false),
                 onClose(Media.video)
               )
             )
+            }
           )
         )(tabId(event, Tab.media), Tab.media === currTab)
 
