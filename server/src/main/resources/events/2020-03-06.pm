@@ -12,6 +12,9 @@ We look forward to seeing you at another London Scala Workshop.
 ◊speakers{kaiang,zainabali}
 ◊tags{functional}
 ◊time{19:30-21:30}
+◊material{
+◊link{◊text{Workshop}◊url{https://github.com/lsug/advent-of-code-typelevel.git}}
+}
 ◊description{
 ◊p{
 Christmas is long gone, but it's never too late to celebrate functional programming. And there's no better way to celebrate than by solving the Advent of Code.

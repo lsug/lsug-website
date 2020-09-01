@@ -188,17 +188,6 @@ object event {
       }
       .build
 
-    // val SocialMedia = ScalaComponent
-    //   .builder[P.Speaker.SocialMedia]("SocialMedia")
-    //   .render_P {
-    //     case P.Speaker.SocialMedia(blog, twitter, xxx) =>
-    //       <.div(
-    //         ^.cls := "speaker-social-media",
-    //         twitter.map(Twitter(_))
-    //       )
-    //   }
-    //   .build
-
     ScalaComponent
       .builder[Option[P.Speaker]]("Speaker")
       .render_P { speaker =>
@@ -359,10 +348,12 @@ object event {
       case object About extends Tab
       case object Setup extends Tab
       case object Media extends Tab
+      case object Material extends Tab
 
       val about: Tab = About
       val setup: Tab = Setup
       val media: Tab = Media
+      val material: Tab = Material
 
       implicit val tabShow: Show[Tab] = Show.fromToString[Tab]
       implicit val tabEq: Eq[Tab] = Eq.fromUniversalEquals[Tab]
@@ -476,6 +467,7 @@ object event {
               tab,
               P.Event.Item(
                 P.Event.Blurb(event, desc, speakerIds, tags),
+                material,
                 setup,
                 slides,
                 recording,
@@ -491,7 +483,8 @@ object event {
               List(
                 Tab.about.some,
                 setup.headOption.map(const(Tab.setup)),
-                slides.orElse(recording).map(const(Tab.media))
+                slides.orElse(recording).map(const(Tab.media)),
+                material.headOption.map(const(Tab.material))
               ).mapFilter(identity)
 
             <.article(
@@ -533,6 +526,21 @@ object event {
                   }.toTagMod
                 )
               )(tabId(event, Tab.setup), tab === Tab.setup),
+              tabs.TabPanel.withChildren(
+                <.div(
+                  ^.cls := "material",
+                  <.ol(material.map { m =>
+                    <.li(
+                      <.a(
+                        ^.href := m.location,
+                        ^.target := "_blank",
+                          MaterialIcon("unfold_more"),
+                        <.span(m.text)
+                      )
+                    )
+                  }.toTagMod)
+                )
+              )(tabId(event, Tab.material), tab === Tab.material),
               MediaTab(
                 event,
                 onOpen,
@@ -590,7 +598,8 @@ object event {
                   ^.cls := "items",
                   blurbs.map {
                     case item @ P.Event.Item(
-                          P.Event.Blurb(id, _, speakers, tags),
+                      P.Event.Blurb(id, _, speakers, tags),
+                      _,
                           _,
                           _,
                           _,

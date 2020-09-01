@@ -278,9 +278,14 @@ object ContentDecoders {
   }
 
   private[markup] def event: Decoder[NonEmptyList[Tag], PEvent.Id => Event] = {
+    val material: Decoder[Tag, Material] =
+      (child("url") >>> contents, child("text") >>> contents).mapN {
+        case (url, text) => Material(text, url)
+      }
     val item: Decoder[Tag, Item] = (
       child("name") >>> contents,
       child("speakers") >>> contents >>> nel,
+      child("material").optional.composeF(children(material)),
       child("tags") >>> contents,
       child("time") >>> contents >>> timeRange,
       child("description") >>> markup,
@@ -293,6 +298,7 @@ object ContentDecoders {
       case (
           name,
           speakers,
+          material,
           tagList,
           (start, end),
           description,
@@ -303,6 +309,7 @@ object ContentDecoders {
         Item(
           name = name,
           speakers = speakers.map(new Speaker.Id(_)),
+          material = material.fold(List.empty[Material])(_.toList),
           tags = tagList.split(",").toList,
           start = start,
           end = end,

@@ -106,6 +106,7 @@
 	button[role=tab] {
 	    min-width: 100px;
 	    text-transform: uppercase;
+	    padding: 0 0.25rem 0 0.25rem;
 	    font: {
 		family: font.$family;
 		size: font.$normal-size;
@@ -207,6 +208,39 @@
 	line-height: font.$block-line-height;
 	font-family: font.$body-family;
 	font-size: font.$body-normal-size;
+    }
+
+    .material {
+
+	width: 100%;
+
+	ol {
+	    list-style: none;
+	}
+
+	li {
+	    
+	    a {
+		display: flex;
+		align-items: center;
+		padding: 0.25rem 0 0.25rem 0;
+
+		font-family: font.$body-family;
+		font-size: font.$body-normal-size;
+		color: color.$foreground;
+		text-decoration: none;
+
+		&:hover, &:focus {
+		    background-color: color.$background-1;
+		}
+
+		.material-icons {
+		    transform: rotate(-90deg);
+		    padding: 0 1rem 0 1rem;
+		    font-variant: none;
+		}
+	    }
+	}
     }
 
     .meetup {

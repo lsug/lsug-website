@@ -97,7 +97,7 @@ object home {
               desc.headOption.map { m =>
                 React.Fragment(
                   markup.Markup(m, markup.Options(false)),
-                  desc.tail.headOption.map(const(<.p("..."))).getOrElse(None)
+                  desc.tail.headOption.map(const(<.p("…"))).getOrElse(None)
                 )
               }.toTagMod
             ),

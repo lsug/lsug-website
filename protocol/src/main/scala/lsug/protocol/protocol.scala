@@ -61,6 +61,12 @@ object Link {
 
 }
 
+final case class Material(text: String, location: String)
+
+object Material {
+  implicit val codec: Codec[Material] = deriveCodec[Material]
+}
+
 final class Asset(val path: String) extends AnyVal
 
 object Asset {
@@ -334,6 +340,7 @@ object Event {
 
   case class Item(
       blurb: Blurb,
+      material: List[Material],
       setup: List[Markup],
       slides: Option[Media],
       recording: Option[Link],

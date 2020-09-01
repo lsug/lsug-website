@@ -1,6 +1,14 @@
+@use "font";
 
 .sponsors-page {
     display: flex;
     justify-content: center;
     padding: 3rem 0 3rem 0;
+
+    p {
+	font: {
+	    family: font.$body-family;
+	    size: font.$body-normal-size;
+	}
+    }
 }

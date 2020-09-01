@@ -13,6 +13,9 @@ We look forward to seeing you at another round of London Scala Talks.
 ◊tags{functional,scala-3}
 ◊time{19:00-19:40}
 ◊slides{◊url{https://slides.com/cb372/type-class-derivation-in-scala-3/embed}}
+◊material{
+◊link{◊url{https://github.com/cb372/type-class-derivation-in-scala-3}◊text{Examples}}
+}
 ◊description{
 ◊p{Type class derivation is one of the most exciting new features of Scala 3. In this talk I’ll explain how library authors can use it to make life easier for their users.
 }
@@ -33,6 +36,12 @@ https://higherkindness.io/mu-scala/}◊text{Mu}}, a microservices framework deve
 ◊speakers{aleksandarskrbic}
 ◊tags{akka,kafka}
 ◊time{19:50-20:30}
+◊material{
+◊link{◊url{https://github.com/aleksandarskrbic/akka-kafka-microservices-patterns/tree/master}◊text{Examples}}
+◊link{◊url{https://github.com/aleksandarskrbic/payment-processing-system}◊text{Functional Java with Vavr + Akka + Kafka}}
+◊link{◊url{https://github.com/aleksandarskrbic/akka-data-processing}◊text{Akka Actors and Akka Streams from Aleksandar’s blog posts}}
+◊link{◊url{https://github.com/aleksandarskrbic/recommender-data-pipeline/tree/master}◊text{Alpakka Kafka to Cassandra Data Pipeline}}
+}
 ◊description{
 ◊p{Talk about some common patterns specific to microservices and streaming architectures.}
 ◊p{I will show how to integrate Kafka in your microservices and why Akka and especially Akka Streams are great tool for that. Also, I will code a few Akka based services and show how interservice communication can be implemented with Akka Http or Alpakka Kafka.}
