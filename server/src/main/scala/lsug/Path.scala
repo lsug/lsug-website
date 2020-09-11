@@ -4,7 +4,7 @@ import java.nio.file.Path
 
 final class PathOps(val path: Path) extends AnyVal {
 
-  def baseName =
+  def baseName: String =
     path.toString.replaceFirst("[.][^.]+$", "")
 
 }

@@ -3,14 +3,13 @@ package markup
 
 import Function.const
 import monocle.function.Cons.cons
-import monocle.{Iso, Getter}
+import monocle.Getter
 import monocle.macros.GenLens
 import cats.implicits._
 import cats._
 import cats.data.{State, StateT}
 import cats.data.NonEmptyList
 import cats.arrow.FunctionK
-import cats.data.Const
 
 import markup.{ParseError => Error}
 
@@ -254,7 +253,7 @@ private object ParsecT {
           )
         ], F]
       ] {
-        case (state, ok, err, _, eerr) =>
+        case (state, ok, _, _, eerr) =>
           _take
             .getOption(state)
             .map {
@@ -314,7 +313,7 @@ private object ParsecT {
           )
         ], F]
       ] {
-        case (state, ok, err, eok, eerr) =>
+        case (state, ok, _, eok, eerr) =>
           val expected =
             Set[Error.Item](Error.Item.Label(tokens))
           _tokens
@@ -421,7 +420,7 @@ private object ParsecT {
           )
         ], F]
       ] {
-        case (state, ok, _, eok, eerr) =>
+        case (state, ok, _, _, eerr) =>
           val (c, s) = _split.get(state)
           val hs = label
             .map(l => new Parse.Hints(Set(Error.Item.Label(l))))
@@ -585,9 +584,9 @@ private case class ParsecT[F[_], A](
           val eitem = Error.Item.Label(l)
           unParser(
             state,
-            (a, s, h) => ok(a, s, Parse.Hints(eitem)),
+            (a, s, _) => ok(a, s, Parse.Hints(eitem)),
             err,
-            (a, s, h) => eok(a, s, Parse.Hints(eitem)),
+            (a, s, _) => eok(a, s, Parse.Hints(eitem)),
             eerr
           )
       }
@@ -609,9 +608,9 @@ private case class ParsecT[F[_], A](
         case (state, _, err, eok, eerr) =>
           unParser(
             state,
-            (a, _, h) => eok(a, state, Parse.Hints.empty),
+            (a, _, _) => eok(a, state, Parse.Hints.empty),
             err,
-            (a, _, h) => eok(a, state, Parse.Hints.empty),
+            (a, _, _) => eok(a, state, Parse.Hints.empty),
             eerr
           )
 
@@ -631,7 +630,7 @@ private case class ParsecT[F[_], A](
           )
         ], F]
       ] {
-        case (state, ok, err, eok, eerr) =>
+        case (state, ok, _, eok, eerr) =>
           unParser(
             (
               state,

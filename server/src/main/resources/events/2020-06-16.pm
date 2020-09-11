@@ -13,6 +13,7 @@ We look forward to seeing you at another round of London Scala Talks.
 ◊tags{functional,scala-3}
 ◊time{19:00-19:40}
 ◊slides{◊url{https://slides.com/cb372/type-class-derivation-in-scala-3/embed}}
+◊recording{pUGCnidcanI}
 ◊material{
 ◊link{◊url{https://github.com/cb372/type-class-derivation-in-scala-3}◊text{Examples}}
 }
@@ -36,6 +37,7 @@ https://higherkindness.io/mu-scala/}◊text{Mu}}, a microservices framework deve
 ◊speakers{aleksandarskrbic}
 ◊tags{akka,kafka}
 ◊time{19:50-20:30}
+◊recording{tt8ajKp5UMg}
 ◊material{
 ◊link{◊url{https://github.com/aleksandarskrbic/akka-kafka-microservices-patterns/tree/master}◊text{Examples}}
 ◊link{◊url{https://github.com/aleksandarskrbic/payment-processing-system}◊text{Functional Java with Vavr + Akka + Kafka}}

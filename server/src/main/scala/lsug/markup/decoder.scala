@@ -18,14 +18,36 @@ sealed trait Decoder[A, B] { self =>
 
   def optional: Decoder[A, Option[B]] = new Decoder[A, Option[B]] {
     val history: List[String] = self.history
-    
+
     def apply(a: A): Either[Decoder.Failure, Option[B]] =
-      self.apply(a)
+      self
+        .apply(a)
         .bimap(_ => Option.empty[B], _.pure[Option])
         .merge
         .pure[Either[Decoder.Failure, ?]]
   }
 
+  def traverseBy[F[_]: Traverse]: Decoder[F[A], F[B]] =
+    new Decoder[F[A], F[B]] {
+      val history: List[String] = self.history
+
+      def apply(as: F[A]): Either[Decoder.Failure, F[B]] =
+        as.traverse(self.apply)
+    }
+
+  def list: Decoder[List[A], List[B]] = traverseBy[List]
+  def nel: Decoder[NonEmptyList[A], NonEmptyList[B]] = traverseBy[NonEmptyList]
+
+  def or[C](fb: Decoder[A, C]): Decoder[A, Either[B, C]] =
+    new Decoder[A, Either[B, C]] {
+      val history: List[String] = Nil
+
+      def apply(a: A): Either[Decoder.Failure, Either[B, C]] =
+        self
+          .apply(a)
+          .map(Either.left[B, C])
+          .orElse(fb.apply(a).map(Either.right[B, C]))
+    }
 }
 
 object Decoder {
@@ -93,13 +115,17 @@ object Decoder {
     }
   }
 
-  private[markup] def make[A, B](name: String)(f: A => Either[Error, B]): Decoder[A, B] =
+  private[markup] def make[A, B](
+      name: String
+  )(f: A => Either[Error, B]): Decoder[A, B] =
     new Decoder[A, B] {
       val history = List(name)
       def apply(a: A): Either[Failure, B] = f(a).leftMap(Failure(_, Nil))
     }
 
-  private[markup] def fromEither[A, B](f: A => Either[String, B]): Decoder[A, B] =
+  private[markup] def fromEither[A, B](
+      f: A => Either[String, B]
+  ): Decoder[A, B] =
     new Decoder[A, B] {
       val history = Nil
       def apply(a: A): Either[Failure, B] =
@@ -114,6 +140,43 @@ private object PollenDecoders {
   import Decoder._
   import Pollen._
 
+  def name(n: String): Decoder[Tag, Tag] =
+    fromEither(tag =>
+      Either
+        .cond(tag.name === n, tag, s"Expected tag named $n.  Got ${tag.name}")
+    )
+
+  def tag(name: String): Decoder[NonEmptyList[Tag], Tag] =
+    make(name)(
+      _.find(_.name === name)
+        .toRight(Error.TagNotFound(name))
+    )
+
+  def childList: Decoder[Tag, List[Pollen]] =
+    fromEither(_.children.pure[Either[String, ?]])
+
+  def childTagList: Decoder[Tag, NonEmptyList[Tag]] =
+    childList >>> pollenTag.list >>> nelFromList
+
+  def single[A]: Decoder[List[A], A] =
+    fromEither(as =>
+      as.headOption
+        .filter(_ => as.size === 1)
+        .toRight(s"Expected a list of one element.  Got ${as.size}")
+    )
+
+  def pollenTag: Decoder[Pollen, Tag] =
+    fromEither {
+      case t: Tag => Right(t)
+      case o      => Left(s"Found contents [$o] but expected tag")
+    }
+
+  def pollenContents: Decoder[Pollen, Contents] =
+    fromEither {
+      case c: Contents => Right(c)
+      case o           => Left(s"Found tag [$o] but expected contents")
+    }
+
   def child(name: String): Decoder[Tag, Tag] =
     make(name)(
       _.children
@@ -122,40 +185,20 @@ private object PollenDecoders {
         .toRight(Error.TagNotFound(name))
     )
 
-  def root(name: String): Decoder[NonEmptyList[Tag], Tag] =
-    make(name)(
-      _.find(_.name === name)
-        .toRight(Error.TagNotFound(name))
+  def nelFromList[A]: Decoder[List[A], NonEmptyList[A]] =
+    fromEither(
+      (NonEmptyList
+        .fromList[A](_))
+        .andThen(_.toRight("Expected a non-empty list, but got an empty one"))
     )
 
   def children[A](
       f: Decoder[Tag, A]
   ): Decoder[Tag, NonEmptyList[A]] =
-    new Decoder[Tag, NonEmptyList[A]] {
-      val history: List[String] = Nil
-      def apply(t: Tag): Either[Failure, NonEmptyList[A]] =
-        t.children
-          .traverse {
-            case t: Tag => f(t)
-            case o =>
-              Left(Failure(Error.Message(s"Unexpected content [$o]"), Nil))
-          }
-          .flatMap(
-            _.toNel
-              .toRight(
-                Failure(Error.Message(s"Element has no child tags [$t]"), Nil)
-              )
-          )
-    }
+    childList >>> (pollenTag >>> f).list >>> nelFromList[A]
 
   def contents: Decoder[Tag, String] =
-    fromEither[Tag, String](tag =>
-      tag.children.headOption
-        .mapFilter(_contents.getOption)
-        .map(_.value)
-        .filter(_ => tag.children.size === 1)
-        .toRight("Contents not found")
-    )
+    (childList >>> single[Pollen] >>> pollenContents).map(_.value)
 
   def nel: Decoder[String, NonEmptyList[String]] =
     fromEither[String, NonEmptyList[String]](str =>
@@ -192,46 +235,31 @@ private object PollenDecoders {
     }
   }
 
-  def markup: Decoder[Tag, List[Markup.Paragraph]] = {
-    def parse(pollen: List[Pollen]): Either[String, List[Markup]] =
-      pollen.traverse {
-        case Tag("p", children) =>
-          parse(children)
-            .flatMap(_.toNel.toRight("Encountered empty paragraph in markup"))
-            .flatMap(_.traverse {
-              case t: Markup.Text => Right(t)
-              case _              => Left("Encountered non-text element in paragraph markup")
-            })
-            .map(Markup.Paragraph(_))
-        case tag @ Tag("code", _) =>
-          contents(tag)
-            .leftMap(_ => "Unexpected contents in inline code element")
-            .map(Markup.Text.Styled.Code(_))
-        case tag @ Tag("em", _) =>
-          contents(tag)
-            .leftMap(_ => "Unexpected contents in inline code element")
-            .map(Markup.Text.Styled.Strong(_))
-        case tag @ Tag("link", _) =>
-          (child("url") >>> contents, child("text") >>> contents)
-            .mapN {
-              case (url, text) =>
-                Markup.Text.Link(
-                  text = text.replaceAll("\\s", " "),
-                  location = url
-                )
-            }.apply(tag)
-          .leftMap(_ => "Unexpected contents in link element")
-        case Tag(name, _) =>
-          Left(s"Encountered unexpected tag in markup [$name]")
-        case Contents(text) =>
-          Markup.Text.Plain(text).pure[Either[String, ?]]
-      }
-    fromEither[Tag, List[Markup.Paragraph]](tag =>
-      parse(tag.children).flatMap(_.traverse {
-        case m: Markup.Paragraph => Right(m)
-        case o                   => Left(s"Encountered non-paragraph root element in markup [$o]")
-      })
-    )
+  def markup: Decoder[Tag, NonEmptyList[Markup.Paragraph]] = {
+    val text: Decoder[Pollen, Markup.Text] = pollenContents
+      .map(c => Markup.Text.Plain(c.value): Markup.Text)
+      .or(
+        (pollenTag >>> name("code") >>> contents)
+          .map(Markup.Text.Styled.Code(_))
+      )
+      .map(_.merge)
+      .or(
+        (pollenTag >>> name("em") >>> contents)
+          .map(Markup.Text.Styled.Strong(_))
+      )
+      .map(_.merge)
+      .or(
+        (pollenTag >>> name("link") >>> childTagList >>>
+          (tag("url") >>> contents, tag("text") >>> contents).mapN {
+            case (url, text) => Markup.Text.Link(text, url)
+          })
+      ).map(_.merge)
+
+    val paragraph: Decoder[Tag, Markup.Paragraph] =
+      (name("p") >>> childList >>> nelFromList >>> text.nel)
+        .map(Markup.Paragraph(_))
+
+    childTagList >>> paragraph.nel
   }
 }
 
@@ -240,11 +268,12 @@ object ContentDecoders {
   import Pollen._
   import PollenDecoders._
 
-  private[markup] def speaker: Decoder[NonEmptyList[Tag], Speaker.Id => Speaker] = {
+  private[markup] def speaker
+      : Decoder[NonEmptyList[Tag], Speaker.Id => Speaker] = {
     val social = (
-      child("blog").optional.composeF(contents),
-      child("twitter").optional.composeF(contents),
-      child("github").optional.composeF(contents)
+      tag("blog").optional.composeF(contents),
+      tag("twitter").optional.composeF(contents),
+      tag("github").optional.composeF(contents)
     ).mapN {
       case (blog, twitter, github) =>
         Speaker.SocialMedia(
@@ -255,45 +284,49 @@ object ContentDecoders {
     }
 
     (
-      root("name") >>> contents,
-      root("photo").optional.composeF(contents),
-      root("social").optional.composeF(social),
-      root("bio").optional.composeF(markup)
+      tag("name") >>> contents,
+      tag("photo").optional.composeF(contents),
+      tag("social").optional.composeF(childTagList >>> social),
+      tag("bio").optional.composeF(markup)
     ).mapN {
       case (name, photo, social, bio) =>
         id =>
           Speaker(
             Speaker.Profile(id, name, photo.map(new Asset(_))),
-            bio.toList.flatten,
+            bio.toList.flatMap(_.toList),
             social.getOrElse(Speaker.SocialMedia(None, None, None))
           )
     }
   }
 
-  private[markup] def venue: Decoder[NonEmptyList[Tag], (Venue.Id => Venue.Summary)] = {
-    (root("name") >>> contents, root("address") >>> contents >>> nel)
+  private[markup] def venue
+      : Decoder[NonEmptyList[Tag], (Venue.Id => Venue.Summary)] = {
+    (tag("name") >>> contents, tag("address") >>> contents >>> nel)
       .mapN {
         case (name, address) => Venue.Summary(_, name, address)
       }
   }
 
   private[markup] def event: Decoder[NonEmptyList[Tag], PEvent.Id => Event] = {
+
     val material: Decoder[Tag, Material] =
-      (child("url") >>> contents, child("text") >>> contents).mapN {
-        case (url, text) => Material(text, url)
-      }
-    val item: Decoder[Tag, Item] = (
-      child("name") >>> contents,
-      child("speakers") >>> contents >>> nel,
-      child("material").optional.composeF(children(material)),
-      child("tags") >>> contents,
-      child("time") >>> contents >>> timeRange,
-      child("description") >>> markup,
-      child("setup").optional.composeF(markup),
-      child("slides").optional.composeF(
-        ((child("url") >>> contents).product(child("external").optional))
-      ),
-      child("recording").optional.composeF(contents)
+      childTagList >>> (tag("url") >>> contents, tag("text") >>> contents)
+        .mapN { case (url, text) => Material(text, url) }
+
+    val item: Decoder[Tag, Item] = childTagList >>> (
+      tag("name") >>> contents,
+      tag("speakers") >>> contents >>> nel,
+      tag("material").optional.composeF(childTagList >>> material.nel),
+      tag("tags") >>> contents,
+      tag("time") >>> contents >>> timeRange,
+      tag("description") >>> markup,
+      tag("setup").optional.composeF(markup),
+      tag("slides").optional
+        .composeF(
+          childTagList >>> (tag("url") >>> contents)
+            .product(tag("external").optional)
+        ),
+      tag("recording").optional.composeF(contents)
     ).mapN {
       case (
           name,
@@ -313,23 +346,24 @@ object ContentDecoders {
           tags = tagList.split(",").toList,
           start = start,
           end = end,
-          description = description,
-          slides = slides.map { case (url, maybeOpen) =>
-            new PEvent.Media(new Link(url), maybeOpen.isDefined)
+          description = description.toList,
+          slides = slides.map {
+            case (url, maybeOpen) =>
+              new PEvent.Media(new Link(url), maybeOpen.isDefined)
           },
           recording = recording.map(new Link(_)),
-          setup = setup.getOrElse(Nil)
+          setup = setup.toList.flatMap(_.toList)
         )
     }
 
     (
-      root("meetup") >>> contents,
-      root("venue").optional.composeF(contents),
-      root("hosts") >>> contents >>> nel,
-      root("date") >>> contents >>> date,
-      root("time") >>> contents >>> timeRange,
-      root("welcome").optional.composeF(markup),
-      root("items") >>> children(item)
+      tag("meetup") >>> contents,
+      tag("venue").optional.composeF(contents),
+      tag("hosts") >>> contents >>> nel,
+      tag("date") >>> contents >>> date,
+      tag("time") >>> contents >>> timeRange,
+      tag("welcome").optional.composeF(markup),
+      tag("items") >>> children(item)
     ).mapN {
       case (meetup, venue, hosts, date, (start, end), welcome, items) =>
         id =>
@@ -341,7 +375,7 @@ object ContentDecoders {
             date,
             start,
             end,
-            welcome.toList.flatten,
+            welcome.toList.flatMap(_.toList),
             items
           )
     }

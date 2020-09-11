@@ -63,7 +63,7 @@ final class Server[F[_]: Sync: ContextShift: Logger](
     }.value
   }
 
-  val BST: ZoneId = ZoneId.of("Europe/London")
+  private val BST: ZoneId = ZoneId.of("Europe/London")
 
   def after(time: ZonedDateTime): Stream[F, Event.Summary[Event.Blurb]] = {
     blurbs.filter { blurb =>
