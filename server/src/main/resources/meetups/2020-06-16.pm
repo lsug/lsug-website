@@ -6,8 +6,8 @@
 We look forward to seeing you at another round of London Scala Talks.
 }}
 
-◊items{
-◊item{
+◊events{
+◊event{
 ◊name{Type class derivation in Scala 3}
 ◊speakers{chrisbirchall}
 ◊tags{functional,scala-3}
@@ -32,7 +32,7 @@ https://higherkindness.io/mu-scala/}◊text{Mu}}, a microservices framework deve
 }
 }
 }
-◊item{
+◊event{
 ◊name{Microservices Patterns with Akka and Kafka}
 ◊speakers{aleksandarskrbic}
 ◊tags{akka,kafka}

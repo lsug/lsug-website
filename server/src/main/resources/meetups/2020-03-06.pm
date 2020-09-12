@@ -6,8 +6,8 @@
 We look forward to seeing you at another London Scala Workshop.
 }}
 
-◊items{
-◊item{
+◊events{
+◊event{
 ◊name{Coding with cats}
 ◊speakers{kaiang,zainabali}
 ◊tags{functional}

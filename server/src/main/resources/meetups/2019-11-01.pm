@@ -7,8 +7,8 @@
 We look forward to seeing you at another round of London Scala Talks.
 }}
 
-◊items{
-◊item{
+◊events{
+◊event{
 ◊name{Lessons learnt with van Laarhoven lenses}
 ◊speakers{joewarren}
 ◊tags{optics,functional}
@@ -20,7 +20,7 @@ Sometimes called “The JQuery of DataTypes”; Lenses and other Optics provide 
 }
 }
 
-◊item{
+◊event{
 ◊name{FP; The Good, the Bad and the Ugly}
 ◊speakers{danielasfregola}
 ◊tags{functional}

@@ -8,8 +8,8 @@ We look forward to seeing you at another round of London Scala Talks.
 }
 }
 
-◊items{
-◊item{
+◊events{
+◊event{
 ◊name{Do fish have legs? Implementing DSLs}
 ◊speakers{yilinwei}
 ◊tags{types, functional}
@@ -26,7 +26,7 @@ We will walk through a case study of creating an API in Scala for searches throu
 }
 }
 
-◊item{
+◊event{
 ◊name{mockito-scala, what it is and how to get the most out of it}
 ◊speakers{brunobonnano}
 ◊tags{testing}

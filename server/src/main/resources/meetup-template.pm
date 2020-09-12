@@ -7,8 +7,8 @@
 We look forward to seeing you at another round of London Scala Talks.
 }}
 
-◊items{
-◊item{
+◊events{
+◊event{
 ◊name{}
 ◊speakers{}
 ◊tags{}
