@@ -13,7 +13,7 @@ import cats.implicits._
 import markup.Read
 import java.time.ZonedDateTime
 import java.time.ZoneId
-import lsug.{Meetup => MeetupApi} 
+import lsug.{Meetup => MeetupApi}
 
 object Server {
 
@@ -22,7 +22,6 @@ object Server {
       meetup: MeetupApi[F]
   ): Resource[F, Server[F]] =
     Blocker[F].map { b => new Server[F](root, meetup, b) }
-
 }
 
 final class Server[F[_]: Sync: ContextShift: Logger](
@@ -66,30 +65,33 @@ final class Server[F[_]: Sync: ContextShift: Logger](
 
   private val BST: ZoneId = ZoneId.of("Europe/London")
 
-  def after(time: ZonedDateTime): Stream[F, Meetup] = {
-    items.filter { item =>
-      ZonedDateTime.of(item.setting.time.end, BST).isAfter(time)
-    }
+  def meetupsAfter(time: ZonedDateTime): F[List[Meetup]] = {
+    meetups.filter { meetup =>
+      ZonedDateTime.of(meetup.setting.time.end, BST).isAfter(time)
+    }.map(_.pure[List]).compile.foldMonoid
   }
 
-  def before(time: ZonedDateTime): Stream[F, Meetup] = {
-    items.filter { item =>
-      ZonedDateTime.of(item.setting.time.end, BST).isBefore(time)
-    }
+  def eventsBefore(time: ZonedDateTime): F[List[Meetup.EventWithSetting]] = {
+    meetups.filter { meetup =>
+        ZonedDateTime.of(meetup.setting.time.end, BST).isBefore(time)
+      }
+      .map(m => m.events.map(Meetup.EventWithSetting(m.setting, _)))
+      .compile
+      .foldMonoid
   }
 
-  def items: Stream[F, Meetup] = {
+  private def meetups: Stream[F, Meetup] = {
 
-    Stream.eval(Logger[F].debug(s"reading directory ${root}/events")) *> io.file
+    Stream.eval(Logger[F].debug(s"reading directory ${root}/meetups")) *> io.file
       .directoryStream(
         blocker,
-        root.resolve("events"),
+        root.resolve("meetups"),
         "*.pm"
       )
       .evalMap { p =>
         val id =
           new Meetup.Id(p.getFileName.baseName)
-        OptionT(read(p, Read.event))
+        OptionT(read(p, Read.meetup))
           .map(_(id))
           .value
       }
@@ -113,14 +115,13 @@ final class Server[F[_]: Sync: ContextShift: Logger](
   def speaker(id: Speaker.Id): F[Option[Speaker]] =
     decodeMarkup(id)("people", (Read.speaker _))
 
-  def event(id: Meetup.Id): F[Option[Meetup]] =
-    decodeMarkup(id)("events", (Read.event _))
-
   def venue(id: Venue.Id): F[Option[Venue.Summary]] =
     decodeMarkup(id)("venues", (Read.venue _))
 
-  def eventMeetup(id: Meetup.Id): F[Option[Meetup.MeetupDotCom.Event]] = {
-    decodeMarkup(id)("events", (Read.meetup _))
+  def venue1(id: Venue.Id): F[Option[Venue.Summary]] =
+    decodeMarkup(id)("venues", (Read.venue _))
+  def meetupDotCom(id: Meetup.Id): F[Option[Meetup.MeetupDotCom.Event]] = {
+    decodeMarkup(id)("meetups", (Read.meetupDotCom _))
       .flatMap(_.flatTraverse(meetup.event))
   }
 }

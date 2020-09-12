@@ -345,13 +345,13 @@ object Meetup {
     implicit val codec: Codec[Event] = deriveCodec[Event]
   }
 
-  case class SetEvent(
+  case class EventWithSetting(
     setting: Setting,
     event: Event
   )
 
-  object SetEvent {
-    implicit val codec: Codec[SetEvent] = deriveCodec[SetEvent]
+  object EventWithSetting {
+    implicit val codec: Codec[EventWithSetting] = deriveCodec[EventWithSetting]
   }
 
   implicit val codec: Codec[Meetup] = deriveCodec[Meetup]

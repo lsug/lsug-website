@@ -77,12 +77,15 @@ object server extends ScalaModule with ScalafixModule with ScalafmtModule {
     ).map { dep => ivy"org.http4s::${dep}::0.21.3" } ++ Agg(
       "tapir-core",
       "tapir-json-circe",
-      "tapir-http4s-server"
-    ).map { dep => ivy"com.softwaremill.sttp.tapir::${dep}::0.16.16"} ++ Agg(
+      "tapir-http4s-server",
+      "tapir-openapi-docs",
+      "tapir-openapi-circe-yaml",
+      "tapir-redoc-http4s" 
+    ).map { dep => ivy"com.softwaremill.sttp.tapir::${dep}::0.16.16" } ++ Agg(
       "fs2-io",
       "fs2-core"
     ).map { dep => ivy"co.fs2::${dep}::2.3.0" } ++ monocleDeps ++
-    Agg(ivy"io.chrisdavenport::cats-time::0.3.4")
+      Agg(ivy"io.chrisdavenport::cats-time::0.3.4")
 
   def assetDir = T.source {
     millSourcePath / "src" / "main" / "resources"

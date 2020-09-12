@@ -307,13 +307,13 @@ object ContentDecoders {
       }
   }
 
-  private[markup] def event: Decoder[NonEmptyList[Tag], PMeetup.Id => Event] = {
+  private[markup] def meetup: Decoder[NonEmptyList[Tag], PMeetup.Id => Meetup] = {
 
     val material: Decoder[Tag, PMeetup.Material] =
       childTagList >>> (tag("url") >>> contents, tag("text") >>> contents)
         .mapN { case (url, text) => PMeetup.Material(text, url) }
 
-    val item: Decoder[Tag, Item] = childTagList >>> (
+    val event: Decoder[Tag, Event] = childTagList >>> (
       tag("name") >>> contents,
       tag("speakers") >>> contents >>> nel,
       tag("material").optional.composeF(childTagList >>> material.nel),
@@ -339,7 +339,7 @@ object ContentDecoders {
           slides,
           recording
           ) =>
-        Item(
+        Event(
           name = name,
           speakers = speakers.map(new Speaker.Id(_)),
           material = material.fold(List.empty[PMeetup.Material])(_.toList),
@@ -363,11 +363,12 @@ object ContentDecoders {
       tag("date") >>> contents >>> date,
       tag("time") >>> contents >>> timeRange,
       tag("welcome").optional.composeF(markup),
-      tag("items") >>> children(item)
+      // TODO: Rename this tag to "events"
+      tag("items") >>> children(event)
     ).mapN {
-      case (meetup, venue, hosts, date, (start, end), welcome, items) =>
+      case (meetup, venue, hosts, date, (start, end), welcome, events) =>
         id =>
-          Event(
+          Meetup(
             id,
             new PMeetup.MeetupDotCom.Event.Id(meetup),
             venue.map(new Venue.Id(_)),
@@ -376,7 +377,7 @@ object ContentDecoders {
             start,
             end,
             welcome.toList.flatMap(_.toList),
-            items
+            events
           )
     }
   }

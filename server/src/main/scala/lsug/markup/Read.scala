@@ -30,9 +30,9 @@ object Read {
   def venue(s: String): Either[ReadError, Venue.Id => Venue.Summary] =
     read(ContentDecoders.venue)(s)
 
-  def event(s: String): Either[ReadError, protocol.Meetup.Id => protocol.Meetup] =
-    read(ContentDecoders.event)(s).map(_.andThen(_.itemEvent))
+  def meetup(s: String): Either[ReadError, protocol.Meetup.Id => protocol.Meetup] =
+    read(ContentDecoders.meetup)(s).map(_.andThen(_.meetup))
 
-  def meetup(s: String): Either[ReadError, protocol.Meetup.Id => protocol.Meetup.MeetupDotCom.Event.Id] =
-    read(ContentDecoders.event)(s).map(_.andThen(_.meetup))
+  def meetupDotCom(s: String): Either[ReadError, protocol.Meetup.Id => protocol.Meetup.MeetupDotCom.Event.Id] =
+    read(ContentDecoders.meetup)(s).map(_.andThen(_.meetupDotCom))
 }

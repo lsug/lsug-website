@@ -9,20 +9,20 @@ import lsug.{protocol => p}
 
 import cats.data.NonEmptyList
 
-case class Event(
+case class Meetup(
     id: p.Meetup.Id,
-    meetup: p.Meetup.MeetupDotCom.Event.Id,
+    meetupDotCom: p.Meetup.MeetupDotCom.Event.Id,
     venue: Option[p.Venue.Id],
     hosts: NonEmptyList[p.Speaker.Id],
     date: LocalDate,
     start: LocalTime,
     end: LocalTime,
     welcome: List[p.Markup] = Nil,
-    items: NonEmptyList[Item],
+    events: NonEmptyList[Event],
     breaks: List[p.Meetup.Schedule.Item] = Nil
 ) {
 
-  def itemEvent: p.Meetup = p.Meetup(
+  def meetup: p.Meetup = p.Meetup(
     hosts = hosts,
     welcome = welcome,
     // TODO: Virtual details
@@ -35,13 +35,13 @@ case class Event(
       .map(p.Meetup.Location.Physical(_))
       .getOrElse(p.Meetup.Location.Virtual)
     ),
-    events = items.map(_.item).toList,
+    events = events.map(_.event).toList,
     schedule =
-      p.Meetup.Schedule((items.map(_.scheduleItem) ++ breaks).sortBy(_.start))
+      p.Meetup.Schedule((events.map(_.scheduleItem) ++ breaks).sortBy(_.start))
   )
 }
 
-case class Item(
+private[markup] case class Event(
     name: String,
     speakers: NonEmptyList[p.Speaker.Id],
     tags: List[String],
@@ -54,7 +54,7 @@ case class Item(
     recording: Option[p.Link],
     photos: List[p.Asset] = Nil
 ) {
-  def item: p.Meetup.Event = p.Meetup.Event(
+  def event: p.Meetup.Event = p.Meetup.Event(
     title = name,
     description = description.toList,
     speakers = speakers.toList,
