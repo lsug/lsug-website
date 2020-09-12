@@ -20,8 +20,6 @@ object home {
 
   import common.tabs
 
-  type PEventSummary = P.Event.Summary[P.Event.Blurb]
-
   import common.{MaterialIcon, markup, ProfilePicture}
 
   type Speakers = Map[P.Speaker.Id, P.Speaker.Profile]
@@ -29,15 +27,15 @@ object home {
 
   val EventLocation = {
     ScalaComponent
-      .builder[(P.Event.Location, Option[P.Venue.Summary])]("EventLocation")
+      .builder[(P.Meetup.Location, Option[P.Venue.Summary])]("EventLocation")
       .render_P {
-        case (P.Event.Location.Virtual, _) =>
+        case (P.Meetup.Location.Virtual, _) =>
           <.div(
             ^.cls := "event-location",
             MaterialIcon("cloud"),
             <.span("Virtual only")
           )
-        case (P.Event.Location.Physical(_), venue) =>
+        case (P.Meetup.Location.Physical(_), venue) =>
           <.div(
             MaterialIcon("place"),
             venue
@@ -84,24 +82,25 @@ object home {
       .build
 
     val Item = ScalaComponent
-      .builder[(P.Event.Blurb, Speakers)]("EventItem")
+      .builder[(P.Meetup.Event, Speakers)]("EventItem")
       .render_P {
-        case (P.Event.Blurb(event, desc, speakerIds, _), speakers) =>
+        case (item: P.Meetup.Event, speakers) =>
           <.section(
             ^.cls := "event-item",
             <.header(
-              <.h2(event)
+              <.h2(item.title)
             ),
             <.div(
-              ^.cls := "event-item-blurb",
-              desc.headOption.map { m =>
+              ^.cls := "event-item-item",
+              item.description.headOption.map { m =>
                 React.Fragment(
                   markup.Markup(m, markup.Options(false)),
-                  desc.tail.headOption.map(const(<.p("…"))).getOrElse(None)
+                  item.description.tail.headOption
+                    .map(const(<.p("…"))).getOrElse(None)
                 )
               }.toTagMod
             ),
-            ItemSpeakers((speakerIds, speakers))
+            ItemSpeakers((item.speakers, speakers))
           )
       }
       .build
@@ -110,7 +109,7 @@ object home {
 
     case class Props(
         now: LocalDateTime,
-        summary: P.Event.Summary[P.Event.Blurb],
+        summary: P.Meetup,
         speakers: Speakers,
         venues: Venues
     )
@@ -119,27 +118,27 @@ object home {
       .builder[Props]("Event")
       .render_P {
         case Props(
-            now,
-            P.Event.Summary(_, P.Event.Time(start, end), venue, events),
+          now,
+            event,
             speakers,
             venues
             ) =>
           <.a(
             ^.cls := "event",
-            ^.href := s"/events/${start.format(format)}",
+            ^.href := s"/events/${event.setting.time.start.format(format)}",
             <.header(
-              <.h1(EventTime(now, start, end)),
-              EventLocation((venue, venue.getId.flatMap(venues.get)))
+              <.h1(EventTime(now, event.setting.time.start, event.setting.time.end)),
+              EventLocation((event.setting.location, event.setting.location.getId.flatMap(venues.get)))
             ),
             <.div(
               ^.cls := "event-content",
-              events.map {
-                case item @ P.Event.Blurb(e, _, _, _) =>
-                  Item.withKey(e)((item, speakers))
+              event.events.map {
+                case item: P.Meetup.Event =>
+                  Item.withKey(item.title)((item, speakers))
               }.toTagMod,
               <.ul(
                 ^.cls := "event-tags",
-                events
+                event.events
                   .flatMap(_.tags)
                   .distinct
                   .map { t =>
@@ -162,8 +161,8 @@ object home {
 
   case class State(
       tab: Tab,
-      upcoming: Option[List[PEventSummary]],
-      past: Option[List[PEventSummary]],
+      upcoming: Option[List[P.Meetup]],
+      past: Option[List[P.Meetup]],
       speakers: Map[P.Speaker.Id, P.Speaker.Profile],
       venues: Map[P.Venue.Id, P.Venue.Summary]
   )
@@ -231,7 +230,7 @@ object home {
                         events
                           .map { e =>
                             <.li(
-                              event.Event.withKey(e.id.show)(
+                              event.Event.withKey(e.setting.id.show)(
                                 event.Props(
                                   props.now,
                                   e,
@@ -263,7 +262,7 @@ object home {
                   .map {
                     _.map { e =>
                       <.li(
-                        event.Event.withKey(e.id.show)(
+                        event.Event.withKey(e.setting.id.show)(
                           event.Props(
                             props.now,
                             e,
@@ -288,7 +287,7 @@ object home {
 
         val pass = ().pure[AsyncCallback]
 
-        def loadEvent(event: PEventSummary): AsyncCallback[Unit] = {
+        def loadEvent(event: P.Meetup): AsyncCallback[Unit] = {
           val loadSpeakers = event.events
             .flatMap(_.speakers)
             .traverse { id =>
@@ -307,8 +306,8 @@ object home {
             }
             .void
 
-          val loadVenues = event.location match {
-            case P.Event.Location.Physical(id) =>
+          val loadVenues = event.setting.location match {
+            case P.Meetup.Location.Physical(id) =>
               for {
                 resource <- Resource[P.Venue.Summary](
                   s"venues/${id.show}/summary"
@@ -328,9 +327,9 @@ object home {
 
         def loadEvents(
             param: String,
-            lens: Lens[State, Option[List[PEventSummary]]]
+            lens: Lens[State, Option[List[P.Meetup]]]
         ): AsyncCallback[Unit] = {
-          Resource[List[PEventSummary]](s"events?$param").value >>= (_.bimap(
+          Resource[List[P.Meetup]](s"events?$param").value >>= (_.bimap(
             AsyncCallback.throwException,
             events =>
               $.modState(lens.set(events.some)).async >> events

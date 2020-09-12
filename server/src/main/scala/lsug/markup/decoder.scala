@@ -9,7 +9,7 @@ import cats.data._
 import cats.implicits._
 import cats.arrow._
 import monocle.macros.GenLens
-import lsug.protocol.{Event => PEvent, _}
+import lsug.protocol.{Meetup => PMeetup, _}
 
 sealed trait Decoder[A, B] { self =>
   val history: List[String]
@@ -307,11 +307,11 @@ object ContentDecoders {
       }
   }
 
-  private[markup] def event: Decoder[NonEmptyList[Tag], PEvent.Id => Event] = {
+  private[markup] def event: Decoder[NonEmptyList[Tag], PMeetup.Id => Event] = {
 
-    val material: Decoder[Tag, Material] =
+    val material: Decoder[Tag, PMeetup.Material] =
       childTagList >>> (tag("url") >>> contents, tag("text") >>> contents)
-        .mapN { case (url, text) => Material(text, url) }
+        .mapN { case (url, text) => PMeetup.Material(text, url) }
 
     val item: Decoder[Tag, Item] = childTagList >>> (
       tag("name") >>> contents,
@@ -342,14 +342,14 @@ object ContentDecoders {
         Item(
           name = name,
           speakers = speakers.map(new Speaker.Id(_)),
-          material = material.fold(List.empty[Material])(_.toList),
+          material = material.fold(List.empty[PMeetup.Material])(_.toList),
           tags = tagList.split(",").toList,
           start = start,
           end = end,
           description = description.toList,
           slides = slides.map {
             case (url, maybeOpen) =>
-              new PEvent.Media(new Link(url), maybeOpen.isDefined)
+              new PMeetup.Media(new Link(url), maybeOpen.isDefined)
           },
           recording = recording.map(new Link(_)),
           setup = setup.toList.flatMap(_.toList)
@@ -369,7 +369,7 @@ object ContentDecoders {
         id =>
           Event(
             id,
-            new PEvent.Meetup.Event.Id(meetup),
+            new PMeetup.MeetupDotCom.Event.Id(meetup),
             venue.map(new Venue.Id(_)),
             hosts.map(new Speaker.Id(_)),
             date,

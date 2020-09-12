@@ -5,6 +5,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.circe._
+import cats._
 import cats.data._
 import cats.implicits._
 import cats.effect._
@@ -18,7 +19,51 @@ object Routes {
 
   import protocol._
 
-  def apply[F[_]: Sync: ContextShift](server: Server[F]): HttpRoutes[F] = {
+  object Endpoints {
+    import sttp.tapir._
+    import sttp.tapir.json.circe._
+    import sttp.model.StatusCode
+
+    private val notFound =
+      oneOf[Unit](statusMapping(StatusCode.NotFound, emptyOutput))
+
+    private val speakerId =
+          path[String]("id")
+            .map[Speaker.Id](new Speaker.Id(_))(_.value)
+
+    val speaker = endpoint
+      .name("speaker")
+      .description("gets a speaker's details")
+      .in("speakers" / speakerId)
+      .out(jsonBody[Speaker])
+      .errorOut(notFound)
+      .get
+
+    val speakerProfile = endpoint
+      .name("speaker-profile")
+      .description("gets a speaker's profile")
+      .in("speakers" / speakerId / "profile")
+      .out(jsonBody[Speaker.Profile])
+      .errorOut(notFound)
+      .get
+
+    private val venueId =
+          path[String]("id")
+            .map[Venue.Id](new Venue.Id(_))(_.value)
+
+    val venueSummary = endpoint
+      .name("venues-summary")
+      .description("fill this in")
+      .in("venues" / venueId / "summary")
+      .out(jsonBody[Venue.Summary])
+      .errorOut(notFound)
+      .get
+
+  }
+
+  import protocol._
+
+  def apply[F[_]: Functor: Sync: ContextShift](server: Server[F]): HttpRoutes[F] = {
 
     val dsl = Http4sDsl[F]
 
@@ -33,20 +78,23 @@ object Routes {
     object AfterParamMatcher
         extends OptionalQueryParamDecoderMatcher[Instant]("after")
 
+    import cats.implicits._
+    import sttp.tapir.server.http4s._
+
+    import Routes.{Endpoints => E}
+
+    def orVoid[A](foa: F[Option[A]]): F[Either[Unit, A]] =
+      foa.map(_.toRight(()))
+
+    E.speaker.toRoutes((server.speaker _).andThen(orVoid)) <+>
+    E.speakerProfile.toRoutes((server.speakerProfile _).andThen(orVoid)) <+>
+    E.venueSummary.toRoutes((server.venue _).andThen(orVoid)) <+>
     HttpRoutes.of[F] {
       case GET -> Root / "events" / id =>
         OptionT(
           server
           //TODO: create unappy
-            .event(new Event.Id(id))
-        ).map(_.asJson)
-          .semiflatMap(Ok(_))
-          .getOrElseF(NotFound())
-      case GET -> Root / "venues" / id / "summary" =>
-        OptionT(
-          server
-          //TODO: create unappy
-            .venue(new Venue.Id(id))
+            .event(new Meetup.Id(id))
         ).map(_.asJson)
           .semiflatMap(Ok(_))
           .getOrElseF(NotFound())
@@ -54,21 +102,7 @@ object Routes {
         OptionT(
           server
           //TODO: GraphQL?
-            .eventMeetup(new Event.Id(id))
-        ).map(_.asJson)
-          .semiflatMap(Ok(_))
-          .getOrElseF(NotFound())
-      case GET -> Root / "speakers" / id / "profile" =>
-        OptionT(
-          server
-            .speakerProfile(new Speaker.Id(id))
-        ).map(_.asJson)
-          .semiflatMap(Ok(_))
-          .getOrElseF(NotFound())
-      case GET -> Root / "speakers" / id =>
-        OptionT(
-          server
-            .speaker(new Speaker.Id(id))
+            .eventMeetup(new Meetup.Id(id))
         ).map(_.asJson)
           .semiflatMap(Ok(_))
           .getOrElseF(NotFound())
@@ -77,14 +111,14 @@ object Routes {
               +& AfterParamMatcher(after) =>
         def events(
             at: Instant,
-          f: ZonedDateTime => fs2.Stream[F, Event.Summary[Event.Blurb]],
-          order: Ordering[LocalDateTime]
+            f: ZonedDateTime => fs2.Stream[F, Meetup],
+            order: Ordering[LocalDateTime]
         ): F[Json] =
           f(ZonedDateTime.ofInstant(at, ZoneOffset.UTC))
             .map(List(_))
             .compile
             .foldMonoid
-            .map(_.sortBy(_.time.start)(order))
+            .map(_.sortBy(_.setting.time.start)(order))
             .map(_.asJson)
 
         before
@@ -136,7 +170,7 @@ object HttpServer extends IOApp {
         .use { client =>
           Server[IO](
             resourceDir,
-            Meetup(new P.Event.Meetup.Group.Id("london-scala"), client)
+            Meetup(new P.Meetup.MeetupDotCom.Group.Id("london-scala"), client)
           ).use { server =>
             BlazeServerBuilder[IO]
               .bindHttp(8080, "0.0.0.0")

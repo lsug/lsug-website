@@ -1,22 +1,10 @@
 package lsug.ui
 package event1
 
-import java.time.Clock
-import java.time.{LocalDateTime, LocalDate}
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.extra.Ajax
-import japgolly.scalajs.react.extra.router.RouterCtl
-import japgolly.scalajs.react.CatsReact._
-import cats._
 import cats.implicits._
-import cats.data.NonEmptyList
-import java.time.format.DateTimeFormatter
-import monocle.macros.{GenLens}
-import monocle.std.option.{some => _some}
-import monocle.function.At.{at => _at}
-import Function.const
 
 object Speaker {
 

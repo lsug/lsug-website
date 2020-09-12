@@ -5,7 +5,7 @@ import cats._
 import cats.implicits._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.CatsReact._
-import java.time.{LocalDateTime, LocalDate, Month, DayOfWeek}
+import java.time._
 
 final class StyleClass(val value: List[String]) extends AnyVal
 

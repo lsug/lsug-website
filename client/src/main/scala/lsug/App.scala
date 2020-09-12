@@ -34,7 +34,7 @@ object App extends IOApp {
       }
 
     def sponsorsRoute =
-      staticRoute(root / "sponsors", Page.Sponsors) ~> renderR{ ctl =>
+      staticRoute(root / "sponsors", Page.Sponsors) ~> renderR { _ =>
         val now = LocalDateTime.now(Clock.systemUTC())
         React.Fragment(
           lui.common.NavBar(),

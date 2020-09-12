@@ -2,22 +2,17 @@ package lsug
 
 import lsug.{protocol => P}
 import java.time.LocalDateTime
-import java.util.Locale
-import java.time.format.{DateTimeFormatter, TextStyle}
+import java.time.format.DateTimeFormatter
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.extra.Ajax
-import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.CatsReact._
-import japgolly.scalajs.react.component.Generic
 
 import Function.const
-import cats._
-import cats.data.EitherT
 import cats.implicits._
 
 import lsug.ui.implicits._
+import lsug.ui.common.{MaterialIcon, Spinner}
 
 package object ui {
 
@@ -25,7 +20,6 @@ package object ui {
   implicit val profileReusability = Reusability.byEq[P.Speaker.Profile]
   implicit val localDateTime = Reusability.byEq[LocalDateTime]
 
-  import common.{Spinner, Banner, Markup, MaterialIcon, markup}
 
   val EventTime = {
 
@@ -113,8 +107,7 @@ package object ui {
         $ : BackendScope[List[P.Speaker.Id], Option[List[P.Speaker.Profile]]]
     ) {
       def render(
-          s: Option[List[P.Speaker.Profile]],
-          p: List[P.Speaker.Id]
+          s: Option[List[P.Speaker.Profile]]
       ): VdomNode = {
         s.map {
             case profile :: Nil =>

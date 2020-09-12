@@ -10,8 +10,8 @@ import lsug.{protocol => p}
 import cats.data.NonEmptyList
 
 case class Event(
-    id: p.Event.Id,
-    meetup: p.Event.Meetup.Event.Id,
+    id: p.Meetup.Id,
+    meetup: p.Meetup.MeetupDotCom.Event.Id,
     venue: Option[p.Venue.Id],
     hosts: NonEmptyList[p.Speaker.Id],
     date: LocalDate,
@@ -19,29 +19,25 @@ case class Event(
     end: LocalTime,
     welcome: List[p.Markup] = Nil,
     items: NonEmptyList[Item],
-    breaks: List[p.Event.Schedule.Item] = Nil
+    breaks: List[p.Meetup.Schedule.Item] = Nil
 ) {
-  private def summary[A](f: Item => A): p.Event.Summary[A] = p.Event.Summary(
-    id = id,
-    time = p.Event
-      .Time(LocalDateTime.of(date, start), LocalDateTime.of(date, end)),
-    location = venue
-      .map(p.Event.Location.Physical(_))
-      .getOrElse(p.Event.Location.Virtual),
-    events = items.map(f).toList
-  )
 
-  def blurbSummary: p.Event.Summary[p.Event.Blurb] = summary(_.blurb)
-  def itemSummary: p.Event.Summary[p.Event.Item] = summary(_.item)
-
-  def itemEvent: p.Event[p.Event.Item] = p.Event(
+  def itemEvent: p.Meetup = p.Meetup(
     hosts = hosts,
     welcome = welcome,
     // TODO: Virtual details
     virtual = None,
-    summary = itemSummary,
+    setting = p.Meetup.Setting(
+    id = id,
+    time = p.Meetup
+      .Time(LocalDateTime.of(date, start), LocalDateTime.of(date, end)),
+    location = venue
+      .map(p.Meetup.Location.Physical(_))
+      .getOrElse(p.Meetup.Location.Virtual)
+    ),
+    events = items.map(_.item).toList,
     schedule =
-      p.Event.Schedule((items.map(_.scheduleItem) ++ breaks).sortBy(_.start))
+      p.Meetup.Schedule((items.map(_.scheduleItem) ++ breaks).sortBy(_.start))
   )
 }
 
@@ -53,20 +49,16 @@ case class Item(
     end: LocalTime,
     description: List[p.Markup],
     setup: List[p.Markup],
-    material: List[p.Material],
-    slides: Option[p.Event.Media],
+    material: List[p.Meetup.Material],
+    slides: Option[p.Meetup.Media],
     recording: Option[p.Link],
     photos: List[p.Asset] = Nil
 ) {
-  def blurb: p.Event.Blurb = p.Event.Blurb(
-    event = name,
+  def item: p.Meetup.Event = p.Meetup.Event(
+    title = name,
     description = description.toList,
     speakers = speakers.toList,
-    tags = tags
-  )
-
-  def item: p.Event.Item = p.Event.Item(
-    blurb = blurb,
+    tags = tags,
     material = material,
     setup = setup,
     slides = slides,
@@ -74,7 +66,7 @@ case class Item(
     photos = photos
   )
 
-  def scheduleItem: p.Event.Schedule.Item = p.Event.Schedule.Item(
+  def scheduleItem: p.Meetup.Schedule.Item = p.Meetup.Schedule.Item(
     event = name,
     start = start,
     end = end

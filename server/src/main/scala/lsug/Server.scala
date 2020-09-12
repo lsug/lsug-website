@@ -13,12 +13,13 @@ import cats.implicits._
 import markup.Read
 import java.time.ZonedDateTime
 import java.time.ZoneId
+import lsug.{Meetup => MeetupApi} 
 
 object Server {
 
   def apply[F[_]: Sync: ContextShift: Logger](
       root: Path,
-      meetup: Meetup[F]
+      meetup: MeetupApi[F]
   ): Resource[F, Server[F]] =
     Blocker[F].map { b => new Server[F](root, meetup, b) }
 
@@ -26,7 +27,7 @@ object Server {
 
 final class Server[F[_]: Sync: ContextShift: Logger](
     root: Path,
-    meetup: Meetup[F],
+    meetup: MeetupApi[F],
     blocker: Blocker
 ) extends PathImplicits {
 
@@ -65,19 +66,19 @@ final class Server[F[_]: Sync: ContextShift: Logger](
 
   private val BST: ZoneId = ZoneId.of("Europe/London")
 
-  def after(time: ZonedDateTime): Stream[F, Event.Summary[Event.Blurb]] = {
-    blurbs.filter { blurb =>
-      ZonedDateTime.of(blurb.time.end, BST).isAfter(time)
+  def after(time: ZonedDateTime): Stream[F, Meetup] = {
+    items.filter { item =>
+      ZonedDateTime.of(item.setting.time.end, BST).isAfter(time)
     }
   }
 
-  def before(time: ZonedDateTime): Stream[F, Event.Summary[Event.Blurb]] = {
-    blurbs.filter { blurb =>
-      ZonedDateTime.of(blurb.time.end, BST).isBefore(time)
+  def before(time: ZonedDateTime): Stream[F, Meetup] = {
+    items.filter { item =>
+      ZonedDateTime.of(item.setting.time.end, BST).isBefore(time)
     }
   }
 
-  def blurbs: Stream[F, Event.Summary[Event.Blurb]] = {
+  def items: Stream[F, Meetup] = {
 
     Stream.eval(Logger[F].debug(s"reading directory ${root}/events")) *> io.file
       .directoryStream(
@@ -87,8 +88,8 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       )
       .evalMap { p =>
         val id =
-          new Event.Id(p.getFileName.baseName)
-        OptionT(read(p, Read.blurb))
+          new Meetup.Id(p.getFileName.baseName)
+        OptionT(read(p, Read.event))
           .map(_(id))
           .value
       }
@@ -112,13 +113,13 @@ final class Server[F[_]: Sync: ContextShift: Logger](
   def speaker(id: Speaker.Id): F[Option[Speaker]] =
     decodeMarkup(id)("people", (Read.speaker _))
 
-  def event(id: Event.Id): F[Option[Event[Event.Item]]] =
+  def event(id: Meetup.Id): F[Option[Meetup]] =
     decodeMarkup(id)("events", (Read.event _))
 
   def venue(id: Venue.Id): F[Option[Venue.Summary]] =
     decodeMarkup(id)("venues", (Read.venue _))
 
-  def eventMeetup(id: Event.Id): F[Option[Event.Meetup.Event]] = {
+  def eventMeetup(id: Meetup.Id): F[Option[Meetup.MeetupDotCom.Event]] = {
     decodeMarkup(id)("events", (Read.meetup _))
       .flatMap(_.flatTraverse(meetup.event))
   }

@@ -9,7 +9,7 @@ import org.http4s.headers._
 import org.http4s._
 import cats.effect._
 
-import lsug.protocol.Event.{Meetup => P}
+import lsug.protocol.Meetup.{MeetupDotCom => P}
 import lsug.protocol.Link
 
 object Meetup {
