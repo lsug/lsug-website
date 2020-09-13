@@ -1,14 +1,14 @@
 package lsug.ui
 package event1
 
+import monocle.Lens
+import io.circe.Decoder
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import cats.implicits._
-import Function.const
 import monocle.macros.{GenLens}
 import java.time.format.DateTimeFormatter
-import japgolly.scalajs.react.CatsReact._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import monocle.function.At.{at => _at}
 
@@ -79,9 +79,7 @@ object eventPage {
                   ^.cls := "items",
                   event1.Item.Item.withKey(event.title.show)(
                         event1.Item.Props(
-                          tab = s.tabs.get(event.title.show).getOrElse(event1.Item.Tab.About),
                           item = event,
-                          onToggle = tab => $.modState(_tab(event.title.show).set(tab.some)),
                           speakers = s.speakers.view
                             .filterKeys(event.speakers.contains(_))
                             .toMap,
@@ -99,55 +97,29 @@ object eventPage {
 
       def load: Callback = {
 
-        val pass = ().pure[AsyncCallback]
+        def resource[R: Decoder](
+            lens: Lens[State, Option[R]],
+            path: String
+        ): AsyncCallback[R] = {
+          Resource.load[R, State]($.modState)(lens, path)
+        }
+
+        def speakers(ids: List[P.Speaker.Id]): AsyncCallback[Unit] =
+          Resource.speakers[State]($.modState, State._speaker)(ids)
+
+        def event(meetupId: P.Meetup.Id, eventId: P.Meetup.Event.Id): AsyncCallback[P.Meetup.EventWithSetting] =
+          resource(_event, s"meetups/${meetupId.show}/events/${eventId.show}")
+
+        def meetupDotCom(meetupId: P.Meetup.Id): AsyncCallback[P.Meetup.MeetupDotCom.Event] =
+          resource(_meetup, s"meetups/${meetupId.show}/meetup-dot-com")
+
         (for {
           (_, id, eventId) <- $.props.async
-          eventResource <- Resource[P.Meetup.EventWithSetting](s"meetups/${id.show}/events/${eventId.show}").value
-          _ <- eventResource
-            .bimap(
-              const(pass),
-              ev => $.modState(_event.set(ev.some)).async
-            )
-            .merge
-          _ <- eventResource
-            .map {
-              case event: P.Meetup.EventWithSetting =>
-                event.event.speakers.traverse {
-                  speakerId =>
-                    for {
-                      speakerResource <- Resource[P.Speaker](
-                        s"speakers/${speakerId.show}"
-                      ).value
-                      _ <- speakerResource
-                        .bimap(
-                          const(pass),
-                          speaker =>
-                            $.modState(_speaker(speakerId).set(speaker.some)).async
-                        )
-                        .merge
-                    } yield ()
-                }
-            }
-            .getOrElse(pass) *> eventResource
-            .map(_.setting.id)
-            .map { event =>
-              for {
-                meetupResource <- Resource[P.Meetup.MeetupDotCom.Event](
-                  s"events/${event.show}"
-                ).value
-                _ <- meetupResource
-                  .bimap(
-                    const(pass),
-                    meetup => $.modState(_meetup.set(meetup.some)).async
-                  )
-                  .merge
-              } yield ()
-
-            }
-            .getOrElse(pass)
+          eventWithSetting <- event(id, eventId)
+          _ <- speakers(eventWithSetting.event.speakers)
+          _ <- meetupDotCom(eventWithSetting.setting.id)
         } yield ()).toCallback
       }
-
     }
 
     ScalaComponent

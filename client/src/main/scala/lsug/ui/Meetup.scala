@@ -116,9 +116,7 @@ object meetup {
                   event.events.map { item =>
                       event1.Item.Item.withKey(item.title.show)(
                         event1.Item.Props(
-                          tab = s.tabs.get(item.title.show).getOrElse(event1.Item.Tab.About),
                           item = item,
-                          onToggle = tab => $.modState(_tab(item.title.show).set(tab.some)),
                           speakers = s.speakers.view
                             .filterKeys(item.speakers.contains(_))
                             .toMap,
@@ -214,7 +212,6 @@ object meetup {
             .getOrElse(pass)
         } yield ()).toCallback
       }
-
     }
 
     ScalaComponent

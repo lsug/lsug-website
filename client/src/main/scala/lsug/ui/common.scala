@@ -265,6 +265,8 @@ object common {
         tab: T,
         panel: VdomElement
     ): VdomNode = {
+      // FIXME: The key should be unique accross pages
+      // We can do this by adding a prefix (e.g the event id) to the key
       TabPanel
         .withKey(tab.show)
         .withChildren(panel)(tab.show, lens.get(s) === tab)

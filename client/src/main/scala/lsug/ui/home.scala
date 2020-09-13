@@ -2,9 +2,7 @@ package lsug.ui
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.CatsReact._
 import cats._
-import cats.implicits._
 import lsug.{protocol => P}
 import java.time.LocalDateTime
 import japgolly.scalajs.react.extra.router.RouterCtl
@@ -148,27 +146,14 @@ object home {
             lens: Lens[State, Option[R]],
             path: String
         ): AsyncCallback[R] = {
-          Resource[R](path).value.flatMap(
-            _.bimap(
-              AsyncCallback.throwException,
-              r => $.modState(lens.set(r.some)).async.as(r)
-            ).merge
-          )
+          Resource.load[R, State]($.modState)(lens, path)
         }
 
         def speakers(ids: List[P.Speaker.Id]): AsyncCallback[Unit] =
-          ids.distinct.traverse { id =>
-            resource(State._speaker(id), s"speakers/${id.show}/profile")
-          }.void
+          Resource.speakerProfiles[State]($.modState, State._speaker)(ids)
 
         def venues(locations: List[P.Meetup.Location]): AsyncCallback[Unit] =
-          locations.distinct
-            .mapFilter {
-              case P.Meetup.Location.Physical(id) => Some(id)
-              case _                              => None
-            }
-            .traverse { id => resource(State._venue(id), s"venues/${id.show}") }
-            .void
+          Resource.venues[State]($.modState, State._venue)(locations)
 
         (for {
           now <- $.props.async.map(_.now)
