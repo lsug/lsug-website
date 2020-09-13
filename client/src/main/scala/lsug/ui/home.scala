@@ -6,7 +6,6 @@ import japgolly.scalajs.react.CatsReact._
 import cats._
 import cats.implicits._
 import lsug.{protocol => P}
-import Function.const
 import java.time.LocalDateTime
 import japgolly.scalajs.react.extra.router.RouterCtl
 import cats.implicits._
@@ -15,144 +14,12 @@ import monocle.macros.{GenLens}
 import monocle.function.At.{at => _at}
 import java.time.format.DateTimeFormatter
 import java.time.ZoneOffset
+import io.circe.Decoder
 
 object home {
 
   import common.tabs
-
-  import common.{MaterialIcon, markup, ProfilePicture}
-
-  type Speakers = Map[P.Speaker.Id, P.Speaker.Profile]
-  type Venues = Map[P.Venue.Id, P.Venue.Summary]
-
-  val EventLocation = {
-    ScalaComponent
-      .builder[(P.Meetup.Location, Option[P.Venue.Summary])]("EventLocation")
-      .render_P {
-        case (P.Meetup.Location.Virtual, _) =>
-          <.div(
-            ^.cls := "event-location",
-            MaterialIcon("cloud"),
-            <.span("Virtual only")
-          )
-        case (P.Meetup.Location.Physical(_), venue) =>
-          <.div(
-            MaterialIcon("place"),
-            venue
-              .map { v =>
-                <.div(
-                  ^.cls := "venue-address",
-                  <.span(v.name),
-                  <.span(","),
-                  <.span(v.address.head)
-                )
-              }
-              .getOrElse(<.span(^.cls := "placeholder venue-address"))
-          )
-      }
-      .build
-  }
-
-  object event {
-
-    val ItemSpeakers = ScalaComponent
-      .builder[(List[P.Speaker.Id], Speakers)]("Speakers")
-      .render_P {
-        case (ids, speakers) =>
-          <.section(
-            ^.cls := "speakers",
-            <.ul(
-              ids.map { id =>
-                <.li(
-                  <.div(
-                    ^.cls := "speaker",
-                    speakers
-                      .get(id)
-                      .map(s => <.span(^.cls := "name", s.name))
-                      .getOrElse(
-                        <.span(^.cls := "name placeholder")
-                      ),
-                    ProfilePicture(speakers.get(id))
-                  )
-                )
-              }.toTagMod
-            )
-          )
-      }
-      .build
-
-    val Item = ScalaComponent
-      .builder[(P.Meetup.Event, Speakers)]("EventItem")
-      .render_P {
-        case (item: P.Meetup.Event, speakers) =>
-          <.section(
-            ^.cls := "event-item",
-            <.header(
-              <.h2(item.title)
-            ),
-            <.div(
-              ^.cls := "event-item-item",
-              item.description.headOption.map { m =>
-                React.Fragment(
-                  markup.Markup(m, markup.Options(false)),
-                  item.description.tail.headOption
-                    .map(const(<.p("…"))).getOrElse(None)
-                )
-              }.toTagMod
-            ),
-            ItemSpeakers((item.speakers, speakers))
-          )
-      }
-      .build
-
-    val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-    case class Props(
-        now: LocalDateTime,
-        summary: P.Meetup,
-        speakers: Speakers,
-        venues: Venues
-    )
-
-    val Event = ScalaComponent
-      .builder[Props]("Event")
-      .render_P {
-        case Props(
-          now,
-            event,
-            speakers,
-            venues
-            ) =>
-          <.a(
-            ^.cls := "event",
-            ^.href := s"/events/${event.setting.time.start.format(format)}",
-            <.header(
-              <.h1(EventTime(now, event.setting.time.start, event.setting.time.end)),
-              EventLocation((event.setting.location, event.setting.location.getId.flatMap(venues.get)))
-            ),
-            <.div(
-              ^.cls := "event-content",
-              event.events.map {
-                case item: P.Meetup.Event =>
-                  Item.withKey(item.title)((item, speakers))
-              }.toTagMod,
-              <.ul(
-                ^.cls := "event-tags",
-                event.events
-                  .flatMap(_.tags)
-                  .distinct
-                  .map { t =>
-                    <.li(
-                      TagBadge(t)
-                    )
-                  }
-                  .toTagMod
-              )
-            )
-          )
-      }
-      .build
-  }
+  import common.modal.control.{ModalProps => CModalProps}
 
   case class Props(
       router: RouterCtl[Page],
@@ -161,20 +28,22 @@ object home {
 
   case class State(
       tab: Tab,
+      modal: Option[ModalId],
       upcoming: Option[List[P.Meetup]],
-      past: Option[List[P.Meetup]],
+      past: Option[List[P.Meetup.EventWithSetting]],
       speakers: Map[P.Speaker.Id, P.Speaker.Profile],
       venues: Map[P.Venue.Id, P.Venue.Summary]
   )
 
   object State {
 
-    val initial = State(Tab.Upcoming, none, none, Map.empty, Map.empty)
+    val initial = State(Tab.Upcoming, none, none, none, Map.empty, Map.empty)
     val _speakers = GenLens[State](_.speakers)
     val _venues = GenLens[State](_.venues)
     val _upcoming = GenLens[State](_.upcoming)
     val _past = GenLens[State](_.past)
     val _tab = GenLens[State](_.tab)
+    val _modal = GenLens[State](_.modal)
     def _speaker(s: P.Speaker.Id) = _speakers ^|-> _at(s)
     def _venue(v: P.Venue.Id) = _venues ^|-> _at(v)
 
@@ -194,157 +63,127 @@ object home {
     implicit val eq: Eq[Tab] = Eq.fromUniversalEquals[Tab]
   }
 
+  sealed trait Media
+
+  object Media {
+
+    object Slides extends Media
+    object Video extends Media
+
+    implicit val eq: Eq[Media] = Eq.fromUniversalEquals[Media]
+  }
+
+  case class ModalId(meetupId: P.Meetup.Id, eventId: String, media: Media)
+
+  object ModalId {
+    implicit val eq: Eq[ModalId] = Eq.fromUniversalEquals[ModalId]
+  }
+
+  type ModalProps = CModalProps[State, ModalId]
+
   val Home = {
 
     final class Backend($ : BackendScope[Props, State]) {
 
-      def tab(tab: Tab)(curr: Tab) =
-        tabs.Tab
-          .withKey(tab.show)
-          .withChildren(
-            <.span(tab.show)
-          )((tab.show, curr === tab, $.modState(State._tab.set(tab))))
-
-      val UpcomingTab = tab(Tab.Upcoming) _
-      val PastTab = tab(Tab.Past) _
-
-      val labels = List(Tab.Upcoming, Tab.Past)
-
       def render(state: State, props: Props): VdomNode = {
-        val State(tab, upcoming, past, speakers, venues) = state
-        <.main(
-          <.h1(^.cls := "screenreader-only", "Events at the London Scala User Group"),
-          tabs.Tabs.withChildren(
-            UpcomingTab(tab),
-            PastTab(tab)
-          )(labels.indexOf(tab)),
-          tabs.TabPanel
-            .withKey(Tab.upcoming.show)
-            .withChildren(
-              upcoming
-                .map {
-                  _.toNel
-                    .map { events =>
-                      <.ul(
-                        ^.cls := "events",
-                        events
-                          .map { e =>
-                            <.li(
-                              event.Event.withKey(e.setting.id.show)(
-                                event.Props(
-                                  props.now,
-                                  e,
-                                  speakers,
-                                  venues
-                                )
-                              )
-                            )
-                          }
-                          .toList
-                          .toTagMod
-                      )
-                    }
-                    .getOrElse(
-                      <.div(
-                        ^.cls := "placeholder",
-                        <.span("There are no upcoming events.")
-                      )
-                    )
-                }
-                .getOrElse(<.div(^.cls := "placeholder"))
-            )(Tab.upcoming.show, tab === Tab.upcoming),
-          tabs.TabPanel
-            .withKey(Tab.past.show)
-            .withChildren(
-              <.ul(
-                ^.cls := "events",
-                past
-                  .map {
-                    _.map { e =>
-                      <.li(
-                        event.Event.withKey(e.setting.id.show)(
-                          event.Props(
-                            props.now,
-                            e,
-                            speakers,
-                            venues
-                          )
+        val State(tab, modal, _, past, speakers, venues) = state
+
+        val makePanel = tabs.makeTabPanel(State._tab, state) _
+        val upcomingPanel = makePanel(
+          Tab.Upcoming,
+          <.div(
+            ^.cls := "placeholder",
+            <.span("There are no upcoming meetups.")
+          )
+        )
+        val pastPanel = makePanel(
+          Tab.Past,
+          <.ul(
+            ^.cls := "events",
+            past
+              .map {
+                _.map { e =>
+                  <.li(
+                    event1.summary.Summary.withKey(e.setting.id.show)(
+                      event1.summary.Props(
+                        props.now,
+                        e,
+                        speakers,
+                        venues,
+                        CModalProps(
+                          modal,
+                          State._modal,
+                          $.modState
                         )
                       )
-                    }.toTagMod
-                  }
-                  .getOrElse {
-                    <.li(
-                      <.div(^.cls := "placeholder")
                     )
-                  }
-              )
-            )(Tab.past.show, tab === Tab.past)
+                  )
+                }.toTagMod
+              }
+              .getOrElse {
+                <.li(
+                  <.div(^.cls := "placeholder")
+                )
+              }
+          )
+        )
+
+        <.main(
+          <.h1(
+            ^.cls := "screenreader-only",
+            "Events by the London Scala User Group"
+          ),
+          tabs.makeTabs($.modState, State._tab, state)(
+            List(Tab.Upcoming, Tab.Past),
+            tab
+          ),
+          upcomingPanel,
+          pastPanel
         )
       }
 
       def load: Callback = {
 
-        val pass = ().pure[AsyncCallback]
+        def resource[R: Decoder](
+            lens: Lens[State, Option[R]],
+            path: String
+        ): AsyncCallback[R] = {
+          Resource[R](path).value.flatMap(
+            _.bimap(
+              AsyncCallback.throwException,
+              r => $.modState(lens.set(r.some)).async.as(r)
+            ).merge
+          )
+        }
 
-        def loadEvent(event: P.Meetup): AsyncCallback[Unit] = {
-          val loadSpeakers = event.events
-            .flatMap(_.speakers)
-            .traverse { id =>
-              for {
-                speakerResource <- Resource[P.Speaker.Profile](
-                  s"speakers/${id.show}/profile"
-                ).value
-                _ <- speakerResource
-                  .bimap(
-                    const(pass),
-                    speaker =>
-                      $.modState(State._speaker(id).set(speaker.some)).async
-                  )
-                  .merge
-              } yield ()
+        def speakers(ids: List[P.Speaker.Id]): AsyncCallback[Unit] =
+          ids.distinct.traverse { id =>
+            resource(State._speaker(id), s"speakers/${id.show}/profile")
+          }.void
+
+        def venues(locations: List[P.Meetup.Location]): AsyncCallback[Unit] =
+          locations.distinct
+            .mapFilter {
+              case P.Meetup.Location.Physical(id) => Some(id)
+              case _                              => None
             }
+            .traverse { id => resource(State._venue(id), s"venues/${id.show}") }
             .void
-
-          val loadVenues = event.setting.location match {
-            case P.Meetup.Location.Physical(id) =>
-              for {
-                resource <- Resource[P.Venue.Summary](
-                  s"venues/${id.show}/summary"
-                ).value
-                _ <- resource
-                  .bimap(
-                    const(pass),
-                    venue => $.modState(State._venue(id).set(venue.some)).async
-                  )
-                  .merge
-              } yield ()
-            case _ => pass
-          }
-
-          loadSpeakers >> loadVenues
-        }
-
-        def loadEvents(
-            param: String,
-            lens: Lens[State, Option[List[P.Meetup]]]
-        ): AsyncCallback[Unit] = {
-          Resource[List[P.Meetup]](s"events?$param").value >>= (_.bimap(
-            AsyncCallback.throwException,
-            events =>
-              $.modState(lens.set(events.some)).async >> events
-                .traverse(loadEvent(_))
-                .void
-          ).merge)
-        }
 
         (for {
           now <- $.props.async.map(_.now)
           instant <- AsyncCallback.point(
             now.atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT)
           )
-          _ <- loadEvents(s"after=$instant", State._upcoming)
-          _ <- loadEvents(s"before=$instant", State._past)
+          upcoming <- resource(State._upcoming, s"meetups?after=$instant")
+          past <- resource(State._past, s"events?before=$instant")
+          _ <- venues(
+            upcoming.map(_.setting.location) ++ past.map(_.setting.location)
+          )
+          _ <- speakers(
+            (upcoming >>= (_.events) >>= (_.speakers)) ++
+              (past >>= (_.event.speakers))
+          )
         } yield ()).toCallback
       }
     }

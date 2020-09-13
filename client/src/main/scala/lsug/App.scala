@@ -14,6 +14,7 @@ object App extends IOApp {
 
   import ui.Page
   import lsug.{ui => lui}
+  import lsug.{protocol => P}
 
   val routerConfig = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
@@ -45,13 +46,13 @@ object App extends IOApp {
 
     def eventRoute =
       dynamicRouteCT(
-        root / "events" / string("[0-9\\-]+").caseClass[Page.Event]
+        root / "events" / (string("[0-9\\-]+") / int).caseClass[Page.Event]
       ) ~> dynRenderR {
-        case (Page.Event(ev), ctl) =>
+        case (Page.Event(meetupId, eventId), ctl) =>
           val now = LocalDateTime.now(Clock.systemUTC())
           React.Fragment(
             lui.common.NavBar(),
-            lui.event.Event((ctl.narrow, ev)),
+            lui.event1.eventPage.Event((ctl.narrow, new P.Meetup.Id(meetupId), new P.Meetup.Event.Id(eventId))),
             lui.common.Footer(now.toLocalDate)
           )
       }

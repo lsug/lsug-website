@@ -75,9 +75,24 @@ final class Server[F[_]: Sync: ContextShift: Logger](
     meetups.filter { meetup =>
         ZonedDateTime.of(meetup.setting.time.end, BST).isBefore(time)
       }
-      .map(m => m.events.map(Meetup.EventWithSetting(m.setting, _)))
+      .map(m =>
+        m.events.zipWithIndex.map{ case (e, i) => Meetup.EventWithSetting(m.setting, e, new Meetup.Event.Id(i))}
+      )
       .compile
       .foldMonoid
+  }
+
+  def event(meetupId: Meetup.Id, eventId: Meetup.Event.Id): F[Option[Meetup.EventWithSetting]] = {
+    meetups.find { meetup =>
+      meetup.setting.id === meetupId
+    }.flatMap(m => Stream.emits(
+      m.events.zipWithIndex.map { case (e, i) =>
+        Meetup.EventWithSetting(m.setting, e, new Meetup.Event.Id(i))
+      }
+    ))
+      .find({e => e.eventId === eventId})
+      .compile
+      .last
   }
 
   private def meetups: Stream[F, Meetup] = {

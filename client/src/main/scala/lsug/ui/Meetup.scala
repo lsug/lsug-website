@@ -11,7 +11,7 @@ import monocle.macros.{GenLens}
 import monocle.function.At.{at => _at}
 import Function.const
 
-object event {
+object meetup {
 
   import common.{
     Markup,
@@ -106,7 +106,7 @@ object event {
 
       def render(s: State): VdomNode = {
         <.main(
-          ^.cls := "event-page",
+          ^.cls := "meetup-page",
           event1.welcome.Welcome((s.event, s.speakers)),
           s.event
             .map {
@@ -116,16 +116,16 @@ object event {
                   event.events.map { item =>
                       event1.Item.Item.withKey(item.title.show)(
                         event1.Item.Props(
-                          s.tabs.get(item.title.show).getOrElse(event1.Item.Tab.About),
-                          item,
-                          tab => $.modState(_tab(item.title.show).set(tab.some)),
-                          s.speakers.view
+                          tab = s.tabs.get(item.title.show).getOrElse(event1.Item.Tab.About),
+                          item = item,
+                          onToggle = tab => $.modState(_tab(item.title.show).set(tab.some)),
+                          speakers = s.speakers.view
                             .filterKeys(item.speakers.contains(_))
                             .toMap,
-                          s.modal.filter(_._1 === item.title.show).map(_._2),
-                          media =>
+                          modal = s.modal.filter(_._1 === item.title.show).map(_._2),
+                          onOpen = media =>
                             $.modState(_modal.set((item.title.show, media).some)),
-                          _ => $.modState(_modal.set(none))
+                          onClose = _ => $.modState(_modal.set(none))
                         )
                       )
                   }.toTagMod

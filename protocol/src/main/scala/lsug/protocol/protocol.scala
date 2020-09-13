@@ -249,9 +249,9 @@ object Meetup {
   }
 
   case class Setting(
-    id: Id,
-    time: Time,
-    location: Location
+      id: Id,
+      time: Time,
+      location: Location
   )
 
   object Setting {
@@ -343,11 +343,22 @@ object Meetup {
 
   object Event {
     implicit val codec: Codec[Event] = deriveCodec[Event]
+
+    final class Id(val value: Int) extends AnyVal
+
+    object Id {
+
+      implicit val decoder: Decoder[Id] = Decoder[Int].map(new Id(_))
+      implicit val encoder: Encoder[Id] = Encoder[Int].contramap(_.value)
+      implicit val show: Show[Id] = Show[Int].contramap(_.value)
+      implicit val eq: Eq[Id] = Eq[Int].contramap(_.value)
+    }
   }
 
   case class EventWithSetting(
-    setting: Setting,
-    event: Event
+      setting: Setting,
+      event: Event,
+      eventId: Event.Id
   )
 
   object EventWithSetting {

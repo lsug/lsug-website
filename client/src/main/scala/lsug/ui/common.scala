@@ -3,6 +3,7 @@ package ui
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import cats._
 import cats.data._
 import cats.implicits._
 import lsug.{protocol => P}
@@ -10,6 +11,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom.html
 import lsug.ui.implicits._
+import monocle.Lens
 
 object common {
 
@@ -55,7 +57,7 @@ object common {
 
     private def toTagMod(markup: P.Markup.Text, options: Options): TagMod = {
       markup match {
-        case P.Markup.Text.Plain(s) => s
+        case P.Markup.Text.Plain(s)         => s
         case P.Markup.Text.Styled.Strong(s) => <.strong(s)
         case P.Markup.Text.Styled.Code(code) =>
           <.pre(<.code(code))
@@ -84,7 +86,7 @@ object common {
 
     def renderText(markup: P.Markup.Text): TagMod = {
       markup match {
-        case P.Markup.Text.Plain(s) => s
+        case P.Markup.Text.Plain(s)         => s
         case P.Markup.Text.Styled.Strong(s) => <.strong(s)
         case P.Markup.Text.Styled.Code(code) =>
           <.code(code)
@@ -239,6 +241,34 @@ object common {
       }
       .build
 
+    def makeTabs[S, T: Show: Eq](
+        f: (S => S) => Callback,
+        lens: Lens[S, T],
+        s: S
+    )(
+        tabs: List[T],
+        current: T
+    ): VdomNode = {
+      Tabs.withChildren(tabs.map { tab =>
+        Tab
+          .withKey(tab.show)
+          .withChildren(
+            <.span(tab.show)
+          )((tab.show, lens.get(s) === tab, f(lens.set(tab))))
+      }.toReactFragment)(tabs.indexOf(current)),
+    }
+
+    def makeTabPanel[S, T: Show: Eq](
+        lens: Lens[S, T],
+        s: S
+    )(
+        tab: T,
+        panel: VdomElement
+    ): VdomNode = {
+      TabPanel
+        .withKey(tab.show)
+        .withChildren(panel)(tab.show, lens.get(s) === tab)
+    }
   }
 
   object modal {
@@ -276,6 +306,56 @@ object common {
           )
       }
       .build
+
+    object control {
+
+      case class ModalProps[S, I](
+          currentModal: Option[I],
+          lens: Lens[S, Option[I]],
+          modify: (S => S) => Callback
+      )
+
+      case class Props[S, I](
+        modal: ModalProps[S, I],
+        id: I,
+        label: String,
+        src: String
+      )
+
+      def apply[S, I: Eq] =
+        ScalaComponent
+          .builder[Props[S, I]]("ModalControl")
+          .render_P {
+            case Props(props, id, label, src) =>
+              <.div(
+                ^.cls := "modal-control",
+                <.button(
+                  ^.cls := "open-media",
+                  ^.onClick --> props.modify(props.lens.set(id.some)),
+                  MaterialIcon("video_library"),
+                  <.span(
+                    ^.cls := "modal-control-label",
+                    label
+                  )
+                ),
+                Modal.withChildren(
+                  <.div(
+                    ^.cls := label,
+                    <.iframe(
+                      ^.src := src,
+                      ^.frameBorder := "0",
+                      ^.allowFullScreen := true
+                    )
+                  )
+                )(
+                  props.currentModal.map(_ === id).getOrElse(false),
+                  props.modify(props.lens.set(none))
+                )
+              )
+
+          }.build
+    }
+
   }
 
   val NavBar = ScalaComponent
@@ -287,11 +367,12 @@ object common {
             ^.cls := "abbrev-name",
             MaterialIcon("home"),
             <.span("LSUG"),
-            ^.href := "/")
+            ^.href := "/"
+          )
         ),
         <.div(
           <.a("About"),
-          <.a("Sponsors", ^.href :="/sponsors")
+          <.a("Sponsors", ^.href := "/sponsors")
         )
       )
     )

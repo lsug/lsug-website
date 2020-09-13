@@ -54,6 +54,40 @@
     }
 }
 
+.modal-control {
+    button.open-media, a.open-media {
+	display: flex;
+	align-items: center;
+	background-color: inherit;
+	border: none;
+	text-transform: uppercase;
+	cursor: pointer;
+	width: 100%;
+	padding: 0.25rem 0 0.25rem 0;
+
+	&:hover, &:focus {
+	    background-color: color.$background-1;
+	}
+
+	> * {
+	    padding: 0 1rem 0 1rem;
+	}
+    }
+}
+
+.modal {
+    .open {
+	iframe {
+	    width: 80vw;
+	    height: 80vh;
+	    border: 3px solid color.$foreground;
+	    border-top: none;
+	    border-radius: 0 0 3px 3px;
+	    background-color: color.$shadow;
+	}
+    }
+}
+
 
 .hidden {
     display: none;

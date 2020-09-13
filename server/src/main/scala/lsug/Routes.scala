@@ -16,10 +16,6 @@ object Routes {
 
     import sttp.tapir._
     import sttp.tapir.json.circe._
-    import sttp.model.StatusCode
-
-    private val notFound =
-      oneOf[Unit](statusMapping(StatusCode.NotFound, emptyOutput))
 
     private val speakerId =
       path[String]("id")
@@ -29,11 +25,21 @@ object Routes {
       path[String]("id")
         .map[Meetup.Id](new Meetup.Id(_))(_.value)
 
+    private val eventId =
+      path[Int]("id")
+        .map[Meetup.Event.Id](new Meetup.Event.Id(_))(_.value)
+
     val upcomingMeetups = endpoint
       .name("Upcoming meetups")
       .in("meetups")
       .in(time("after"))
       .out(jsonBody[List[Meetup]])
+      .get
+
+    val event = endpoint
+      .name("Event")
+      .in("meetups" / meetupId / "events" / eventId)
+      .out(jsonBody[Meetup.EventWithSetting])
       .get
 
     val pastEvents = endpoint
@@ -47,7 +53,6 @@ object Routes {
       .name("Speaker")
       .in("speakers" / speakerId)
       .out(jsonBody[Speaker])
-      .errorOut(notFound)
       .get
 
     val speakerProfile = endpoint
@@ -55,7 +60,6 @@ object Routes {
       .description("The speaker's name and profile photo link")
       .in("speakers" / speakerId / "profile")
       .out(jsonBody[Speaker.Profile])
-      .errorOut(notFound)
       .get
 
     private val venueId =
@@ -70,7 +74,6 @@ object Routes {
       .name("Venue")
       .in("venues" / venueId)
       .out(jsonBody[Venue.Summary])
-      .errorOut(notFound)
       .get
     val meetupDotComEvent = endpoint
       .name("meetup.com event")
@@ -79,7 +82,6 @@ object Routes {
       )
       .in("meetups" / meetupId / "meetup-dot-com")
       .out(jsonBody[Meetup.MeetupDotCom.Event])
-      .errorOut(notFound)
       .get
 
     val endpoints = List(
@@ -103,7 +105,7 @@ object Routes {
 
     import Routes.{Endpoints => E}
 
-   def orVoid[A](foa: F[Option[A]]): F[Either[Unit, A]] =
+    def orVoid[A](foa: F[Option[A]]): F[Either[Unit, A]] =
       foa.map(_.toRight(()))
 
     val yaml = E.endpoints.toOpenAPI("London Scala User Group", "0.1").toYaml
@@ -113,6 +115,9 @@ object Routes {
       E.venue.toRoutes((server.venue _).andThen(orVoid)) <+>
       E.pastEvents.toRoutes(
         (server.eventsBefore _).andThen(_.map(_.pure[Either[Unit, ?]]))
+      ) <+>
+      E.event.toRoutes(
+        (server.event _).tupled.andThen(orVoid)
       ) <+>
       E.upcomingMeetups.toRoutes(
         (server.meetupsAfter _).andThen(_.map(_.pure[Either[Unit, ?]]))

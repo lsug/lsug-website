@@ -363,8 +363,7 @@ object ContentDecoders {
       tag("date") >>> contents >>> date,
       tag("time") >>> contents >>> timeRange,
       tag("welcome").optional.composeF(markup),
-      // TODO: Rename this tag to "events"
-      tag("items") >>> children(event)
+      tag("events") >>> children(event)
     ).mapN {
       case (meetup, venue, hosts, date, (start, end), welcome, events) =>
         id =>
