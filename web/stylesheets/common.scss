@@ -1,8 +1,17 @@
 @use "color";
-
+@use "font";
 
 .hidden {
     display: none;
+}
+
+.screenreader-only {
+    position:absolute;
+    left:-10000px;
+    top:auto;
+    width:1px;
+    height:1px;
+    overflow:hidden;
 }
 
 .modal-overlay {
@@ -52,30 +61,7 @@
 	height: 90vh;
 	z-index: 2;
     }
-}
 
-.modal-control {
-    button.open-media, a.open-media {
-	display: flex;
-	align-items: center;
-	background-color: inherit;
-	border: none;
-	text-transform: uppercase;
-	cursor: pointer;
-	width: 100%;
-	padding: 0.25rem 0 0.25rem 0;
-
-	&:hover, &:focus {
-	    background-color: color.$background-1;
-	}
-
-	> * {
-	    padding: 0 1rem 0 1rem;
-	}
-    }
-}
-
-.modal {
     .open {
 	iframe {
 	    width: 80vw;
@@ -88,16 +74,90 @@
     }
 }
 
+.media {
+    button.open-media, a.open-media {
+	display: flex;
+	align-items: center;
+	background-color: inherit;
+	color: color.$foreground;
+	border: none;
+	text-transform: uppercase;
+	cursor: pointer;
+	padding: 0.25rem 0 0.25rem 0;
 
-.hidden {
-    display: none;
+	text-decoration: none;
+
+	div {
+	    display: flex;
+	    align-items: center;
+
+	    span.material-icons {
+		font-size: 1rem;
+		padding: 0.5rem;
+	    }
+	}
+
+	&:hover, &:focus {
+	    background-color: color.$background-1;
+	}
+
+
+	> * {
+	    padding: 0 1rem 0 1rem;
+	}
+    }
 }
 
-.screenreader-only {
-    position:absolute;
-    left:-10000px;
-    top:auto;
-    width:1px;
-    height:1px;
-    overflow:hidden;
+.tab-indicator {
+    height: 0.2rem;
+    display: inline-block;
+    position: relative;
+    background-color: lighten(color.$secondary, 30%);
+    transition: left 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    padding-top: 2.5rem;
+}
+
+div[role=tabpanel] {
+    display: flex;
+    justify-content: center;
+    &[hidden] {
+	display: none;
+    }
+}
+
+
+div[role=tablist] {
+
+    button[role=tab] {
+	min-width: 160px;
+	background-color: transparent;
+	color: lighten(color.$primary, 15%);
+	border: 0rem;
+	padding: 0rem;
+	margin: 0rem;
+	text-transform: uppercase;
+	font: {
+	    family: font.$family;
+	    size: font.$large-size;
+	    weight: 800;
+	}
+
+	&[aria-selected=true] {
+	    color: color.$primary;
+	}
+
+	&:hover, &:focus {
+	    color: color.$primary;
+	    cursor: pointer;
+	}
+
+	&:focus {
+	    color: color.$primary;
+	}
+    }
 }

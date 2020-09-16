@@ -1,5 +1,5 @@
 package lsug.ui
-package event1
+package meetup
 
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
@@ -51,7 +51,7 @@ object plan {
       .builder[Option[P.Meetup.MeetupDotCom.Event]]("Meetup")
       .render_P { props =>
         <.section(
-          ^.cls := "meetup",
+          ^.cls := "meetup-dot-com",
           props
             .map {
               case P.Meetup.MeetupDotCom.Event(link, attendees) =>
@@ -59,7 +59,7 @@ object plan {
                   ^.href := link.show,
                   ^.target := "_blank",
                   <.h2(Logo(), <.span(s"${attendees} attendees")),
-                  <.div(<.span(^.cls := "sign-up", "view"))
+                  <.div(<.span(^.cls := "sign-up", "sign up"))
                 )
             }
             .getOrElse {

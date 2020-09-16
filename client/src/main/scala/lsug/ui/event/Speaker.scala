@@ -1,5 +1,5 @@
 package lsug.ui
-package event1
+package event
 
 import lsug.{protocol => P}
 import japgolly.scalajs.react._

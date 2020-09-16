@@ -18,124 +18,9 @@
     }
 }
 
-
 .meetup-page {
 
-    div[role=tabpanel] {
-	.media {
-	    list-style: none;
-	    width: 100%;
-
-	    a.open-media {
-		text-decoration: none;
-		color: color.$foreground;
-
-		div {
-		    display: flex;
-		    align-items: center;
-
-		    span.material-icons {
-			font-size: 1rem;
-			padding: 0.5rem;
-		    }
-		}
-	    }
-
-	    button.open-media, a.open-media {
-		display: flex;
-		align-items: center;
-		background-color: inherit;
-		border: none;
-		text-transform: uppercase;
-		cursor: pointer;
-		width: 100%;
-		padding: 0.25rem 0 0.25rem 0;
-
-		&:hover, &:focus {
-		    background-color: color.$background-1;
-		}
-
-		> * {
-		    padding: 0 1rem 0 1rem;
-		}
-	    }
-	}
-    }
-
-
-    .tabs {
-	padding-top: 0.5rem;
-    }
-
-    .abstract {
-	line-height: font.$block-line-height;
-	font-family: font.$body-family;
-	font-size: font.$body-normal-size;
-    }
-
-    .bio {
-	font-family: font.$body-family;
-	font-size: font.$body-normal-size;
-    }
-
-    div[role=tablist] {
-	button[role=tab] {
-	    min-width: 100px;
-	    text-transform: uppercase;
-	    padding: 0 0.25rem 0 0.25rem;
-	    font: {
-		family: font.$family;
-		size: font.$normal-size;
-		weight: 800;
-	    }
-	}
-    }
-
     display: grid;
-
-    .item {
-
-	.item-header {
-	    font-family: font.$body-family;
-	    font-size: font.$body-normal-size;
-	    text-align: center;
-	    font-weight: normal;
-	    font-variant: small-caps;
-	}
-	padding-top: 3rem;
-	.tags {
-
-	    list-style: none;
-
-	    li {
-		padding-right: 0.5rem;
-		display: inline-block;
-	    }
-
-	    padding: 0rem;
-	    margin-bottom: 1rem;
-	}
-
-	a.external {
-	    border-radius: 10px;
-	    text-decoration: none;
-	    color: color.$foreground;
-
-	    &::after {
-		content: "\FEFF°";
-		color: color.$primary;
-	    }
-	    &:hover, &:focus {
-		background-color: lighten(color.$primary, 45%);
-	    }
-
-	}
-
-	strong {
-	    font-weight: 600;
-	}
-
-    }
 
     .hosts {
 
@@ -169,7 +54,6 @@
 
     .items {
 	grid-area: content;
-	max-width: 800px;
     }
 
     .welcome {
@@ -180,47 +64,7 @@
 	font-size: font.$body-normal-size;
     }
 
-    .setup {
-	line-height: font.$block-line-height;
-	font-family: font.$body-family;
-	font-size: font.$body-normal-size;
-    }
-
-    .material {
-
-	width: 100%;
-
-	ol {
-	    list-style: none;
-	}
-
-	li {
-	    
-	    a {
-		display: flex;
-		align-items: center;
-		padding: 0.25rem 0 0.25rem 0;
-
-		font-family: font.$body-family;
-		font-size: font.$body-normal-size;
-		color: color.$foreground;
-		text-decoration: none;
-
-		&:hover, &:focus {
-		    background-color: color.$background-1;
-		}
-
-		.material-icons {
-		    transform: rotate(-90deg);
-		    padding: 0 1rem 0 1rem;
-		    font-variant: none;
-		}
-	    }
-	}
-    }
-
-    .meetup {
-
+    .meetup-dot-com {
 
 	padding-left: 1rem;
 	padding-right: 1rem;
@@ -277,7 +121,6 @@
 	}
     }
 
-
     .panel-summary {
 
 	display: flex;
@@ -330,8 +173,141 @@
 	}
 	padding: 0px;
     }
+}
+
+.event-page {
+    display: flex;
+    justify-content: center;
+}
+
+.event {
+
+    max-width: 800px;
+    min-width: 800px;
+    padding-top: 3rem;
+
+    // This is a fishy way of making the page longer than the screen height
+    // If it’s too short, switching from a long tab (e.g ABOUT) to a small tab (e.g. MEDIA)
+    // changes the visual position of the view.  Try removing this and switching tabs to
+    // see the problem.
+    padding-bottom: 10rem;
+
+    div[role=tablist] {
+	button[role=tab] {
+	    min-width: 100px;
+	    padding: 0 0.25rem 0 0.25rem;
+	    font: {
+		family: font.$family;
+		size: font.$normal-size;
+	    }
+	}
+    }
+
+    .tabs {
+	padding-top: 0.5rem;
+    }
+
+    .abstract {
+	line-height: font.$block-line-height;
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
+    }
+
+    .bio {
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
+    }
+
+
+    div[role=tabpanel] {
+	.media {
+	    list-style: none;
+	    width: 100%;
+	}
+    }
+
+    .event-header {
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
+	text-align: center;
+	font-weight: normal;
+	font-variant: small-caps;
+    }
+    .tags {
+
+	list-style: none;
+
+	li {
+	    padding-right: 0.5rem;
+	    display: inline-block;
+	}
+
+	padding: 0rem;
+	margin-bottom: 1rem;
+    }
+
+    a.external {
+	border-radius: 10px;
+	text-decoration: none;
+	color: color.$foreground;
+
+	&::after {
+	    content: "\FEFF°";
+	    color: color.$primary;
+	}
+	&:hover, &:focus {
+	    background-color: lighten(color.$primary, 45%);
+	}
+
+    }
+
+    strong {
+	font-weight: 600;
+    }
+
+    .setup {
+	line-height: font.$block-line-height;
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
+    }
+
+    .material {
+
+	width: 100%;
+
+	ol {
+	    list-style: none;
+	}
+
+	li {
+	    
+	    a {
+		display: flex;
+		align-items: center;
+		padding: 0.25rem 0 0.25rem 0;
+
+		font-family: font.$body-family;
+		font-size: font.$body-normal-size;
+		color: color.$foreground;
+		text-decoration: none;
+
+		&:hover, &:focus {
+		    background-color: color.$background-1;
+		}
+
+		.material-icons {
+		    transform: rotate(-90deg);
+		    padding: 0 1rem 0 1rem;
+		    font-variant: none;
+		}
+	    }
+	}
+    }
 
     .speaker {
+
+	padding: 0.5rem 0 0.5rem 0;
+
 	header {
 	    font-weight: 600;
 	    font-family: font.$body-family;
@@ -355,9 +331,9 @@
 	}
     }
 
-}
-
-.event-page {
-    display: flex;
-    justify-content: center;
+    .media {
+	button.open-media, a.open-media {
+	    width: 100%;
+	}
+    }
 }

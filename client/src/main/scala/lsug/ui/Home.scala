@@ -14,8 +14,10 @@ import java.time.format.DateTimeFormatter
 import java.time.ZoneOffset
 import io.circe.Decoder
 
-object home {
+object Home {
 
+  import event.{Summary => ESummary}
+  import meetup.{Summary => MSummary}
   import common.tabs
   import common.modal.control.{ModalProps => CModalProps}
 
@@ -84,26 +86,46 @@ object home {
     final class Backend($ : BackendScope[Props, State]) {
 
       def render(state: State, props: Props): VdomNode = {
-        val State(tab, modal, _, past, speakers, venues) = state
+        val State(tab, modal, upcoming, past, speakers, venues) = state
 
         val makePanel = tabs.makeTabPanel(State._tab, state) _
         val upcomingPanel = makePanel(
           Tab.Upcoming,
-          <.div(
-            ^.cls := "placeholder",
-            <.span("There are no upcoming meetups.")
+          <.ul(
+            ^.cls := "cards",
+            upcoming
+              .map {
+                _.map { m =>
+                  <.li(
+                    MSummary.Summary.withKey(m.setting.id.show)(
+                      MSummary.Props(
+                        props.now,
+                        m,
+                        speakers,
+                        venues
+                      )
+                    )
+                  )
+                }.toTagMod
+              }
+              .getOrElse {
+                <.div(
+                  ^.cls := "placeholder",
+                  <.span("There are no upcoming meetups.")
+                )
+              }
           )
         )
         val pastPanel = makePanel(
           Tab.Past,
           <.ul(
-            ^.cls := "events",
+            ^.cls := "cards",
             past
               .map {
                 _.map { e =>
                   <.li(
-                    event1.summary.Summary.withKey(e.setting.id.show)(
-                      event1.summary.Props(
+                    ESummary.Summary.withKey(e.setting.id.show)(
+                      ESummary.Props(
                         props.now,
                         e,
                         speakers,

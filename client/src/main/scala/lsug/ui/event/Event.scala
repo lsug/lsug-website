@@ -1,5 +1,5 @@
 package lsug.ui
-package event1
+package event
 
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
@@ -9,11 +9,10 @@ import monocle.Lens
 import cats.implicits._
 import Function.const
 
-object Item {
+object Event {
 
-  import common.{Markup, MaterialIcon, modal}
-
-  import common.tabs
+  import common.{Speakers, Markup, MaterialIcon, modal, tabs, TagBadge}
+  import common.modal.control.ModalProps
 
   sealed trait Tab
 
@@ -46,24 +45,18 @@ object Item {
     implicit val mediaEq: Eq[Media] = Eq.fromUniversalEquals[Media]
   }
 
-  val Youtube =
-    ScalaComponent
-      .builder[P.Link]("Youtube")
-      .render_P {
-        case link =>
-          <.iframe(
-            ^.src := s"https://www.youtube.com/embed/${link.show}?modestbranding=1",
-            ^.frameBorder := "0",
-            ^.allowFullScreen := true
-          )
-      }
-      .build
+  case class Props[S, I](
+      event: P.Meetup.Event,
+      speakers: Speakers,
+      modalProps: ModalProps[S, I],
+      modalId: Media => I
+  )
 
-  val Item = {
+  def Event[S, I: Eq] = {
 
-    final class Backend($ : BackendScope[Props, Tab]) {
+    final class Backend($ : BackendScope[Props[S, I], Tab]) {
 
-      def render(currentTab: Tab, props: Props): VdomNode = {
+      def render(currentTab: Tab, props: Props[S, I]): VdomNode = {
         props match {
           case Props(
               P.Meetup.Event(
@@ -78,9 +71,8 @@ object Item {
                 _
               ),
               speakers,
-              openModal,
-              onOpen,
-              onClose
+              modalProps,
+              modalId
               ) =>
             val existingTabs =
               List(
@@ -96,10 +88,7 @@ object Item {
               <.div(
                 <.div(
                   ^.cls := "abstract",
-                  desc.zipWithIndex.map {
-                    case (d, i) =>
-                      Markup.withKey(i)(d)
-                  }.toTagMod
+                  desc.map(Markup(_)).toTagMod
                 ),
                 <.ul(
                   ^.cls := "tags",
@@ -112,10 +101,7 @@ object Item {
               Tab.Setup,
               <.div(
                 ^.cls := "setup",
-                setup.zipWithIndex.map {
-                  case (d, i) =>
-                    Markup.withKey(i)(d)
-                }.toTagMod
+                setup.map(Markup(_)).toTagMod
               )
             )
 
@@ -136,34 +122,25 @@ object Item {
               )
             )
 
-            // We should use props to control the modal
-            // Problem: The id is different for events and for meetups
-            // We should have a function in the item props from Media => I
             val mediaPanel = makePanel(
               Tab.Media,
               <.ol(
                 ^.cls := Tab.media.show.toLowerCase,
                 slides.map { link =>
                   if (!link.openInNew) {
+                    val id = modalId(Media.slides)
                     <.li(
-                      <.button(
-                        ^.cls := "open-media",
-                        ^.onClick --> onOpen(Media.slides),
-                        MaterialIcon("description"),
-                        <.span("slides")
-                      ),
-                      modal.Modal.withChildren(
-                        <.div(
-                          ^.cls := openModal.show.toLowerCase,
-                          <.iframe(
-                            ^.src := link.link.show,
-                            ^.allowFullScreen := true
+                      modal
+                        .control[S, I]
+                        .apply(
+                          modal.control.Props(
+                            modalProps,
+                            id,
+                            "slides",
+                            "description",
+                            link.link.show
                           )
                         )
-                      )(
-                        openModal.map(_ === Media.slides).getOrElse(false),
-                        onClose(Media.slides)
-                      )
                     )
                   } else {
                     <.li(
@@ -181,31 +158,36 @@ object Item {
                   }
                 },
                 recording.map { recording =>
+                  val id = modalId(Media.video)
                   <.li(
-                    <.button(
-                      ^.cls := "open-media",
-                      ^.onClick --> onOpen(Media.video),
-                      MaterialIcon("video_library"),
-                      <.span("video")
-                    ),
-                    modal.Modal.withChildren(
-                      <.div(
-                        ^.cls := openModal.show.toLowerCase,
-                        Youtube(recording)
+                    modal
+                      .control[S, I]
+                      .apply(
+                        modal.control.Props(
+                          modalProps,
+                          id,
+                          "video",
+                          "video_library",
+                          s"https://www.youtube.com/embed/${recording.show}?modestbranding=1"
+                        )
                       )
-                    )(
-                      openModal.map(_ === Media.video).getOrElse(false),
-                      onClose(Media.video)
-                    )
                   )
                 }
               )
             )
 
             <.article(
-              ^.cls := "item",
+              ^.cls := "event",
               <.header(
-                <.h2(^.cls := "item-header", event)
+                <.h2(^.cls := "event-header", event)
+              ),
+              <.div(
+                ^.cls := "speakers",
+                speakerIds.map { id =>
+                  Speaker.Speaker(
+                    speakers.get(id)
+                  )
+                }.toTagMod
               ),
               tabs.makeTabs($.modState, Lens.id[Tab], currentTab)(
                 existingTabs,
@@ -214,34 +196,16 @@ object Item {
               aboutPanel,
               mediaPanel,
               setupPanel,
-              materialPanel,
-              <.div(
-                ^.cls := "speakers",
-                speakerIds.map { id =>
-                  Speaker.Speaker.withKey(id.show)(
-                    speakers.get(id)
-                  )
-                }.toTagMod
-              )
+              materialPanel
             )
         }
       }
     }
 
     ScalaComponent
-      .builder[Props]("Item")
+      .builder[Props[S, I]]("Event")
       .initialState[Tab](Tab.About)
       .renderBackend[Backend]
       .build
   }
-
-  type Speakers = Map[P.Speaker.Id, P.Speaker]
-
-  case class Props(
-      item: P.Meetup.Event,
-      speakers: Speakers,
-      modal: Option[Media],
-      onOpen: Media => Callback,
-      onClose: Media => Callback
-  )
 }

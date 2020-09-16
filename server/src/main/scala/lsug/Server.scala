@@ -95,6 +95,13 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       .last
   }
 
+  def meetup(meetupId: Meetup.Id): F[Option[Meetup]] = {
+    meetups.find { meetup =>
+      meetup.setting.id === meetupId
+    }.compile
+    .last
+  }
+
   private def meetups: Stream[F, Meetup] = {
 
     Stream.eval(Logger[F].debug(s"reading directory ${root}/meetups")) *> io.file

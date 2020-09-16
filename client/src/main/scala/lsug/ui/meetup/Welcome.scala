@@ -1,5 +1,5 @@
 package lsug.ui
-package event1
+package meetup
 
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
@@ -8,7 +8,7 @@ import cats.implicits._
 import cats.data.NonEmptyList
 import java.time.format.DateTimeFormatter
 
-object welcome {
+object Welcome {
 
   type PEvent = P.Meetup
 

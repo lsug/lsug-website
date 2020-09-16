@@ -36,6 +36,12 @@ object Routes {
       .out(jsonBody[List[Meetup]])
       .get
 
+    val meetup = endpoint
+      .name("Meetup")
+      .in("meetups" / meetupId)
+      .out(jsonBody[Meetup])
+      .get
+
     val event = endpoint
       .name("Event")
       .in("meetups" / meetupId / "events" / eventId)
@@ -90,7 +96,9 @@ object Routes {
       speaker,
       speakerProfile,
       venue,
-      meetupDotComEvent
+      meetupDotComEvent,
+      meetup,
+      event
     )
   }
 
@@ -118,6 +126,9 @@ object Routes {
       ) <+>
       E.event.toRoutes(
         (server.event _).tupled.andThen(orVoid)
+      ) <+>
+      E.meetup.toRoutes(
+        (server.meetup _).andThen(orVoid)
       ) <+>
       E.upcomingMeetups.toRoutes(
         (server.meetupsAfter _).andThen(_.map(_.pure[Either[Unit, ?]]))

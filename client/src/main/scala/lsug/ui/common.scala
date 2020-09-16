@@ -1,8 +1,6 @@
 package lsug
 package ui
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import cats._
 import cats.data._
 import cats.implicits._
@@ -10,39 +8,21 @@ import lsug.{protocol => P}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom.html
-import lsug.ui.implicits._
 import monocle.Lens
+import Function.const
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import lsug.ui.implicits._
 
 object common {
+
+  type Speakers = Map[P.Speaker.Id, P.Speaker]
+  type SpeakerProfiles = Map[P.Speaker.Id, P.Speaker.Profile]
+  type Venues = Map[P.Venue.Id, P.Venue.Summary]
 
   val Spinner = ScalaComponent
     .builder[Unit]("Spinner")
     .render_(<.div(^.cls := "spinner"))
-    .build
-
-  val Banner = ScalaComponent
-    .builder[String]("Banner")
-    .render_P { asset =>
-      <.div(
-        ^.cls := "banner",
-        <.img(^.src := s"/assets/${asset}", ^.alt := "")
-      )
-    }
-    .configure(Reusability.shouldComponentUpdate)
-    .build
-
-  val PersonBadge = ScalaComponent
-    .builder[Option[P.Asset]]("PersonBadge")
-    .render_P(pic =>
-      <.div(
-        ^.cls := "person-badge",
-        pic
-          .map(asset => <.img(^.src := asset.show, ^.alt := ""))
-          .getOrElse(
-            MaterialIcon("person")
-          )
-      )
-    )
     .build
 
   val MaterialIcon = ScalaComponent
@@ -75,9 +55,10 @@ object common {
       .render_P {
         case (P.Markup.Paragraph(text), options) =>
           <.p(text.map(toTagMod(_, options)).toList.toTagMod)
-        case m =>
-          println(m)
-          ???
+        case _ =>
+          throw new Error(
+            "Markup rendering for non-paragraph elements has not been implemented"
+          )
       }
       .build
   }
@@ -104,62 +85,6 @@ object common {
       }
       .build
 
-  }
-
-  object panel {
-
-    val Summary = ScalaComponent
-      .builder[(Boolean, Boolean => Callback)]("PanelSummary")
-      .render_PC {
-        case ((expanded, onToggle), children) =>
-          <.div(
-            ^.cls := ("panel-summary".cls |+| (if (expanded)
-                                                 "panel-toggle-on".cls
-                                               else
-                                                 "panel-toggle-off".cls)).show,
-            ^.onClick --> onToggle(!expanded),
-            children
-          )
-      }
-      .build
-
-    val Details = ScalaComponent
-      .builder[Boolean]("PanelDetails")
-      .render_PC {
-        case (expanded, children) =>
-          <.div(
-            ^.cls := (if (expanded) "panel-details"
-                      else "panel-details hidden"),
-            children
-          )
-      }
-      .build
-
-    val Panel = ScalaComponent
-      .builder[Unit]("Panel")
-      .render_C(cs =>
-        <.div(
-          ^.cls := "panel",
-          cs
-        )
-      )
-      .build
-  }
-
-  object sidesheet {
-
-    val SideSheet = ScalaComponent
-      .builder[Unit]("SideSheet")
-      .render_C(cs =>
-        <.div(
-          ^.cls := "side-sheet",
-          <.div(
-            ^.cls := "side-sheet-content",
-            cs
-          )
-        )
-      )
-      .build
   }
 
   object tabs {
@@ -265,8 +190,6 @@ object common {
         tab: T,
         panel: VdomElement
     ): VdomNode = {
-      // FIXME: The key should be unique accross pages
-      // We can do this by adding a prefix (e.g the event id) to the key
       TabPanel
         .withKey(tab.show)
         .withChildren(panel)(tab.show, lens.get(s) === tab)
@@ -318,23 +241,24 @@ object common {
       )
 
       case class Props[S, I](
-        modal: ModalProps[S, I],
-        id: I,
-        label: String,
-        src: String
+          modal: ModalProps[S, I],
+          id: I,
+          label: String,
+          icon: String,
+          src: String
       )
 
       def apply[S, I: Eq] =
         ScalaComponent
           .builder[Props[S, I]]("ModalControl")
           .render_P {
-            case Props(props, id, label, src) =>
+            case Props(props, id, label, icon, src) =>
               <.div(
                 ^.cls := "modal-control",
                 <.button(
                   ^.cls := "open-media",
                   ^.onClick --> props.modify(props.lens.set(id.some)),
-                  MaterialIcon("video_library"),
+                  MaterialIcon(icon),
                   <.span(
                     ^.cls := "modal-control-label",
                     label
@@ -355,53 +279,9 @@ object common {
                 )
               )
 
-          }.build
+          }
+          .build
     }
-
-  }
-
-  val NavBar = ScalaComponent
-    .builder[Unit]("NavBar")
-    .renderStatic(
-      <.nav(
-        <.div(
-          <.a(
-            ^.cls := "abbrev-name",
-            MaterialIcon("home"),
-            <.span("LSUG"),
-            ^.href := "/"
-          )
-        ),
-        <.div(
-          <.a("About"),
-          <.a("Sponsors", ^.href := "/sponsors")
-        )
-      )
-    )
-    .build
-
-  val Disclaimer = {
-
-    val format = DateTimeFormatter.ofPattern("yyyy")
-
-    ScalaComponent
-      .builder[(String, LocalDate)]("Disclaimer")
-      .render_P {
-        case (id, now) =>
-          <.div(
-            ^.cls := "disclaimer",
-            <.p(
-              s"© ${now.format(format)}.",
-              s"London Scala User Group is a registered community interest group in England and Wales (",
-              <.a(
-                id,
-                ^.href := s"https://beta.companieshouse.gov.uk/company/${id}"
-              ),
-              ")"
-            )
-          )
-      }
-      .build
   }
 
   val ProfilePicture =
@@ -422,15 +302,137 @@ object common {
       .configure(Reusability.shouldComponentUpdate)
       .build
 
-  val Footer = ScalaComponent
-    .builder[LocalDate]("Footer")
-    .render_P(now =>
-      <.footer(
-        ^.cls := "footer",
-        Disclaimer(("12325025", now))
+  val TimeRange = {
+
+    def pattern(s: String) = DateTimeFormatter.ofPattern(s)
+
+    def display(
+        now: LocalDateTime,
+        start: LocalDateTime,
+        end: LocalDateTime
+    ): String = {
+      val endStr = end.format(pattern("HH:mm"))
+      lazy val default =
+        s"""${start.format(pattern("dd MMM, HH:mm"))} - $endStr"""
+      val isPast = now.isAfter(start)
+      if (isPast) {
+        default
+      } else {
+        val nd = now.toLocalDate
+        val td = start.toLocalDate
+        val isToday = nd === td
+        val isTomorrow = nd.plusDays(1) === td
+        val isThisWeek = nd.plusDays(6).isAfter(td)
+
+        if (isToday) {
+          s"Today, ${start.format(pattern("HH:mm"))} - $endStr"
+        } else if (isTomorrow) {
+          s"Tomorrow, ${start.format(pattern("HH:mm"))} - $endStr"
+        } else if (isThisWeek) {
+          s"""${start.format(pattern("E  HH:mm"))} - $endStr"""
+        } else {
+          default
+        }
+      }
+
+    }
+
+    ScalaComponent
+      .builder[(LocalDateTime, LocalDateTime, LocalDateTime)](
+        "TimeRange"
       )
-    )
-    .configure(Reusability.shouldComponentUpdate)
+      .render_P {
+        case (now, start, end) =>
+          <.div(
+            ^.cls := "event-time",
+            MaterialIcon("event"),
+            <.span(
+              display(now, start, end)
+            )
+          )
+      }
+      .configure(Reusability.shouldComponentUpdate)
+      .build
+  }
+
+  val Location = {
+    ScalaComponent
+      .builder[(P.Meetup.Location, Option[P.Venue.Summary])]("EventLocation")
+      .render_P {
+        case (P.Meetup.Location.Virtual, _) =>
+          <.div(
+            ^.cls := "virtual",
+            MaterialIcon("cloud"),
+            <.span("Virtual only")
+          )
+        case (P.Meetup.Location.Physical(_), venue) =>
+          <.div(
+            MaterialIcon("place"),
+            venue
+              .map { v =>
+                <.div(
+                  ^.cls := "venue-address",
+                  <.span(v.name),
+                  <.span(","),
+                  <.span(v.address.head)
+                )
+              }
+              .getOrElse(<.span(^.cls := "placeholder venue-address"))
+          )
+      }
+      .build
+  }
+
+  val SpeakerProfiles = ScalaComponent
+    .builder[(List[P.Speaker.Id], SpeakerProfiles)]("Speakers")
+    .render_P {
+      case (ids, speakers) =>
+        <.section(
+          ^.cls := "speakers",
+          <.ul(
+            ids.map { id =>
+              <.li(
+                <.div(
+                  ^.cls := "speaker",
+                  speakers
+                    .get(id)
+                    .map(s => <.span(^.cls := "name", s.name))
+                    .getOrElse(
+                      <.span(^.cls := "name placeholder")
+                    ),
+                  ProfilePicture(speakers.get(id))
+                )
+              )
+            }.toTagMod
+          )
+        )
+    }
     .build
 
+  val EventDescription = ScalaComponent
+    .builder[List[P.Markup]]("EventDescription")
+    .render_P { description =>
+      <.div(
+        ^.cls := "event-description",
+        description.headOption.map { m =>
+          React.Fragment(
+            markup.Markup(m, markup.Options(false)),
+            description.tail.headOption
+              .map(const(<.p("…")))
+              .getOrElse(None)
+          )
+        }.toTagMod
+      )
+    }.build
+
+  val TagBadge =
+    ScalaComponent
+      .builder[String]("TagBadge")
+      .render_P(tag =>
+        <.div(
+          ^.cls := "tag-badge",
+          <.span(tag)
+        )
+      )
+      .build
 }
