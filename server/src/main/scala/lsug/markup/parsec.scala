@@ -859,9 +859,8 @@ private object Text {
       _ <- end
     } yield a
 
-  //TODO: Windows?
   def newline: Parser[Unit] =
-    ParsecT.single[State[Source, ?]]('\n').void <* ParsecT.liftF(
+    string(System.lineSeparator()).void <* ParsecT.liftF(
       State.modify[Source](
         Source._line.modify(_ + 1) andThen Source._column.set(0)
       )

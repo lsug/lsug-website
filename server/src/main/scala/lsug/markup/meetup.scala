@@ -40,7 +40,6 @@ case class Meetup(
           )
         )
       )(_.toList),
-    // TODO: Virtual details
     virtual = None,
     setting = p.Meetup.Setting(
       id = id,
