@@ -1,7 +1,6 @@
 package lsug
 package markup
 
-import munit._
 import cats.implicits._
 import cats.effect._
 import fs2.io.file
@@ -9,10 +8,10 @@ import java.nio.file.Paths
 import fs2._
 
 import lsug.{protocol => P}
+import lsug.{Meetup => MeetupApi}
 
 class ResourceSpec extends IOSuite with PathImplicits {
 
-  import protocol._
 
   def tests(
       dir: String,
@@ -33,8 +32,8 @@ class ResourceSpec extends IOSuite with PathImplicits {
         s"$name $path",
         body = () =>
           munitValueTransform(
-            Server[IO](path.getParent.getParent.toAbsolutePath, new Meetup[IO] {
-              def event(id: P.Event.Meetup.Event.Id) = none.pure[IO]
+            Server[IO](path.getParent.getParent.toAbsolutePath, new MeetupApi[IO] {
+              def event(id: P.Meetup.MeetupDotCom.Event.Id) = none.pure[IO]
             }).use { server =>
               val name = path.getFileName.baseName
               f(server, name).map { ev => assert(clue(ev).isDefined) }
@@ -45,24 +44,24 @@ class ResourceSpec extends IOSuite with PathImplicits {
   }
   override def munitTests() =
     tests(
-      "events",
-      "events",
-      (server, id) => server.event(new Event.Id(id)).map(_.void)
+      "meetups",
+      "meetups",
+      (server, id) => server.meetup(new P.Meetup.Id(id)).map(_.void)
     ) ++
     tests(
       "venues",
       "venues",
-      (server, id) => server.venue(new Venue.Id(id)).map(_.void)
+      (server, id) => server.venue(new P.Venue.Id(id)).map(_.void)
     ) ++
     tests(
       "people",
       "speaker",
-      (server, id) => server.speaker(new Speaker.Id(id)).map(_.void)
+      (server, id) => server.speaker(new P.Speaker.Id(id)).map(_.void)
     ) ++
     tests(
       "people",
       "profile",
-      (server, id) => server.speakerProfile(new Speaker.Id(id)).map(_.void)
+      (server, id) => server.speakerProfile(new P.Speaker.Id(id)).map(_.void)
     )
 
 }

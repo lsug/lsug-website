@@ -26,14 +26,14 @@ class DecoderSpec extends FunSuite {
   }
 
   test("root tag") {
-    assertSuccess(root("root"),
+    assertSuccess(tag("root"),
       NonEmptyList.of(Tag("root", Nil)),
       Tag("root", Nil)
     )
   }
 
   test("wrong root tag") {
-    assertFailure(root("root"),
+    assertFailure(tag("root"),
       NonEmptyList.of(Tag("foo", Nil)),
       Decoder.Failure(Decoder.Error.TagNotFound("root"), Nil)
     )
