@@ -8,7 +8,7 @@ import cats.implicits._
 
 object Speaker {
 
-  import common.{Markup, ProfilePicture}
+  import common.{markup, ProfilePicture}
 
   private def icon[A](
       name: String,
@@ -87,7 +87,8 @@ object Speaker {
                   <.div(
                     ^.cls := "bio",
                     bio.zipWithIndex.map {
-                      case (markup, index) => Markup.withKey(index)(markup)
+                      case (bio, index) => markup.Markup.withKey(index)(bio,
+                        markup.Options(true))
                     }.toTagMod
                   )
                 )

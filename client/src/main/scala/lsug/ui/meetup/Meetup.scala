@@ -67,7 +67,7 @@ object Meetup {
           s.meetup
             .map { meetup =>
                 <.section(
-                  ^.cls := "items",
+                  ^.cls := "events",
                   meetup.events.zipWithIndex.map {
                     case (event, i) =>
                       val eventId = new P.Meetup.Event.Id(i)
@@ -133,7 +133,6 @@ object Meetup {
 
         (for {
           (_, id) <- $.props.async
-          _ = println("Foo")
           meetup <- resource(_meetup, s"meetups/${id.show}")
           _ <- {
             val speakerIds = (meetup.hosts ++ meetup.events.flatMap(_.speakers))

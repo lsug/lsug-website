@@ -5,7 +5,7 @@
 @media screen and (min-width: 320px) {
     .meetup-page {
 	grid: {
-	    template-areas:  "heading" "sidebar" "content";
+	    template-areas:  "sidebar" "content" "welcome" ;
 	}
     }
 }
@@ -13,7 +13,7 @@
 @media screen and (min-width: 1100px) {
     .meetup-page {
 	grid: {
-	    template-areas: "heading sidebar" "content sidebar";
+	    template-areas: "content sidebar" "welcome sidebar" ;
 	}
     }
 }
@@ -52,12 +52,16 @@
 	}
     }
 
-    .items {
+    .events {
 	grid-area: content;
+
+	.event {
+	    padding-bottom: 3rem;
+	}
     }
 
     .welcome {
-	grid-area: heading;
+	grid-area: welcome;
 	max-width: 800px;
 	padding-top: 1rem;
 	font-family: font.$body-family;
@@ -218,7 +222,6 @@
 	font-size: font.$body-normal-size;
     }
 
-
     div[role=tabpanel] {
 	.media {
 	    list-style: none;
@@ -246,20 +249,6 @@
 	margin-bottom: 1rem;
     }
 
-    a.external {
-	border-radius: 10px;
-	text-decoration: none;
-	color: color.$foreground;
-
-	&::after {
-	    content: "\FEFF°";
-	    color: color.$primary;
-	}
-	&:hover, &:focus {
-	    background-color: lighten(color.$primary, 45%);
-	}
-
-    }
 
     strong {
 	font-weight: 600;
@@ -335,5 +324,19 @@
 	button.open-media, a.open-media {
 	    width: 100%;
 	}
+    }
+}
+
+a.external {
+    border-radius: 10px;
+    text-decoration: none;
+    color: color.$foreground;
+
+    &::after {
+	content: "\FEFF°";
+	color: color.$primary;
+    }
+    &:hover, &:focus {
+	background-color: lighten(color.$primary, 45%);
     }
 }

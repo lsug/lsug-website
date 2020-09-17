@@ -3,10 +3,6 @@
 ◊hosts{zainabali,tamerabdulradi}
 ◊date{2019-08-21}
 ◊time{18:30-20:30}
-◊welcome{◊p{
-We look forward to seeing you at another round of London Scala Talks.
-}
-}
 
 ◊events{
 ◊event{

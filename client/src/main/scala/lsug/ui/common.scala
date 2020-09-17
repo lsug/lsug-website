@@ -43,9 +43,9 @@ object common {
           <.pre(<.code(code))
         case P.Markup.Text.Link(text, loc) =>
           if (options.link) {
-            <.a(^.href := loc, text)
+            <.a(^.cls := "external", ^.href := loc, ^.target := "_blank", text)
           } else {
-            <.em(^.cls := "link", text)
+            text
           }
       }
     }
@@ -61,30 +61,6 @@ object common {
           )
       }
       .build
-  }
-
-  val Markup = {
-
-    def renderText(markup: P.Markup.Text): TagMod = {
-      markup match {
-        case P.Markup.Text.Plain(s)         => s
-        case P.Markup.Text.Styled.Strong(s) => <.strong(s)
-        case P.Markup.Text.Styled.Code(code) =>
-          <.code(code)
-        case P.Markup.Text.Link(text, loc) =>
-          <.a(^.cls := "external", ^.href := loc, text)
-      }
-    }
-
-    ScalaComponent
-      .builder[P.Markup]("Markup")
-      .render_P {
-        case P.Markup.Paragraph(text) =>
-          <.p(text.map(renderText).toList.toTagMod)
-        case t: P.Markup.Text => <.span(renderText(t))
-      }
-      .build
-
   }
 
   object tabs {

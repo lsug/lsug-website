@@ -24,16 +24,31 @@ case class Meetup(
 
   def meetup: p.Meetup = p.Meetup(
     hosts = hosts,
-    welcome = welcome,
+    welcome = NonEmptyList
+      .fromList(welcome)
+      .fold(
+        List(
+          p.Markup.Paragraph(
+            NonEmptyList.of(p.Markup.Text.Plain("We look forward to seeing you at the London Scala User Group."))
+          ): p.Markup,
+          p.Markup.Paragraph(
+            NonEmptyList.of(
+              p.Markup.Text.Plain("We're Community Partners with "),
+            p.Markup.Text.Link("Meetup Mates", "https://meetup-mates.com"),
+            p.Markup.Text.Plain(". If you would like to attend this meetup but you feel overwhelmed by the idea of going and networking by yourself, Meetup Mates is a great way to connect with like-minded people to go to meetups with.")
+            )
+          )
+        )
+      )(_.toList),
     // TODO: Virtual details
     virtual = None,
     setting = p.Meetup.Setting(
-    id = id,
-    time = p.Meetup
-      .Time(LocalDateTime.of(date, start), LocalDateTime.of(date, end)),
-    location = venue
-      .map(p.Meetup.Location.Physical(_))
-      .getOrElse(p.Meetup.Location.Virtual)
+      id = id,
+      time = p.Meetup
+        .Time(LocalDateTime.of(date, start), LocalDateTime.of(date, end)),
+      location = venue
+        .map(p.Meetup.Location.Physical(_))
+        .getOrElse(p.Meetup.Location.Virtual)
     ),
     events = events.map(_.event).toList,
     schedule =

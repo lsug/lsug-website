@@ -3,9 +3,6 @@
 ◊hosts{zainabali}
 ◊date{2019-11-01}
 ◊time{19:00-21:00}
-◊welcome{◊p{
-We look forward to seeing you at another round of London Scala Talks.
-}}
 
 ◊events{
 ◊event{

@@ -11,8 +11,10 @@ import Function.const
 
 object Event {
 
-  import common.{Speakers, Markup, MaterialIcon, modal, tabs, TagBadge}
+  import common.{Speakers, MaterialIcon, modal, tabs, markup, TagBadge}
   import common.modal.control.ModalProps
+
+  val markupOpts = markup.Options(true)
 
   sealed trait Tab
 
@@ -88,7 +90,7 @@ object Event {
               <.div(
                 <.div(
                   ^.cls := "abstract",
-                  desc.map(Markup(_)).toTagMod
+                  desc.map(markup.Markup(_, markupOpts)).toTagMod
                 ),
                 <.ul(
                   ^.cls := "tags",
@@ -101,7 +103,7 @@ object Event {
               Tab.Setup,
               <.div(
                 ^.cls := "setup",
-                setup.map(Markup(_)).toTagMod
+                setup.map(markup.Markup(_, markupOpts)).toTagMod
               )
             )
 

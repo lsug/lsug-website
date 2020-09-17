@@ -14,10 +14,7 @@ object Welcome {
 
   type Speakers = Map[P.Speaker.Id, P.Speaker]
 
-  import common.{
-    ProfilePicture,
-    Markup,
-  }
+  import common.{ProfilePicture, markup}
 
   val EventHosts =
     ScalaComponent
@@ -64,7 +61,9 @@ object Welcome {
               case P.Meetup(
                   hosts,
                   welcome,
-                  _, P.Meetup.Setting(_, time, _), _,
+                  _,
+                  P.Meetup.Setting(_, time, _),
+                  _,
                   _
                   ) =>
                 <.header(
@@ -76,7 +75,8 @@ object Welcome {
                   <.section(
                     ^.cls := "message",
                     welcome.zipWithIndex.map {
-                      case (m, i) => Markup.withKey(i.toLong)(m)
+                      case (m, i) =>
+                        markup.Markup.withKey(i.toLong)(m, markup.Options(true))
                     }.toTagMod
                   ),
                   EventHosts(hosts.traverse(speakers.get))
