@@ -181,7 +181,7 @@ object Event {
             <.article(
               ^.cls := "event",
               <.header(
-                <.h2(^.cls := "event-header", event)
+                <.h2(^.cls := "event-header small-heading", event)
               ),
               <.div(
                 ^.cls := "speakers",

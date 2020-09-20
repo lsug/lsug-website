@@ -12,7 +12,6 @@ import lsug.{Meetup => MeetupApi}
 
 class ResourceSpec extends IOSuite with PathImplicits {
 
-
   def tests(
       dir: String,
       name: String,

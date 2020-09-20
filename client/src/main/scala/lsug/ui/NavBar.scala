@@ -21,7 +21,7 @@ object NavBar {
           )
         ),
         <.div(
-          <.a("About"),
+          <.a("About", ^.href := "/about"),
           <.a("Sponsors", ^.href := "/sponsors")
         )
       )

@@ -136,17 +136,8 @@
 	}
 
 	h2 {
-	    font: {
-		size: font.$body-large-size;
-		family: font.$body-family;
-		weight: 600;
-	    }
-
-	    font-variant: small-caps;
-	    color: color.$primary;
 	    padding: 0;
 	    margin: 0;
-	    text-decoration: none;
 	}
 
 	.card-body {
@@ -256,7 +247,14 @@
     }
 }
 
+.small-heading {
+    font: {
+	size: font.$body-large-size;
+	family: font.$body-family;
+	weight: 600;
+	variant: small-caps;
+    }
 
-
-
-
+    color: color.$primary;
+    text-decoration: none;
+}

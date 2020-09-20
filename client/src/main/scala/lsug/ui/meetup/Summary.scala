@@ -25,7 +25,10 @@ object Summary {
         <.div(
           ^.cls := "card-body",
           <.section(
-            <.h2(event.title),
+            <.h2(
+              ^.cls := "small-heading",
+              event.title
+            ),
             SpeakerProfiles((event.speakers, speakers)),
             EventDescription(event.description)
           ),

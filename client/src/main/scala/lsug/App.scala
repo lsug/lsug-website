@@ -43,6 +43,11 @@ object App extends IOApp {
         page(const(lui.sponsors.Sponsors()))
       }
 
+    def aboutRoute =
+      staticRoute(root / "about", Page.About) ~> renderR { _ =>
+        page(const(lui.about.About()))
+      }
+
     def eventRoute =
       dynamicRouteCT(
         root / "events" / (string("[0-9\\-]+") / int).caseClass[Page.Event]
@@ -72,7 +77,7 @@ object App extends IOApp {
             )))
       }
 
-    (homeRoute | eventRoute | meetupRoute | sponsorsRoute).notFound(
+    (homeRoute | eventRoute | meetupRoute | sponsorsRoute | aboutRoute).notFound(
       redirectToPage(Page.Home)(SetRouteVia.HistoryReplace)
     )
   }

@@ -28,6 +28,7 @@ object Summary {
         <.section(
           <.header(
             <.h2(
+              ^.cls := "small-heading",
               <.a(
                 ^.href := eventPage,
                 event.title

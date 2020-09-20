@@ -1,0 +1,55 @@
+@use "font";
+@use "color";
+
+.about-page {
+    // padding: 3rem 0 3rem 0;
+    display: flex;
+    justify-content: center;
+
+    div {
+	max-width: 45rem;
+
+	h1.small-heading {
+	    font: {
+		variant: none;
+		size: font.$body-huge-size;
+	    }
+	}
+
+	.small-heading {
+	    padding-top: 2rem;
+	}
+
+	span.em {
+	    font-style: italic;
+	}
+
+	div.button-container {
+	    display: flex;
+	    justify-content: center;
+
+	    a, button {
+		background-color: color.$secondary;
+		color: color.$background;
+		border-radius: 0.75rem;
+		font-size: 1.2rem;
+		border: 0.5rem solid color.$secondary;
+		margin: 1rem;
+		text-decoration: none;
+
+		&:hover, &:focus {
+		    background-color: color.$primary;
+		    border-color: color.$primary;
+		}
+	    }
+	}
+
+
+	p {
+	    font: {
+		family: font.$body-family;
+		size: font.$body-normal-size;
+	    }
+	}
+    }
+}
