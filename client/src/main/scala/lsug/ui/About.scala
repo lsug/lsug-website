@@ -56,11 +56,6 @@ object about {
             ), ", a community for people who are underrepresented in technology to learn Scala or improve their skill in the language."
           ),
           Action(("Find out more", "https://www.scalabridgelondon.org/students/")),
-          SubHeading("Code for the community"),
-          <.p(
-            "Take your first steps in open source by contributing to our website. If you're new to Scala or it's your first time contributing, this is the perfect place to start."
-          ),
-          Action(("Contribute", "TODO: Fill in this link")),
           SubHeading("Speak"),
           <.p(
             "Do you have a talk you want to give, but are not sure how to give it? There’s no friendlier place to present than with us.  If it’s you’re first time speaking, we’re hear to help.  We’ll give informal coaching from a seasoned toastmaster, or casual chats from other experienced speakers."
