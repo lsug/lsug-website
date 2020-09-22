@@ -65,12 +65,12 @@ object about {
           <.p(
             "Do you have a talk you want to give, but are not sure how to give it? There’s no friendlier place to present than with us.  If it’s you’re first time speaking, we’re hear to help.  We’ll give informal coaching from a seasoned toastmaster, or casual chats from other experienced speakers."
           ),
-          Action(("Sumbit a proposal", "https://docs.google.com/forms/d/1UabHTXdw3EpIeT4ntqa_6OjuCc4NI81lgsNXvj3ZaO4/edit")),
+          Action(("Sumbit a proposal", "https://forms.gle/Auyyodhp4h7mXLseA")),
           SubHeading("Get involved"),
           <.p(
             "We welcome volunteers.  Help us organize our upcoming meetups, find new speakers and guide new contributors."
           ),
-          Action(("Volunteer", "TODO: Add a form")),
+          Action(("Volunteer", "https://forms.gle/J1pJQCD7AeVzYZhJ8")),
           SubHeading("Code of Conduct"),
           <.p("Our organizers are committed to providing a friendly, safe and welcoming environment to everyone. We ask that the community adheres to the ",
             <.a(^.cls := "external", ^.href := "https://www.scala-lang.org/conduct/", "Scala Code of Conduct"), ".")
