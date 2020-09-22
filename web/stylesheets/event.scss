@@ -3,96 +3,37 @@
 @use "icon";
 
 @media screen and (min-width: 320px) {
-    .event-page {
+    .meetup-page {
 	grid: {
-	    template-areas:  "heading" "sidebar" "content";
+	    template-areas:  "sidebar" "content" "welcome" ;
 	}
     }
 }
 
-@media screen and (min-width: 992px) {
-    .event-page {
+@media screen and (min-width: 1100px) {
+    .meetup-page {
 	grid: {
-	    template-areas: "heading heading" "content sidebar";
+	    template-areas: "content sidebar" "welcome sidebar" ;
 	}
     }
 }
 
-
-.event-page {
-
-
-    div[role=tabpanel] {
-	.modal {
-	    .open {
-		iframe {
-		    width: 80vw;
-		    height: 80vh;
-		}
-	    }
-	}
-	.video {
-	    iframe {
-		width: 100%;
-		height: 100%;
-	    }
-	}
-	.slides {
-	    iframe {
-		width: 100%;
-		height: 100%;
-	    }
-	}
-    }
-
-
-    .tabs {
-	padding-top: 0.5rem;
-    }
-
-    .abstract {
-	line-height: font.$block-line-height;
-    }
-
-    div[role=tablist] {
-	button[role=tab] {
-	    min-width: 100px;
-	    text-transform: uppercase;
-	    font: {
-		size: font.$normal-size;
-		weight: 800;
-	    }
-	}
-    }
+.meetup-page {
 
     display: grid;
-
-    .item {
-	.tags {
-
-	    list-style: none;
-
-	    li {
-		padding-right: 0.5rem;
-		display: inline-block;
-	    }
-
-	    padding: 0rem;
-	    margin-bottom: 1rem;
-	}
-    }
 
     .hosts {
 
 	list-style: none;
 	display: flex;
+	flex-direction: row-reverse;
 	padding: 0px;
 
 	.host {
 	    display: flex;
 	    align-items: center;
 	    font: {
-		style: italic;
+		size: font.$body-small-size;
 	    }
 	    span {
 		padding-right: 0.25rem;
@@ -103,23 +44,41 @@
 
     .side-sheet {
 	grid-area: sidebar;
+	max-width: 600px;
+
+	.side-sheet-content > * {
+	    padding-top: 1rem;
+	    padding-bottom: 1rem;
+	}
     }
 
-    .items {
+    .events {
 	grid-area: content;
-	max-width: 800px;
+
+	.event {
+	    padding-bottom: 3rem;
+	}
     }
 
     .welcome {
-	grid-area: heading;
+	grid-area: welcome;
+	max-width: 800px;
+	padding-top: 1rem;
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
     }
 
-    .meetup {
+    .meetup-dot-com {
+
+	padding-left: 1rem;
+	padding-right: 1rem;
 
 	a {
 	    text-decoration: none;
 	    color: color.$foreground;
 	    padding: 0rem;
+	    display: flex;
+	    justify-content: space-between;
 	}
 
 	h2 {
@@ -132,8 +91,8 @@
 	    margin: 0px;
 	}
 
-	&:hover {
-	    background-color: darken(color.$background, 2%);
+	&:hover, &:focus {
+	    background-color: color.$background-1;
 	}
 	.logo {
 	    height: icon.$standard-size;
@@ -151,15 +110,31 @@
     }
 
     .panel {
-	// max-width: 600px;
+	min-width: 600px;
+	max-width: 600px;
+	padding: 2rem 0 1rem 0;
+
+	.date {
+	    padding: 1rem;
+	    display: flex;
+	    align-items: center;
+
+	    .material-icons {
+		padding-right: 8px;
+	    }
+	}
     }
 
     .panel-summary {
 
 	display: flex;
+	cursor: pointer;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+	padding-left: 1rem;
+	padding-right: 1rem;
 
 	.event-time {
-	    font-size: 18px;
 	    display: flex;
 	    align-items: center;
 	    .material-icons {
@@ -169,8 +144,8 @@
 	align-items: center;
 	justify-content: space-between;
 
-	&:hover {
-	    background-color: darken(color.$background, 2%);
+	&:hover, &:focus {
+	    background-color: color.$background-1;
 	}
     }
 
@@ -188,6 +163,10 @@
 	display: grid;
 	list-style: none;
 	li {
+
+	    > * {
+		padding: 0.25rem;
+	    }
 	    display: contents;
 	    .event-time {
 		grid-column: 1;
@@ -198,8 +177,130 @@
 	}
 	padding: 0px;
     }
+}
+
+.event-page {
+    display: flex;
+    justify-content: center;
+}
+
+.event {
+
+    max-width: 800px;
+    min-width: 800px;
+    padding-top: 3rem;
+
+    // This is a fishy way of making the page longer than the screen height
+    // If it’s too short, switching from a long tab (e.g ABOUT) to a small tab (e.g. MEDIA)
+    // changes the visual position of the view.  Try removing this and switching tabs to
+    // see the problem.
+    padding-bottom: 10rem;
+
+    div[role=tablist] {
+	button[role=tab] {
+	    min-width: 100px;
+	    padding: 0 0.25rem 0 0.25rem;
+	    font: {
+		family: font.$family;
+		size: font.$normal-size;
+	    }
+	}
+    }
+
+    .tabs {
+	padding-top: 0.5rem;
+    }
+
+    .abstract {
+	line-height: font.$block-line-height;
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
+    }
+
+    .bio {
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
+    }
+
+    div[role=tabpanel] {
+	.media {
+	    list-style: none;
+	    width: 100%;
+	}
+    }
+
+    .event-header {
+	text-align: center;
+    }
+    .tags {
+
+	list-style: none;
+
+	li {
+	    padding-right: 0.5rem;
+	    display: inline-block;
+	}
+
+	padding: 0rem;
+	margin-bottom: 1rem;
+    }
+
+
+    strong {
+	font-weight: 600;
+    }
+
+    .setup {
+	line-height: font.$block-line-height;
+	font-family: font.$body-family;
+	font-size: font.$body-normal-size;
+    }
+
+    .material {
+
+	width: 100%;
+
+	ol {
+	    list-style: none;
+	}
+
+	li {
+	    
+	    a {
+		display: flex;
+		align-items: center;
+		padding: 0.25rem 0 0.25rem 0;
+
+		font-family: font.$body-family;
+		font-size: font.$body-normal-size;
+		color: color.$foreground;
+		text-decoration: none;
+
+		&:hover, &:focus {
+		    background-color: color.$background-1;
+		}
+
+		.material-icons {
+		    transform: rotate(-90deg);
+		    padding: 0 1rem 0 1rem;
+		    font-variant: none;
+		}
+	    }
+	}
+    }
 
     .speaker {
+
+	padding: 0.5rem 0 0.5rem 0;
+
+	header {
+	    font-weight: 600;
+	    font-family: font.$body-family;
+
+	    h3 {
+		font-weight: 600;
+	    }
+	}
 	.social-media {
 	    display: flex;
 	    align-items: center;
@@ -208,7 +309,30 @@
 		padding-right: 0.5rem;
 		padding-left: 0.5rem;
 	    }
+
+	    a {
+		color: color.$foreground;
+	    }
 	}
     }
 
+    .media {
+	button.open-media, a.open-media {
+	    width: 100%;
+	}
+    }
+}
+
+a.external {
+    border-radius: 10px;
+    text-decoration: none;
+    color: color.$foreground;
+
+    &::after {
+	content: "\FEFF°";
+	color: color.$primary;
+    }
+    &:hover, &:focus {
+	background-color: lighten(color.$primary, 45%);
+    }
 }

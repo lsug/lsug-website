@@ -4,6 +4,8 @@
 @use "common";
 @use "event";
 @use "icon";
+@use "sponsors";
+@use "about";
 
 body {
     background-color: color.$background;
@@ -31,18 +33,31 @@ nav {
     color: color.$background;
 
     .abbrev-name {
-	font-weight: 800;
+	display: flex;
+	align-items: center;
+
+	.material-icons {
+	    font-size: 1.75rem;
+	    padding: 0 0.25rem 0 0.25rem;
+	}
+
     }
 
     a {
-	border-radius: 1rem;
+	text-decoration: none;
+	border-radius: 0.75rem;
 	display: block;
 	margin: 0.5rem;
 	border: 0.5rem solid color.$secondary;
-	&:hover {
+	color: color.$background;
+
+	&:hover, &:focus {
 	    border: 0.5rem solid color.$primary;
 	    background-color: color.$primary;
 	    cursor: pointer;
+	}
+	&:visited {
+	    color: color.$background;
 	}
     }
 
@@ -62,4 +77,8 @@ main {
 .footer {
     display: flex;
     justify-content: center;
+    font: {
+	family: font.$body-family;
+	size: font.$body-small-size;
+    }
 }

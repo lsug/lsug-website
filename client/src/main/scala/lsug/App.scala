@@ -3,6 +3,7 @@ package lsug
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.extra.router._
+import Function.const
 
 import cats.effect._
 import org.scalajs.dom.document
@@ -14,46 +15,76 @@ object App extends IOApp {
 
   import ui.Page
   import lsug.{ui => lui}
+  import lsug.{protocol => P}
 
   val routerConfig = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
 
+    def page(node: LocalDateTime => VdomNode): VdomElement = {
+      val now = LocalDateTime.now(Clock.systemUTC())
+      React.Fragment(
+        lui.NavBar.NavBar(),
+        node(now),
+        lui.Footer.Footer(now.toLocalDate)
+      )
+    }
+
     def homeRoute =
-      staticRoute(root, Page.Home) ~> renderR{ ctl =>
-        val now = LocalDateTime.now(Clock.systemUTC())
-        React.Fragment(
-          lui.common.NavBar(),
-          lui.home.Home(
-            lui.home.Props(
+      staticRoute(root, Page.Home) ~> renderR { ctl =>
+        page(now => lui.Home.Home(
+            lui.Home.Props(
               ctl,
               now
-            )
-          ),
-          lui.common.Footer(now.toLocalDate)
-        )
+            )))
+      }
+
+    def sponsorsRoute =
+      staticRoute(root / "sponsors", Page.Sponsors) ~> renderR { _ =>
+        page(const(lui.sponsors.Sponsors()))
+      }
+
+    def aboutRoute =
+      staticRoute(root / "about", Page.About) ~> renderR { _ =>
+        page(const(lui.about.About()))
       }
 
     def eventRoute =
       dynamicRouteCT(
-        root / "events" / string("[0-9\\-]+").caseClass[Page.Event]
+        root / "events" / (string("[0-9\\-]+") / int).caseClass[Page.Event]
       ) ~> dynRenderR {
-        case (Page.Event(ev), ctl) =>
-          val now = LocalDateTime.now(Clock.systemUTC())
-          React.Fragment(
-            lui.common.NavBar(),
-            lui.event.Event((ctl.narrow, ev)),
-            lui.common.Footer(now.toLocalDate)
-          )
+        case (Page.Event(meetupId, eventId), ctl) =>
+          page(const(
+            lui.event.EventPage.EventPage(
+              (
+                ctl.narrow,
+                new P.Meetup.Id(meetupId),
+                new P.Meetup.Event.Id(eventId)
+              )
+            )))
       }
 
-    (homeRoute | eventRoute).notFound(
+    def meetupRoute =
+      dynamicRouteCT(
+        root / "meetups" / (string("[0-9\\-]+")).caseClass[Page.Meetup]
+      ) ~> dynRenderR {
+        case (Page.Meetup(meetupId), ctl) =>
+          page(const(
+            lui.meetup.Meetup.Meetup(
+              (
+                ctl.narrow,
+                new P.Meetup.Id(meetupId)
+              )
+            )))
+      }
+
+    (homeRoute | eventRoute | meetupRoute | sponsorsRoute | aboutRoute).notFound(
       redirectToPage(Page.Home)(SetRouteVia.HistoryReplace)
     )
   }
 
   override def run(args: List[String]): IO[ExitCode] = {
     IO.delay {
-      Locale.setDefault(Locale.ENGLISH)
+        Locale.setDefault(Locale.ENGLISH)
         val router = Router(BaseUrl.fromWindowOrigin, routerConfig)
         val div = document.createElement("div")
         document.body.appendChild(div)

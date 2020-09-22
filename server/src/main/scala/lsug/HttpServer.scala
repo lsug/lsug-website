@@ -1,86 +1,9 @@
 package lsug
 
-import org.http4s._
-import org.http4s.dsl.Http4sDsl
-import org.http4s.dsl.io._
 import org.http4s.implicits._
-import org.http4s.circe._
-import cats.data._
 import cats.implicits._
 import cats.effect._
-import io.circe.syntax._
-import java.nio.file.{Paths, Path}
-
-object Routes {
-
-  import protocol._
-
-  def apply[F[_]: Sync: ContextShift](server: Server[F]): HttpRoutes[F] = {
-
-    val dsl = Http4sDsl[F]
-
-    import dsl._
-    import java.time.ZonedDateTime
-    import cats.data._
-
-    HttpRoutes.of[F] {
-      case GET -> Root / "events" / id =>
-        OptionT(
-          server
-          //TODO: create unappy
-            .event(new Event.Id(id))
-        ).map(_.asJson)
-          .semiflatMap(Ok(_))
-          .getOrElseF(NotFound())
-      case GET -> Root / "venues" / id / "summary" =>
-        OptionT(
-          server
-          //TODO: create unappy
-            .venue(new Venue.Id(id))
-        ).map(_.asJson)
-          .semiflatMap(Ok(_))
-          .getOrElseF(NotFound())
-      case GET -> Root / "events" / id / "meetup" =>
-        OptionT(
-          server
-          //TODO: GraphQL?
-            .eventMeetup(new Event.Id(id))
-        ).map(_.asJson)
-          .semiflatMap(Ok(_))
-          .getOrElseF(NotFound())
-      case GET -> Root / "speakers" / id / "profile" =>
-        OptionT(
-          server
-            .speakerProfile(new Speaker.Id(id))
-        ).map(_.asJson)
-          .semiflatMap(Ok(_))
-          .getOrElseF(NotFound())
-      case GET -> Root / "speakers" / id =>
-        OptionT(
-          server
-            .speaker(new Speaker.Id(id))
-        ).map(_.asJson)
-          .semiflatMap(Ok(_))
-          .getOrElseF(NotFound())
-      case GET -> Root / "events" =>
-        Ok(server.blurbs.map(List(_)).compile.foldMonoid.map(_.asJson))
-    }
-  }
-
-  def orIndex[F[_]: Sync: ContextShift](
-      path: Path,
-      routes: HttpRoutes[F],
-      blocker: Blocker
-  ): HttpRoutes[F] =
-    Kleisli { r =>
-      routes.run(r).orElse {
-        StaticFile.fromFile(path.resolve("index.html").toFile, blocker)
-      }
-    }
-
-}
-
-import cats.implicits._
+import java.nio.file.Paths
 
 object HttpServer extends IOApp {
 
@@ -98,8 +21,6 @@ object HttpServer extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
 
-    //TODO: fix this please
-
     val assetDir = Paths.get(args(0))
     val resourceDir = Paths.get(args(1))
 
@@ -111,10 +32,10 @@ object HttpServer extends IOApp {
         .use { client =>
           Server[IO](
             resourceDir,
-            Meetup(new P.Event.Meetup.Group.Id("london-scala"), client)
+            Meetup(new P.Meetup.MeetupDotCom.Group.Id("london-scala"), client)
           ).use { server =>
             BlazeServerBuilder[IO]
-              .bindHttp(80, "0.0.0.0")
+              .bindHttp(8080, "0.0.0.0")
               .withHttpApp(
                 Router(
                   "/api" -> Routes[IO](server),

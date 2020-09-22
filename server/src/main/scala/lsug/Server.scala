@@ -1,8 +1,5 @@
 package lsug
 
-import Function.const
-import scala.annotation
-import java.time.LocalDateTime
 import io.chrisdavenport.log4cats.Logger
 import fs2._
 import fs2.io
@@ -13,50 +10,27 @@ import cats.data._
 import cats._
 import cats.effect._
 import cats.implicits._
-import parsec.{Text, Parse}
-import parsec.Markup.{markup => parseMarkup}
-import parsec.Yaml.{yaml => parseYaml}
-import yaml.Yaml
-
-import monocle.{Lens, Prism, Traversal, Getter, Optional}
-import monocle.macros.{GenLens, GenPrism}
-import monocle.std.option.{some => _some}
+import markup.Read
+import java.time.ZonedDateTime
+import java.time.ZoneId
+import lsug.{Meetup => MeetupApi}
 
 object Server {
 
   def apply[F[_]: Sync: ContextShift: Logger](
       root: Path,
-      meetup: Meetup[F]
+      meetup: MeetupApi[F]
   ): Resource[F, Server[F]] =
     Blocker[F].map { b => new Server[F](root, meetup, b) }
-
 }
 
 final class Server[F[_]: Sync: ContextShift: Logger](
     root: Path,
-    meetup: Meetup[F],
+    meetup: MeetupApi[F],
     blocker: Blocker
 ) extends PathImplicits {
 
-  private def monoid[F[_]: Applicative, A: Monoid]: Monoid[F[A]] =
-    new Monoid[F[A]] {
-      val empty = Monoid[A].empty.pure[F]
-      def combine(x: F[A], y: F[A]): F[A] = x.map2(y)(_ |+| _)
-    }
-
-  val parser = parseYaml
-    .map(_.some)
-    .map2(parseMarkup.nel)(_ -> _)
-    .compile
-
-  def parse(s: String) =
-    parser
-      .runA(Parse.State(s))
-      .runA(Text.Source())
-      .value
-      .result
-
-  def content(path: Path): F[Option[String]] = {
+  private def content(path: Path): F[Option[String]] = {
     Logger[F].debug(s"request for: ${path}") *> io.file
       .exists(blocker, path)
       .flatMap { exists =>
@@ -73,93 +47,103 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       }
   }
 
-  def markup(
-      path: Path
-  ): F[Option[(Option[Yaml.Obj], List[Markup])]] = {
-    OptionT(content(root.resolve(path))).flatMapF { c =>
-      (for {
-        (yaml, markup) <- parse(c)
-      } yield (yaml, markup.toList))
+  private def read[A](
+      path: Path,
+      f: String => Either[Read.ReadError, A]
+  ): F[Option[A]] = {
+    OptionT(content(root.resolve(path))).flatMapF { contents =>
+      f(contents)
         .bimap(
-          err =>
-            Logger[F]
-              .error(s"could not parse ${path}, ${err}") *> none[
-              (
-                  Option[Yaml.Obj],
-                  List[
-                    Markup
-                  ]
-              )
-            ].pure[F],
+          error =>
+            Logger[F].error(s"Could not read contents $error") *> none[A]
+              .pure[F],
           _.some.pure[F]
         )
         .merge
     }.value
   }
 
-  def blurbs: Stream[F, Event.Summary[Event.Blurb]] = {
+  private val BST: ZoneId = ZoneId.of("Europe/London")
 
-    val decoder = decoders.event.summary(decoders.event.blurb)
+  def meetupsAfter(time: ZonedDateTime): F[List[Meetup]] = {
+    meetups.filter { meetup =>
+      ZonedDateTime.of(meetup.setting.time.end, BST).isAfter(time)
+    }.map(_.pure[List]).compile.foldMonoid
+  }
 
-    Stream.eval(Logger[F].debug(s"reading directory ${root}/events")) *> io.file
+  def eventsBefore(time: ZonedDateTime): F[List[Meetup.EventWithSetting]] = {
+    meetups.filter { meetup =>
+        ZonedDateTime.of(meetup.setting.time.end, BST).isBefore(time)
+      }
+      .map(m =>
+        m.events.zipWithIndex.map{ case (e, i) => Meetup.EventWithSetting(m.setting, e, new Meetup.Event.Id(i))}
+      )
+      .compile
+      .foldMonoid
+  }
+
+  def event(meetupId: Meetup.Id, eventId: Meetup.Event.Id): F[Option[Meetup.EventWithSetting]] = {
+    meetups.find { meetup =>
+      meetup.setting.id === meetupId
+    }.flatMap(m => Stream.emits(
+      m.events.zipWithIndex.map { case (e, i) =>
+        Meetup.EventWithSetting(m.setting, e, new Meetup.Event.Id(i))
+      }
+    ))
+      .find({e => e.eventId === eventId})
+      .compile
+      .last
+  }
+
+  def meetup(meetupId: Meetup.Id): F[Option[Meetup]] = {
+    meetups.find { meetup =>
+      meetup.setting.id === meetupId
+    }.compile
+    .last
+  }
+
+  private def meetups: Stream[F, Meetup] = {
+
+    Stream.eval(Logger[F].debug(s"reading directory ${root}/meetups")) *> io.file
       .directoryStream(
         blocker,
-        root.resolve("events"),
-        "*.md"
+        root.resolve("meetups"),
+        "*.pm"
       )
       .evalMap { p =>
         val id =
-          new Event.Id(p.getFileName.baseName)
-        OptionT(markup(p))
-          .map((decoder.apply _).tupled)
-          .subflatMap(_.toOption)
+          new Meetup.Id(p.getFileName.baseName)
+        OptionT(read(p, Read.meetup))
           .map(_(id))
           .value
       }
-      .collect {
-        case Some(ev) => ev
-      }
+      .mapFilter(identity)
   }
 
-  private def decodeMarkup[A: Show, B](
-      decoder: Decoder[A => B],
-      path: String
-  )(id: A): F[Option[B]] =
-    OptionT(markup(Paths.get(s"$path/${id.show}.md"))).flatMapF {
-      case (yaml, markup) =>
-        decoder(yaml, markup)
-          .map(_(id))
-          .toEither
-          .bimap(
-            err =>
-              Logger[F]
-                .error(s"could not decode resource ${id.show}, $err") *> none[B]
-                .pure[F],
-            _.some.pure[F]
-          )
-          .merge
-    }.value
+  private def decodeMarkup[A: Show, B](id: A)(
+      path: String,
+      f: String => Either[Read.ReadError, A => B]
+  ): F[Option[B]] =
+    OptionT(read(Paths.get(s"$path/${id.show}.pm"), f))
+      .map(_.apply(id))
+      .value
 
   def speakerProfile(id: Speaker.Id): F[Option[Speaker.Profile]] =
-    decodeMarkup(decoders.speaker.profile, "people")(id)
+    decodeMarkup(id)(
+      "people",
+      (Read.speaker _).andThen(_.map(_.andThen(_.profile)))
+    )
 
   def speaker(id: Speaker.Id): F[Option[Speaker]] =
-    decodeMarkup(decoders.speaker.speaker, "people")(id)
-
-  def event(id: Event.Id): F[Option[Event[Event.Item]]] =
-    decodeMarkup(decoders.event.event, "events")(id)
+    decodeMarkup(id)("people", (Read.speaker _))
 
   def venue(id: Venue.Id): F[Option[Venue.Summary]] =
-    decodeMarkup(decoders.venue.summary, "venues")(id)
+    decodeMarkup(id)("venues", (Read.venue _))
 
-  def eventMeetup(id: Event.Id): F[Option[Event.Meetup.Event]] = {
-    val link =
-      Yaml._objKey("meetup") ^|-? Yaml._strValue
-    OptionT(markup(Paths.get(s"events/${id.show}.md"))).flatMapF {
-      case (yaml, _) =>
-        val eventId =
-          (yaml >>= link.getOption).map(new Event.Meetup.Event.Id(_))
-        eventId.flatTraverse(meetup.event)
-    }.value
+  def venue1(id: Venue.Id): F[Option[Venue.Summary]] =
+    decodeMarkup(id)("venues", (Read.venue _))
+  def meetupDotCom(id: Meetup.Id): F[Option[Meetup.MeetupDotCom.Event]] = {
+    decodeMarkup(id)("meetups", (Read.meetupDotCom _))
+      .flatMap(_.flatTraverse(meetup.event))
   }
 }

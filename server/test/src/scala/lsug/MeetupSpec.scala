@@ -1,12 +1,11 @@
 package lsug
 
-import munit._
 import org.http4s.client.blaze._
 import cats.implicits._
 import cats.effect._
 import org.http4s.headers._
 
-import lsug.protocol.Event.{Meetup => P}
+import lsug.protocol.Meetup.{MeetupDotCom => P}
 
 final class MeetupSpec extends IOSuite {
 

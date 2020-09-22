@@ -37,6 +37,7 @@ object Github {
     implicit val decoder: Decoder[User] = Decoder[String].map(new User(_))
     implicit val encoder: Encoder[User] = Encoder[String].contramap(_.value)
     implicit val eq: Eq[User] = Eq[String].contramap(_.value)
+    implicit val show: Show[User] = Show[String].contramap(_.value)
   }
 
 }
@@ -75,29 +76,14 @@ object Asset {
   }
 
   val twitter = new Asset("twitter.svg")
+  val github = new Asset("github.png")
 }
 
 sealed trait Markup
 
 object Markup {
 
-  sealed trait Text extends Markup { self =>
-    def string: String = self match {
-      case Text.Plain(value)        => value
-      case Text.Styled.Code(text)   => text
-      case Text.Styled.Strong(text) => text.map(_.string).fold
-      case Text.Styled.Italic(text) => text.map(_.string).fold
-      case Text.Link(text, _)       => text
-    }
-
-    def trim: Text = self match {
-      case Text.Plain(value)          => Text.Plain(value.trim)
-      case Text.Link(text, location)  => Text.Link(text.trim, location)
-      case code @ Text.Styled.Code(_) => code
-      case styled                     => styled
-      //TODO: finish this off
-    }
-  }
+  sealed trait Text extends Markup
 
   object Text {
 
@@ -108,8 +94,7 @@ object Markup {
     object Styled {
 
       case class Code(text: String) extends Styled
-      case class Strong(text: NonEmptyList[Text]) extends Styled
-      case class Italic(text: NonEmptyList[Text]) extends Styled
+      case class Strong(text: String) extends Styled
 
       implicit val codec: Codec[Styled] = deriveCodec[Styled]
 
@@ -124,29 +109,6 @@ object Markup {
     implicit val codec: Codec[Text] = deriveCodec[Text]
 
   }
-
-  case class Table(headings: NonEmptyList[Text], rows: List[Table.Row])
-      extends Markup
-
-  object Table {
-
-    case class Row(columns: NonEmptyList[Text]) extends Markup
-
-    object Row {
-      implicit val codec: Codec[Row] = deriveCodec[Row]
-    }
-
-    implicit val codec: Codec[Table] = deriveCodec[Table]
-
-  }
-
-  case class Section(heading: Text, content: List[Markup]) extends Markup
-
-  object Section {
-    implicit val codec: Codec[Section] = deriveCodec[Section]
-  }
-
-  case class CodeBlock(lang: String, code: NonEmptyList[String]) extends Markup
 
   case class Paragraph(text: NonEmptyList[Text]) extends Markup
 
@@ -204,6 +166,8 @@ object Speaker {
   object Id {
     implicit val decoder: Decoder[Id] = Decoder[String].map(new Id(_))
     implicit val encoder: Encoder[Id] = Encoder[String].contramap(_.value)
+    implicit val codec: Codec[Id] = Codec.from(decoder, encoder)
+
     implicit val eq: Eq[Speaker.Id] = Eq[String].contramap(_.value)
     implicit val show: Show[Id] = Show[String].contramap(_.value)
   }
@@ -262,15 +226,16 @@ object Venue {
   }
 }
 
-case class Event[A](
-    host: NonEmptyList[Speaker.Id],
+case class Meetup(
+    hosts: NonEmptyList[Speaker.Id],
     welcome: List[Markup],
-    virtual: Option[Event.Virtual],
-    summary: Event.Summary[A],
-    schedule: Event.Schedule
+    virtual: Option[Meetup.Virtual],
+    setting: Meetup.Setting,
+    events: List[Meetup.Event],
+    schedule: Meetup.Schedule
 )
 
-object Event {
+object Meetup {
 
   final class Id(val value: String) extends AnyVal
 
@@ -281,6 +246,16 @@ object Event {
     implicit val show: Show[Id] = Show[String].contramap(_.value)
     implicit val eq: Eq[Id] = Eq[String].contramap(_.value)
 
+  }
+
+  case class Setting(
+      id: Id,
+      time: Time,
+      location: Location
+  )
+
+  object Setting {
+    implicit val codec: Codec[Setting] = deriveCodec[Setting]
   }
 
   case class Schedule(items: NonEmptyList[Schedule.Item])
@@ -321,7 +296,7 @@ object Event {
 
   sealed trait Location {
     def getId: Option[Venue.Id] = this match {
-      case Location.Virtual => none
+      case Location.Virtual      => none
       case Location.Physical(id) => id.some
     }
   }
@@ -342,47 +317,62 @@ object Event {
     implicit val eq: Eq[Time] = Eq.fromUniversalEquals[Time]
   }
 
-  case class Summary[A](
-      id: Id,
-      time: Time,
-      location: Location,
-      events: List[A]
-  )
+  case class Media(link: Link, openInNew: Boolean)
 
-  object Summary {
-    implicit def codec[A: Codec]: Codec[Summary[A]] = deriveCodec[Summary[A]]
+  object Media {
+    implicit val codec: Codec[Media] = deriveCodec[Media]
   }
 
-  case class Blurb(
-      event: String,
+  case class Material(text: String, location: String)
+
+  object Material {
+    implicit val codec: Codec[Material] = deriveCodec[Material]
+  }
+
+  case class Event(
+      title: String,
       description: List[Markup],
       speakers: List[Speaker.Id],
-      tags: List[String]
-  )
-
-  object Blurb {
-    implicit val codec: Codec[Blurb] = deriveCodec[Blurb]
-  }
-
-  case class Item(
-      blurb: Blurb,
+      tags: List[String],
+      material: List[Material],
       setup: List[Markup],
-      slides: Option[Link],
+      slides: Option[Media],
       recording: Option[Link],
       photos: List[Asset]
   )
 
-  object Item {
-    implicit val codec: Codec[Item] = deriveCodec[Item]
+  object Event {
+    implicit val codec: Codec[Event] = deriveCodec[Event]
+
+    final class Id(val value: Int) extends AnyVal
+
+    object Id {
+
+      implicit val decoder: Decoder[Id] = Decoder[Int].map(new Id(_))
+      implicit val encoder: Encoder[Id] = Encoder[Int].contramap(_.value)
+      implicit val show: Show[Id] = Show[Int].contramap(_.value)
+      implicit val eq: Eq[Id] = Eq[Int].contramap(_.value)
+    }
   }
 
-  implicit val codec: Codec[Event[Item]] = deriveCodec[Event[Item]]
+  case class EventWithSetting(
+      setting: Setting,
+      event: Event,
+      eventId: Event.Id
+  )
 
-  object Meetup {
+  object EventWithSetting {
+    implicit val codec: Codec[EventWithSetting] = deriveCodec[EventWithSetting]
+  }
+
+  implicit val codec: Codec[Meetup] = deriveCodec[Meetup]
+
+  object MeetupDotCom {
 
     case class Event(link: Link, attendees: Int)
 
-    implicit val codec: Codec[Meetup.Event] = deriveCodec[Meetup.Event]
+    implicit val codec: Codec[MeetupDotCom.Event] =
+      deriveCodec[MeetupDotCom.Event]
     implicit val eq: Eq[Event] = Eq.instance {
       case (Event(l, a), Event(ll, aa)) =>
         l === ll && a === aa
@@ -409,11 +399,8 @@ object Event {
         implicit val encoder: Encoder[Id] = Encoder[String].contramap(_.value)
         implicit val eq: Eq[Id] = Eq[String].contramap(_.value)
       }
-
     }
-
   }
-
 }
 
 case class Contact(

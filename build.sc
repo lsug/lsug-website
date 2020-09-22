@@ -3,8 +3,12 @@ import $file.webpack
 
 import mill._
 import scalalib._
+import scalafmt._
 import mill.scalajslib._
 import webpack.{WebpackModule, NpmDependency}
+
+import $ivy.`com.goyeau::mill-scalafix:9433263`
+import com.goyeau.mill.scalafix.ScalafixModule
 
 val catsEffectDep = ivy"org.typelevel::cats-effect::2.1.0"
 
@@ -21,6 +25,7 @@ val commonScalacOptions =
     "-Xfatal-warnings",
     "-language:higherKinds",
     "-language:existentials",
+    "-Wunused",
     "-encoding",
     "UTF-8"
   )
@@ -47,7 +52,7 @@ object protocolJs extends ProtocolModule with ScalaJSModule {
 
 object protocolJvm extends ProtocolModule
 
-object server extends ScalaModule {
+object server extends ScalaModule with ScalafixModule with ScalafmtModule {
 
   def scalaVersion = "2.13.1"
   def moduleDeps = Seq(protocolJvm)
@@ -70,9 +75,17 @@ object server extends ScalaModule {
       "http4s-blaze-server",
       "http4s-blaze-client"
     ).map { dep => ivy"org.http4s::${dep}::0.21.3" } ++ Agg(
+      "tapir-core",
+      "tapir-json-circe",
+      "tapir-http4s-server",
+      "tapir-openapi-docs",
+      "tapir-openapi-circe-yaml",
+      "tapir-redoc-http4s" 
+    ).map { dep => ivy"com.softwaremill.sttp.tapir::${dep}::0.16.16" } ++ Agg(
       "fs2-io",
       "fs2-core"
-    ).map { dep => ivy"co.fs2::${dep}::2.3.0" } ++ monocleDeps
+    ).map { dep => ivy"co.fs2::${dep}::2.3.0" } ++ monocleDeps ++
+      Agg(ivy"io.chrisdavenport::cats-time::0.3.4")
 
   def assetDir = T.source {
     millSourcePath / "src" / "main" / "resources"

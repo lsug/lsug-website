@@ -1,11 +1,14 @@
 package lsug
 package ui
 
+import lsug.{protocol => P}
+import java.time.LocalDateTime
+
 import cats._
 import cats.implicits._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.CatsReact._
-import java.time.{LocalDateTime, LocalDate, Month, DayOfWeek}
+import java.time._
 
 final class StyleClass(val value: List[String]) extends AnyVal
 
@@ -44,6 +47,12 @@ object implicits {
   implicit val eqMonth: Eq[Month] =
     Eq.fromUniversalEquals[Month]
 
-  implicit val localDate = Reusability.byEq[LocalDate]
+  implicit val localDate: Reusability[LocalDate] = Reusability.byEq[LocalDate]
 
+  implicit val speakerIdReusability: Reusability[P.Speaker.Id] =
+    Reusability.byEq[P.Speaker.Id]
+  implicit val profileReusability: Reusability[P.Speaker.Profile] =
+    Reusability.byEq[P.Speaker.Profile]
+  implicit val localDateTime: Reusability[LocalDateTime] =
+    Reusability.byEq[LocalDateTime]
 }
