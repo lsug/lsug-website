@@ -8,6 +8,7 @@ import java.nio.file.Paths
 object HttpServer extends IOApp {
 
   import org.http4s.server.blaze._
+  import org.http4s.server.middleware.GZip
   import org.http4s.server.staticcontent._
   import org.http4s.server.Router
   import org.http4s.client.blaze.BlazeClientBuilder
@@ -38,14 +39,16 @@ object HttpServer extends IOApp {
               .bindHttp(80, "0.0.0.0")
               .withHttpApp(
                 Router(
-                  "/api" -> Routes[IO](server),
+                  "/api" -> GZip(Routes[IO](server)),
                   "" ->
                     Routes.orIndex(
                       assetDir,
-                      fileService[IO](
-                        FileService.Config(
-                          assetDir.toString,
-                          blocker
+                      GZip(
+                        fileService[IO](
+                          FileService.Config(
+                            assetDir.toString,
+                            blocker
+                          )
                         )
                       ),
                       blocker
