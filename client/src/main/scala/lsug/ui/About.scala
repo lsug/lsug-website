@@ -60,7 +60,7 @@ object about {
           <.p(
             "Do you have a talk you want to give, but are not sure how to give it? There’s no friendlier place to present than with us.  If it’s you’re first time speaking, we’re hear to help.  We’ll give informal coaching from a seasoned toastmaster, or casual chats from other experienced speakers."
           ),
-          Action(("Sumbit a proposal", "https://forms.gle/Auyyodhp4h7mXLseA")),
+          Action(("Submit a proposal", "https://forms.gle/Auyyodhp4h7mXLseA")),
           SubHeading("Get involved"),
           <.p(
             "We welcome volunteers.  Help us organize our upcoming meetups, find new speakers and guide new contributors."
