@@ -69,7 +69,7 @@ def main(
                 |- content: |
                 |    [Service]
                 |    Type=exec
-                |    ExecStart=/bin/bash /usr/local/bin/lsug /var/www/html /usr/local/lsug/.config
+                |    ExecStart=/bin/bash /usr/local/bin/lsug /var/www/html /usr/local/lsug/.config 80
                 |  path: /etc/systemd/system/lsug.service
                 |--//
                 |Content-Type: text/x-shellscript; charset="us-ascii"

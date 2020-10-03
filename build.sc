@@ -149,7 +149,7 @@ object web extends WebModule {
 
     (r0, r1) match {
       case (Result.Success(bundle), Result.Success(assetDir)) =>
-        server.runBackground(bundle.path.toString, assetDir.path.toString)
+        server.runBackground(bundle.path.toString, assetDir.path.toString, "8080")
     }
 
   }
@@ -163,7 +163,7 @@ object web extends WebModule {
 
     (r0, r1) match {
       case (Result.Success(bundle), Result.Success(assetDir)) =>
-        server.run(bundle.path.toString, assetDir.path.toString)
+        server.run(bundle.path.toString, assetDir.path.toString, "8080")
     }
 
   }
