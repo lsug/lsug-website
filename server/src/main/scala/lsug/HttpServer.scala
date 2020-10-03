@@ -24,6 +24,7 @@ object HttpServer extends IOApp {
 
     val assetDir = Paths.get(args(0))
     val resourceDir = Paths.get(args(1))
+    val port = args(2).toInt
 
     Blocker[IO].use { blocker =>
       BlazeClientBuilder[IO](ec)
@@ -35,8 +36,8 @@ object HttpServer extends IOApp {
             resourceDir,
             Meetup(new P.Meetup.MeetupDotCom.Group.Id("london-scala"), client)
           ).use { server =>
-            BlazeServerBuilder[IO]
-              .bindHttp(80, "0.0.0.0")
+            BlazeServerBuilder.apply[IO](ec)
+              .bindHttp(port, "0.0.0.0")
               .withHttpApp(
                 Router(
                   "/api" -> GZip(Routes[IO](server)),
