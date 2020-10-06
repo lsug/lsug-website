@@ -36,7 +36,7 @@ object HttpServer extends IOApp {
             resourceDir,
             Meetup(new P.Meetup.MeetupDotCom.Group.Id("london-scala"), client)
           ).use { server =>
-            BlazeServerBuilder[IO](ec)
+            BlazeServerBuilder[IO]
               .bindHttp(port, "0.0.0.0")
               .withHttpApp(
                 Router(
