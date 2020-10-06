@@ -108,7 +108,7 @@ def main(
           image,
           sg,
           Instance.public,
-          keyName = Some("admin")
+          keyName = Some("lsug")
         )
         _ <- Eip("WebsiteIp", instance.getInstanceId)
       } yield {
