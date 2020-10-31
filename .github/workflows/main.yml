@@ -61,6 +61,8 @@ jobs:
       with:
         node-version: '10.x'
     - name: Deploy HTTP server
+      env:
+          LSUG_SSL_PASSWORD: ${{ secrets.LSUG_SSL_PASSWORD }}
       run: |
         mill ci.synth
         mill ci.deploy

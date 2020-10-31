@@ -23,7 +23,8 @@ def main(
     stack: String,
     account: String,
     region: String,
-    assetPath: Path
+    assetPath: Path,
+    sslPassword: String,
 ) = {
   App(
     pwd,
@@ -51,7 +52,7 @@ def main(
         image <- Image(
           Some(
             Image.Data.custom(
-              """Content-Type: multipart/mixed; boundary="//"
+              s"""Content-Type: multipart/mixed; boundary="//"
                 |MIME-Version: 1.0
                 |
                 |--//
@@ -70,7 +71,7 @@ def main(
                 |- content: |
                 |    [Service]
                 |    Type=exec
-                |    ExecStart=/bin/bash /usr/local/bin/lsug /var/www/html /usr/local/lsug/.config 80
+                |    ExecStart=/bin/bash /usr/local/bin/lsug /var/www/html /usr/local/lsug/.config 443 80 /usr/local/lsug/fullchain.pkcs12 $sslPassword
                 |  path: /etc/systemd/system/lsug.service
                 |--//
                 |Content-Type: text/x-shellscript; charset="us-ascii"
