@@ -47,6 +47,7 @@ def main(
           "CodeAssets",
           assetPath
         )
+        config <- Bucket("lsug-website-config", "Config")
         image <- Image(
           Some(
             Image.Data.custom(
@@ -114,6 +115,7 @@ def main(
       } yield {
         // Really ugly...
         asset.getBucket.grantRead(instance)
+        config.grantRead(instance)
         instance
       }
     )
