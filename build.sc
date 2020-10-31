@@ -87,6 +87,10 @@ object server extends ScalaModule with ScalafmtModule {
     millSourcePath / "src" / "main" / "resources"
   }
 
+  def localSslKey = T.source {
+    millSourcePath / "src" / "main" / "resources" / "localkey.pkcs12"
+  }
+
   object test extends Tests {
     def ivyDeps = Agg(ivy"org.scalameta::munit::0.7.1")
     def testFrameworks = Seq("munit.Framework")
@@ -143,13 +147,21 @@ object web extends WebModule {
   def runBackground(ev: Evaluator) = T.command {
     val t0 = bundle
     val t1 = server.assetDir
-    val r = ev.evaluate(SAgg[Task[_]](t0, t1)).results
+    val t2 = server.localSslKey
+    val r = ev.evaluate(SAgg[Task[_]](t0, t1, t2)).results
     val r0 = r(t0).map(_.asInstanceOf[PathRef])
     val r1 = r(t1).map(_.asInstanceOf[PathRef])
+    val r2 = r(t2).map(_.asInstanceOf[PathRef])
 
-    (r0, r1) match {
-      case (Result.Success(bundle), Result.Success(assetDir)) =>
-        server.runBackground(bundle.path.toString, assetDir.path.toString, "8080")
+    (r0, r1, r2) match {
+      case (Result.Success(bundle), Result.Success(assetDir), Result.Success(sslKey)) =>
+        server.runBackground(
+          bundle.path.toString,
+          assetDir.path.toString,
+          "8443",
+          "8080",
+          sslKey.path.toString,
+          "password")
     }
 
   }
@@ -157,13 +169,21 @@ object web extends WebModule {
   def run(ev: Evaluator) = T.command {
     val t0 = bundle
     val t1 = server.assetDir
-    val r = ev.evaluate(SAgg[Task[_]](t0, t1)).results
+    val t2 = server.localSslKey
+    val r = ev.evaluate(SAgg[Task[_]](t0, t1, t2)).results
     val r0 = r(t0).map(_.asInstanceOf[PathRef])
     val r1 = r(t1).map(_.asInstanceOf[PathRef])
+    val r2 = r(t2).map(_.asInstanceOf[PathRef])
 
-    (r0, r1) match {
-      case (Result.Success(bundle), Result.Success(assetDir)) =>
-        server.run(bundle.path.toString, assetDir.path.toString, "8080")
+    (r0, r1, r2) match {
+      case (Result.Success(bundle), Result.Success(assetDir), Result.Success(sslKey)) =>
+        server.run(
+          bundle.path.toString,
+          assetDir.path.toString,
+          "8443",
+          "8080",
+          sslKey.path.toString,
+          "password")
     }
 
   }
@@ -180,6 +200,9 @@ object ci extends WebModule {
   def account: T[String] = "930183804331"
   def region: T[String] = "eu-west-2"
   def stack: T[String] = "Website"
+
+  def sslPassword: T[String] = System.getenv("LSUG_SSL_KEY")
+
   def devDependencies =
     Agg(
       "aws-cdk" -> "1.33.1"
@@ -219,7 +242,8 @@ object ci extends WebModule {
               stack(),
               account(),
               region(),
-              upload.toString
+              upload.toString,
+              sslPassword(),
             ).mkString(" ")
         )
         .render(2)
