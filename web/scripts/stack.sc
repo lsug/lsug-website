@@ -71,7 +71,7 @@ def main(
                 |- content: |
                 |    [Service]
                 |    Type=exec
-                |    ExecStart=/bin/bash /usr/local/bin/lsug /var/www/html /usr/local/lsug/.config 443 80 /usr/local/lsug/fullchain.pkcs12 $sslPassword
+                |    ExecStart=/bin/bash /usr/local/bin/lsug /var/www/html /usr/local/lsug/.config 443 80 /usr/local/lsug/fullchain.pkcs12 ${sslPassword}
                 |  path: /etc/systemd/system/lsug.service
                 |--//
                 |Content-Type: text/x-shellscript; charset="us-ascii"
