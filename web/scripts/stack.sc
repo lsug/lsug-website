@@ -82,6 +82,7 @@ def main(
                 |code_dir=$(mktemp -d)
                 |""".stripMargin +
               s"""aws s3 cp 's3://${asset.getS3BucketName}/${asset.getS3ObjectKey}' """ + """ "$code_dir/assets.zip" """ +
+              s"""aws s3 cp 's3://lsug-website-config/fullchain.pkcs12' """ + """ "$code_dir/fullchain.pkcs12" """ +
               """
                 |cd $code_dir
                 |unzip assets.zip
@@ -95,6 +96,7 @@ def main(
                 |fi
                 |mkdir --p /usr/local/lsug
                 |mv resources /usr/local/lsug/.config
+                |mv fullchain.pkcs12 /usr/local/lsug/.config
                 |mv app.jar /usr/local/bin/lsug
                 |chmod +x /usr/local/bin/lsug
                 |rm -rf $code_dir
