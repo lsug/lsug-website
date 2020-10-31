@@ -41,7 +41,7 @@ object HttpServer extends IOApp {
             resourceDir,
             Meetup(new P.Meetup.MeetupDotCom.Group.Id("london-scala"), client)
           ).use { server =>
-            val sslStream = BlazeServerBuilder[IO](ec)
+            val sslStream = BlazeServerBuilder[IO]
               .bindHttp(httpsPort, "0.0.0.0")
               .withSslContext(ssl)
               .withHttpApp(
@@ -64,9 +64,9 @@ object HttpServer extends IOApp {
               )
               .serve
 
-            val redirectStream = BlazeServerBuilder[IO](ec)
+            val redirectStream = BlazeServerBuilder[IO]
               .bindHttp(httpPort, "0.0.0.0")
-              .withHttpApp(SSL.redirectApp(httpsPort))
+              .withHttpApp(SSL.redirectApp[IO](httpsPort))
               .serve
 
             sslStream
