@@ -96,7 +96,7 @@ def main(
                 |fi
                 |mkdir --p /usr/local/lsug
                 |mv resources /usr/local/lsug/.config
-                |mv fullchain.pkcs12 /usr/local/lsug/.config
+                |mv fullchain.pkcs12 /usr/local/lsug/fullchain.pkcs12
                 |mv app.jar /usr/local/bin/lsug
                 |chmod +x /usr/local/bin/lsug
                 |rm -rf $code_dir
