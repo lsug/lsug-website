@@ -201,7 +201,7 @@ object ci extends WebModule {
   def region: T[String] = "eu-west-2"
   def stack: T[String] = "Website"
 
-  def sslPassword: T[String] = System.getenv("LSUG_SSL_KEY")
+  def sslPassword: T[String] = System.getenv("LSUG_SSL_PASSWORD")
 
   def devDependencies =
     Agg(
