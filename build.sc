@@ -243,7 +243,7 @@ object ci extends WebModule {
               account(),
               region(),
               upload.toString,
-              sslPassword(),
+              region(),
             ).mkString(" ")
         )
         .render(2)
