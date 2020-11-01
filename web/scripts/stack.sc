@@ -106,7 +106,7 @@ def main(
           )
         )
         instance <- Instance(
-          "WebServer",
+          "LSUGWebServer",
           vpc,
           image,
           sg,

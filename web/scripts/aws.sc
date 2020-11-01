@@ -154,7 +154,7 @@ object Instance {
       securityGroup: SecurityGroup.AWS,
       subnetSelection: ec2.SubnetSelection,
       instanceType: ec2.InstanceType = ec2.InstanceType
-        .of(ec2.InstanceClass.BURSTABLE2, ec2.InstanceSize.MICRO),
+        .of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
       keyName: Option[String] = None
   ): Resource[ec2.Instance] = { scope =>
     {
