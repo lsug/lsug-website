@@ -2,7 +2,6 @@ package lsug
 package ui
 
 import cats._
-import cats.data._
 import cats.implicits._
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
@@ -65,12 +64,6 @@ object common {
 
   object tabs {
 
-    case class TabProps(
-        label: String,
-        selected: Boolean,
-        onSelect: Callback
-    )
-
     val Tab = ScalaComponent
       .builder[(String, Boolean, Callback)]("Tab")
       .render_PC {
@@ -84,11 +77,6 @@ object common {
           )
       }
       .build
-
-    case class TabsProps(
-        minWidth: Int,
-        tabs: NonEmptyList[Tab.type]
-    )
 
     val Tabs = {
 
@@ -142,10 +130,14 @@ object common {
       }
       .build
 
-    def makeTabs[S, T: Show: Eq](
-        f: (S => S) => Callback,
+    case class TabProps[S, T](
+        currentTab: T,
         lens: Lens[S, T],
-        s: S
+        modify: (S => S) => Callback
+    )
+
+    def makeTabs[S, T: Show: Eq](
+        tabProps: TabProps[S, T]
     )(
         tabs: List[T],
         current: T
@@ -155,20 +147,22 @@ object common {
           .withKey(tab.show)
           .withChildren(
             <.span(tab.show)
-          )((tab.show, lens.get(s) === tab, f(lens.set(tab))))
-      }.toReactFragment)(tabs.indexOf(current)),
+          )((
+            tab.show,
+            tabProps.currentTab === tab,
+            tabProps.modify(tabProps.lens.set(tab))))
+      }.toReactFragment)(tabs.indexOf(current))
     }
 
     def makeTabPanel[S, T: Show: Eq](
-        lens: Lens[S, T],
-        s: S
+        currentTab: T
     )(
         tab: T,
         panel: VdomElement
     ): VdomNode = {
       TabPanel
         .withKey(tab.show)
-        .withChildren(panel)(tab.show, lens.get(s) === tab)
+        .withChildren(panel)(tab.show, currentTab === tab)
     }
   }
 

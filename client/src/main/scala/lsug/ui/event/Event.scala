@@ -5,7 +5,6 @@ import lsug.{protocol => P}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import cats._
-import monocle.Lens
 import cats.implicits._
 import Function.const
 
@@ -13,6 +12,7 @@ object Event {
 
   import common.{Speakers, MaterialIcon, modal, tabs, markup, TagBadge}
   import common.modal.control.ModalProps
+  import common.tabs.TabProps
 
   val markupOpts = markup.Options(true)
 
@@ -51,16 +51,16 @@ object Event {
       event: P.Meetup.Event,
       speakers: Speakers,
       modalProps: ModalProps[S, I],
-      modalId: Media => I
+      modalId: Media => I,
+      tabProps: TabProps[S, Tab]
   )
 
   def Event[S, I: Eq] = {
 
-    final class Backend($ : BackendScope[Props[S, I], Tab]) {
-
-      def render(currentTab: Tab, props: Props[S, I]): VdomNode = {
-        props match {
-          case Props(
+    ScalaComponent
+      .builder[Props[S, I]]("Event")
+      .render_P {
+        case Props(
               P.Meetup.Event(
                 event,
                 desc,
@@ -74,7 +74,8 @@ object Event {
               ),
               speakers,
               modalProps,
-              modalId
+            modalId,
+            tabProps
               ) =>
             val existingTabs =
               List(
@@ -84,7 +85,7 @@ object Event {
                 material.headOption.map(const(Tab.material))
               ).mapFilter(identity)
 
-            val makePanel = tabs.makeTabPanel(Lens.id[Tab], currentTab) _
+            val makePanel = tabs.makeTabPanel[S, Tab](tabProps.currentTab) _
             val aboutPanel = makePanel(
               Tab.About,
               <.div(
@@ -191,23 +192,17 @@ object Event {
                   )
                 }.toTagMod
               ),
-              tabs.makeTabs($.modState, Lens.id[Tab], currentTab)(
+              tabs.makeTabs[S, Tab](tabProps)(
                 existingTabs,
-                currentTab
+                tabProps.currentTab
               ),
               aboutPanel,
               mediaPanel,
               setupPanel,
               materialPanel
             )
-        }
-      }
-    }
 
-    ScalaComponent
-      .builder[Props[S, I]]("Event")
-      .initialState[Tab](Tab.About)
-      .renderBackend[Backend]
+      }
       .build
   }
 }
