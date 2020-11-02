@@ -2,7 +2,6 @@ package lsug
 package ui
 
 import cats._
-import cats.data._
 import cats.implicits._
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
@@ -79,11 +78,6 @@ object common {
       }
       .build
 
-    case class TabsProps(
-        minWidth: Int,
-        tabs: NonEmptyList[Tab.type]
-    )
-
     val Tabs = {
 
       final class Backend($ : BackendScope[Int, Int]) {
@@ -157,7 +151,7 @@ object common {
             tab.show,
             tabProps.currentTab === tab,
             tabProps.modify(tabProps.lens.set(tab))))
-      }.toReactFragment)(tabs.indexOf(current)),
+      }.toReactFragment)(tabs.indexOf(current))
     }
 
     def makeTabPanel[S, T: Show: Eq](
