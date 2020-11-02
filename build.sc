@@ -1,4 +1,5 @@
 import $file.webpack
+import $file.reboot
 
 import mill._
 import scalalib._
@@ -248,7 +249,6 @@ object ci extends WebModule {
         )
         .render(2)
     )
-    // This is ludicrous, but tht's how the cdk works...
     yarn().%("cdk", "synth")(wd = T.ctx.dest)
     PathRef(out)
   }
@@ -270,4 +270,11 @@ object ci extends WebModule {
     yarn().%("cdk", "deploy", "--require-approval", "never")(wd = wd.path)
   }
 
+  def instanceId = T {
+    $file.reboot.instanceId
+  }
+
+  def reboot() = T.command {
+    $file.reboot.reboot(instanceId())
+  }
 }
