@@ -19,6 +19,7 @@ object Home {
   import event.{Summary => ESummary}
   import meetup.{Summary => MSummary}
   import common.tabs
+  import common.tabs.TabProps
   import common.modal.control.{ModalProps => CModalProps}
 
   case class Props(
@@ -88,7 +89,7 @@ object Home {
       def render(state: State, props: Props): VdomNode = {
         val State(tab, modal, upcoming, past, speakers, venues) = state
 
-        val makePanel = tabs.makeTabPanel(State._tab, state) _
+        val makePanel = tabs.makeTabPanel(state.tab) _
         val upcomingPanel = makePanel(
           Tab.Upcoming,
           <.ul(
@@ -153,7 +154,10 @@ object Home {
             ^.cls := "screenreader-only",
             "Events by the London Scala User Group"
           ),
-          tabs.makeTabs($.modState, State._tab, state)(
+          tabs.makeTabs(TabProps(
+            modify = $.modState,
+            lens = State._tab,
+            currentTab = state.tab))(
             List(Tab.Upcoming, Tab.Past),
             tab
           ),

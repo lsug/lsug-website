@@ -15,13 +15,15 @@ import monocle.function.At.{at => _at}
 object EventPage {
 
   import common.modal.control.ModalProps
+  import common.tabs.TabProps
   import common.Speakers
 
   case class State(
       event: Option[P.Meetup.EventWithSetting],
       meetup: Option[P.Meetup.MeetupDotCom.Event],
       speakers: Speakers,
-      modal: Option[Event.Media]
+      modal: Option[Event.Media],
+      tab: Event.Tab
   )
 
   object State {
@@ -30,6 +32,7 @@ object EventPage {
     val _speakers = GenLens[State](_.speakers)
     def _speaker(s: P.Speaker.Id) = _speakers ^|-> _at(s)
     val _modal = GenLens[State](_.modal)
+    val _tab = GenLens[State](_.tab)
   }
 
   final class Backend(
@@ -57,11 +60,16 @@ object EventPage {
                         .filterKeys(event.speakers.contains(_))
                         .toMap,
                       modalProps = ModalProps(
-                        currentModal = None,
+                        currentModal = s.modal,
                         lens = State._modal,
                         modify = $.modState
                       ),
-                      modalId = identity
+                      modalId = identity,
+                      tabProps = TabProps(
+                        currentTab = s.tab,
+                        lens = State._tab,
+                        modify = $.modState
+                      )
                     )
                   )
               )
@@ -109,7 +117,7 @@ object EventPage {
     .builder[(RouterCtl[Page.Home.type], P.Meetup.Id, P.Meetup.Event.Id)](
       "Event"
     )
-    .initialState[State](State(none, none, Map(), none))
+    .initialState[State](State(none, none, Map(), none, Event.Tab.about))
     .renderBackend[Backend]
     .componentDidMount(_.backend.load)
     .build

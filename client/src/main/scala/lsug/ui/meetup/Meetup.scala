@@ -20,6 +20,7 @@ object Meetup {
   import event.{Event => UIEvent}
   import common.{Speakers, MaterialIcon}
   import common.modal.control.ModalProps
+  import common.tabs.TabProps
 
   type PMeetup = P.Meetup
 
@@ -28,7 +29,8 @@ object Meetup {
       meetupDotCom: Option[P.Meetup.MeetupDotCom.Event],
       showSchedule: Boolean,
       speakers: Speakers,
-      modal: Option[ModalId]
+      modal: Option[ModalId],
+      tab: UIEvent.Tab
   )
 
   object State {
@@ -38,6 +40,7 @@ object Meetup {
     val _modal = GenLens[State](_.modal)
     val _meetupDotCom = GenLens[State](_.meetupDotCom)
     val _meetup = GenLens[State](_.meetup)
+    val _tab = GenLens[State](_.tab)
   }
 
   import State._
@@ -81,8 +84,13 @@ object Meetup {
                               .toMap,
                             modalId = ModalId(new P.Meetup.Event.Id(i), _),
                             modalProps = ModalProps(
-                              currentModal = None,
+                              currentModal = s.modal,
                               lens = State._modal,
+                              modify = $.modState
+                            ),
+                            tabProps = TabProps(
+                              currentTab = s.tab,
+                              lens = State._tab,
                               modify = $.modState
                             )
                           )
@@ -145,7 +153,7 @@ object Meetup {
 
     ScalaComponent
       .builder[(RouterCtl[Page.Home.type], P.Meetup.Id)]("Meetup")
-      .initialState[State](State(none, none, false, Map(), none))
+      .initialState[State](State(none, none, false, Map(), none, UIEvent.Tab.about))
       .renderBackend[Backend]
       .componentDidMount(_.backend.load)
       .build
