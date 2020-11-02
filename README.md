@@ -1,5 +1,7 @@
 # LSUG website
 
+[![Join the chat at https://gitter.im/lsug/lsug-website](https://badges.gitter.im/lsug/lsug-website.svg)](https://gitter.im/lsug/lsug-website?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## Overview
 
 This is the source code for the [London Scala User Group](https://www.lsug.org) website which
