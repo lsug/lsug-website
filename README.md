@@ -9,7 +9,7 @@ Both the HTTP server and website are written using the [Scala Programming Langua
 
 ## The London Scala User Group
 
-The London Scala User Group is a not-for-profit [community interest company](https://www.gov.uk/government/organisations/office-of-the-regulator-of-community-interest-companies) that organizes Scala related events within the UK. You can read more about our initiatives on [our website](https://www.lsug.co.uk/about).
+The London Scala User Group is a not-for-profit community interest company that organizes Scala related events within the UK. You can read more about our initiatives on [our website](https://www.lsug.co.uk/about).
 
 ## Contributing
 
