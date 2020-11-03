@@ -138,13 +138,11 @@ Navigate to https://localhost:8443/ in any browser. You should see a security wa
 
 ![A browser warning with the text "Warning: Potential Security Risk Ahead" and the buttons "Go Back" and "Advanced…"](contributing/ssl-security-risk.png)
 
-We use a fake, hence insecure, certificate for local development. You can safely bypass the warning.
-
-This is done in different ways depending on your browser.
+We use a fake, hence insecure, certificate for local development. You can safely bypass the warning. This is done in different ways depending on your browser.
  - In Firefox, click `Advanced…`, then `Accept the risk and continue`.
  - Let us know if you have a different browser. We’ll update this list with better instructions.
 
-You should see the website home page:
+Finally, you should see the website home page:
 
 ![Screenshot of the LSUG website homepage](contributing/homepage-screenshot.png)
 
