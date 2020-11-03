@@ -1,5 +1,7 @@
 # The London Scala User Group website
 
+[![Join the chat at https://gitter.im/lsug/lsug-website](https://badges.gitter.im/lsug/lsug-website.svg)](https://gitter.im/lsug/lsug-website?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This is the source code for the [London Scala User Group](https://www.lsug.co.uk) website.
 
 Both the HTTP server and website are written using the [Scala Programming Language](https://www.scala-lang.org/) and are licensed under the copyleft license [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html).
