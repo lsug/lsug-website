@@ -25,6 +25,7 @@ You don’t have to contribute to the Scala community through code — we’re a
 	These terms are explained in the [first-contributions project](https://github.com/firstcontributions/first-contributions). If you’re still not quite sure what they mean, head over to [Gitter](https://gitter.im/lsug/lsug-website).
  5. [Setup the project](#Setup).
  6. [Explore the codebase](#The-Codebase).
+ 6. [Learn how to work on it](#Local-Development).
  7. Make your code change.
 
 	Comment on the issue to let us know you’re working on it, then head over to [Gitter](https://gitter.im/lsug/lsug-website) to chat about the details.
@@ -135,7 +136,7 @@ The MacOS firewall needs your approval before letting Java run applications on a
 
 Navigate to https://localhost:8443/ in any browser. You should see a security warning:
 
-![A browser warning with the text "Warning: Potential Security Risk Ahead" and the buttons "Go Back" and "Advanced…"](contributing/ssl-security-risk.png)
+![A browser warning with the text "Warning: Potential Security Risk Ahead" and the buttons "Go Back" and "Advanced…"](contributing/ssl-security-risk.png | width=500)
 
 We use a fake, hence insecure, certificate for local development. You can safely bypass the warning.
 
