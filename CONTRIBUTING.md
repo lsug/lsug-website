@@ -10,7 +10,7 @@ If you’re unfamiliar to open source coding, this codebase is a great place to 
 
 You don’t have to contribute to the Scala community through code — we’re also looking for volunteers to help organize events. Reach out [here](https://forms.gle/J1pJQCD7AeVzYZhJ8) if you’d like to get involved.
 
-# How to contribute
+# How to contribute to this project
  1. Introduce yourself in our [Gitter chat room](https://gitter.im/lsug/lsug-website).
 
 	We’ll help you with any issues you have.
