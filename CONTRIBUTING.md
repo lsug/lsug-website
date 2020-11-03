@@ -4,7 +4,7 @@ What are your favourite Scala libraries?
 
 Perhaps you like [cats](https://github.com/typelevel/cats) for functional programming, or build actor systems with [Akka](https://github.com/akka/akka), or even dabble in machine learning with [Spark](https://github.com/apache/spark). If nothing else, you must be keen on [Scala](https://github.com/scala/scala) itself. All of these libraries, along with almost all of the Scala ecosystem, are *open source*. Their code is publicly available to view, download and improve. Anyone can contribute changes to their codebases. Including you.
 
-Open source codebases empower you to code the improvements you want to see. You can shape the libraries you use, and in turn shape the wider Scala ecosystem. Your contributions are valuable. Many smaller Scala projects stay alive through the work of new contributors. By making a useful change, however small, you play a cruicial part in the Scala community.
+Open source codebases empower you to code the improvements you want to see. You can shape the libraries you use, and in turn shape the wider Scala ecosystem. Your contributions are valuable. Many smaller Scala projects stay alive through the work of new contributors. By making a useful change, however small, you play a crucial part in the Scala community.
 
 If you’re unfamiliar to open source coding, this codebase is a great place to start. There are a wealth of small improvements to make, and we encourage you to suggest your own. The [LSUG maintainers](#maintainers) will happily walk you through the process of making code changes.
 
@@ -154,13 +154,13 @@ The main purpose of the LSUG website is to present information on LSUG events.
 
 The website is made of two parts - the client and the server.
 
-The **client** is written in [ScalaJS](https://github.com/scala-js/scala-js) - Scala that compiles to javascript - with the [ScalaJS React](https://github.com/japgolly/scalajs-react) web framework. It is responsible for the appearance and behaviour of the website.
+The **client** is written in [ScalaJS](https://github.com/scala-js/scala-js) - Scala that compiles to JavaScript - with the [ScalaJS React](https://github.com/japgolly/scalajs-react) web framework. It is responsible for the appearance and behaviour of the website.
 
 The **server** is written in Scala using [http4s](https://github.com/http4s/http4s). It is responsible for serving the website content. It decodes event details from files and delivers them to the client.
 
 You can read about client-server architectures in depth on the [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Learn/Server-side/First_steps).
 
-The entire website is written in [functional scala](https://en.wikipedia.org/wiki/Functional_programming). The code is unit tested in some areas, but we encourage you to write better tests.
+The entire website is written in [functional Scala](https://en.wikipedia.org/wiki/Functional_programming). The code is unit tested in some areas, but we encourage you to write better tests.
 
 ## Code structure
 
@@ -197,7 +197,7 @@ The appearance is styled with [SASS](https://sass-lang.com/), found in the [styl
 
 The server is a webservice responsible for providing the client with event-related information. You can view its API at https://www.lsug.co.uk/api/.
 
-Event information is stored in pm files in the [resources directory](server/src/main/resources/meetups). These files are written in a custom format inspired by the [Pollen book publishing format](https://docs.racket-lang.org/pollen/). The server parses and decodes the event files into protocol datatypes, then serves these to the client. It also queries [meetup.com](https://www.meetup.com/) to find the number of attendees for each event.
+Event information is stored in `.pm` files in the [resources directory](server/src/main/resources/meetups). These files are written in a custom format inspired by the [Pollen book publishing format](https://docs.racket-lang.org/pollen/). The server parses and decodes the event files into protocol data types, then serves these to the client. It also queries [meetup.com](https://www.meetup.com/) to find the number of attendees for each event.
 
 # Local Development
 
@@ -221,7 +221,7 @@ Then navigate to https://localhost:8443/ to see it in action.
 The client can be reloaded on the fly. You can keep the website running while you make code changes.
 
  1. Start the website.
- 2. Bundle the javascript, styles and assets on the fly.
+ 2. Bundle the JavaScript, styles and assets on the fly.
 	```sh
 	mill -w web.bundle
 	```

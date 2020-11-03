@@ -20,7 +20,7 @@ We actively encourage new contributors. Please take a look at our [Contributor G
 The project is maintained by the organizers of the London Scala User Group and we are committed to providing a friendly, safe and welcoming environment to everyone. We ask that the community adheres to the [Scala Code of Conduct](https://www.scala-lang.org/conduct/).
 
 
-## Acknowledgements
+## Acknowledgments
 
 This website builds on a wealth of open source libraries; [ScalaJS](https://github.com/scala-js/scala-js), [ScalaJS React](https://github.com/japgolly/scalajs-react), [http4s](https://github.com/http4s/http4s) and [cats](https://github.com/typelevel/cats) to name a few. If you like the website, please give credit to these libraries too.
 
