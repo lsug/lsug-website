@@ -2,17 +2,11 @@
 
 What are your favourite Scala libraries?
 
-Perhaps you like [cats](https://github.com/typelevel/cats) for functional programming, or build actor systems with [Akka](https://github.com/akka/akka), or even dabble in machine learning with [Spark](https://github.com/apache/spark). If nothing else, you must be keen on [Scala](https://github.com/scala/scala) itself.
+Perhaps you like [cats](https://github.com/typelevel/cats) for functional programming, or build actor systems with [Akka](https://github.com/akka/akka), or even dabble in machine learning with [Spark](https://github.com/apache/spark). If nothing else, you must be keen on [Scala](https://github.com/scala/scala) itself. All of these libraries, along with almost all of the Scala ecosystem, are *open source*. Their code is publicly available to view, download and improve. Anyone can contribute changes to their codebases. Including you.
 
-All of these libraries, along with almost all of the Scala ecosystem, are *open source*. Their code is publicly available to view, download and improve. Anyone can contribute changes to their codebases. Including you.
+Open source codebases empower you to code the improvements you want to see. You can shape the libraries you use, and in turn shape the wider Scala ecosystem. Your contributions are valuable. Many smaller Scala projects stay alive through the work of new contributors. By making a useful change, however small, you play a cruicial part in the Scala community.
 
-Open source codebases empower you to code the improvements you want to see. You can shape the libraries you use, and in turn shape the wider Scala ecosystem.
-
-Your contributions are valuable. Many smaller Scala projects stay alive through new contributors. By making a change, however small, you play a cruicial part in the Scala community.
-
-If you’re unfamiliar to open source coding, this codebase is a great place to start. There are a wealth of small improvements to make, and we encourage you to suggest your own.
-
-The [LSUG maintainers](#maintainers) will happily walk you through the process of making code changes.
+If you’re unfamiliar to open source coding, this codebase is a great place to start. There are a wealth of small improvements to make, and we encourage you to suggest your own. The [LSUG maintainers](#maintainers) will happily walk you through the process of making code changes.
 
 You don’t have to contribute to the Scala community through code — we’re also looking for volunteers to help organize events. Reach out [here](https://forms.gle/J1pJQCD7AeVzYZhJ8) if you’d like to get involved.
 
@@ -40,7 +34,7 @@ You don’t have to contribute to the Scala community through code — we’re a
  9. Get it deployed.
 
 	The [LSUG maintainers](#maintainers) will take a look at your code and suggest changes. Once we’re happy, we’ll merge and deploy it ourselves.
-	You can then add your name to our [awesome contributors list](CONTRIBUTORS.md)!
+	You can then add your name to our [contributors list](CONTRIBUTORS.md).
 
 # Setup
 
@@ -48,7 +42,7 @@ You don’t have to contribute to the Scala community through code — we’re a
 
 This project requires quite a few tools to get up and running. Don’t worry if you aren’t familiar with them yet. If you have any trouble, head over to [Gitter](https://gitter.im/lsug/lsug-website) and let us know.
 
-By this point, you should be familiar with GitHub, git and a terminal. If not, get set up with the [first-contributions project](https://github.com/firstcontributions/first-contributions).
+By this point, you should have already used GitHub, git and a terminal. If not, get set up with the [first-contributions project](https://github.com/firstcontributions/first-contributions).
 
 You’ll now need to install:
  - [mill version 0.8.0](http://www.lihaoyi.com/mill/)
@@ -131,7 +125,7 @@ You should see the output:
 ```
 
 
-This starts the server on ports 8080 and 8443. The server will run in your terminal, so you won’t be able to use this terminal for anything else.
+This starts the server on ports 8080 and 8443. The server will run in your terminal, so you won’t be able to use it for anything else.
 
 If you use MacOS, you may see the following message:
 
