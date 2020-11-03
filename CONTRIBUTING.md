@@ -136,7 +136,7 @@ The MacOS firewall needs your approval before letting Java run applications on a
 
 Navigate to https://localhost:8443/ in any browser. You should see a security warning:
 
-![A browser warning with the text "Warning: Potential Security Risk Ahead" and the buttons "Go Back" and "Advanced…"](contributing/ssl-security-risk.png | width=500)
+![A browser warning with the text "Warning: Potential Security Risk Ahead" and the buttons "Go Back" and "Advanced…"](contributing/ssl-security-risk.png)
 
 We use a fake, hence insecure, certificate for local development. You can safely bypass the warning.
 
