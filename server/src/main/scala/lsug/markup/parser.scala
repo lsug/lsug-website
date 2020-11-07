@@ -21,11 +21,12 @@ object Parser {
     def apply(text: String): Result[A] = Result.Success(value, text)
   }
 
-  private final case class Symbol(pattern: Regex) extends Parser[Char] {
-    def apply(text: String): Result[Char] =
-      text.headOption
-        .filter(c => pattern.matches(c.toString))
-        .fold[Result[Char]](Result.Fail)(Result.Success(_, text.tail))
+  private final case class Pattern(regex: Regex) extends Parser[String] {
+    def apply(text: String): Result[String] =
+      regex.findPrefixOf(text)
+        .fold[Result[String]](Result.Fail
+        )(prefix => Result.Success(prefix, text.stripPrefix(prefix)))
+
   }
 
   private final class Map[A, B](f: A => B, pa: => Parser[A]) extends Parser[B] {
@@ -48,18 +49,18 @@ object Parser {
 
   def fail: Parser[Nothing] = Fail
   def pure[A](value: => A): Parser[A] = Pure(value)
-  def symbol(pattern: Regex): Parser[Char] = Symbol(pattern)
+  def pattern(regex: Regex): Parser[String] = Pattern(regex)
   def either[A](left: => Parser[A], right: => Parser[A]): Parser[A] = new Either(left, right)
   def product[A, B](pa: => Parser[A], pb: => Parser[B]): Parser[(A, B)] = new Product(pa, pb)
   def map[A, B](pa: => Parser[A])(f: A => B): Parser[B] = new Map(f, pa)
 
   def zeroOrMore[A](pa: => Parser[A]): Parser[List[A]] =
     either(
-      map(product(pa, zeroOrMore(pa))){ case (head, tail) => head :: tail },
+      product(pa, zeroOrMore(pa)).map{ case (head, tail) => head :: tail },
       pure(List.empty[A]))
 
   def oneOrMore[A](pa: => Parser[A]): Parser[NonEmptyList[A]] =
-    map(product(pa, zeroOrMore(pa))) { case (head, tail) =>
+    product(pa, zeroOrMore(pa)).map { case (head, tail) =>
       NonEmptyList(head, tail)
     }
 
