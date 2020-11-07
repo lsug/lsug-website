@@ -70,7 +70,7 @@ object Parser {
   implicit val parserAlternative: Alternative[Parser] = new Alternative[Parser] {
    def pure[A](x: A): Parser[A] = new Pure(x)
     def ap[A, B](pf: Parser[A => B])(pa: Parser[A]): Parser[B] =
-      product(pf, pa).map {
+      Parser.map(Parser.product(pf, pa)) {
         case (f, a) => f(a)
       }
 
