@@ -1,6 +1,5 @@
 package lsug
 package markup
-package parser
 
 import scala.util.matching.Regex
 
@@ -43,7 +42,6 @@ class ParserSpec extends ParserChecks {
 trait ParserChecks extends FunSuite {
 
   import Parser._
-  import combinators._
 
   def check[A](
     name: String,

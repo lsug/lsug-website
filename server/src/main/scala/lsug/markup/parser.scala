@@ -1,6 +1,5 @@
 package lsug
 package markup
-package parser
 
 import scala.util.matching.Regex
 
@@ -54,6 +53,16 @@ object Parser {
   def product[A, B](pa: => Parser[A], pb: => Parser[B]): Parser[(A, B)] = new Product(pa, pb)
   def map[A, B](pa: => Parser[A])(f: A => B): Parser[B] = new Map(f, pa)
 
+  def zeroOrMore[A](pa: => Parser[A]): Parser[List[A]] =
+    either(
+      map(product(pa, zeroOrMore(pa))){ case (head, tail) => head :: tail },
+      pure(List.empty[A]))
+
+  def oneOrMore[A](pa: => Parser[A]): Parser[NonEmptyList[A]] =
+    map(product(pa, zeroOrMore(pa))) { case (head, tail) =>
+      NonEmptyList(head, tail)
+    }
+
   implicit val parserFunctor: Functor[Parser] = new Functor[Parser] {
     def map[A, B](pa: Parser[A])(f: A => B): Parser[B] = Parser.map(pa)(f)
   }
@@ -71,7 +80,12 @@ object Parser {
   }
 }
 
-sealed trait Result[+A]
+sealed trait Result[+A] {
+  def toEither: Either[Unit, A] = this match {
+    case Result.Fail => Left(())
+    case Result.Success(value, _) => Right(value)
+  }
+}
 
 object Result {
   case object Fail extends Result[Nothing]
@@ -83,17 +97,4 @@ object Result {
       case Success(value, rest) => Success(f(value), rest)
     }
   }
-}
-
-object combinators {
-  import Parser._
-  def zeroOrMore[A](pa: => Parser[A]): Parser[List[A]] =
-    either(
-      map(product(pa, zeroOrMore(pa))){ case (head, tail) => head :: tail },
-      pure(List.empty[A]))
-
-  def oneOrMore[A](pa: => Parser[A]): Parser[NonEmptyList[A]] =
-    map(product(pa, zeroOrMore(pa))) { case (head, tail) =>
-      NonEmptyList(head, tail)
-    }
 }

@@ -4,12 +4,12 @@ package markup
 import munit.{Tag => _, _}
 import cats.data._
 
-class ParserSpec extends FunSuite {
+class PollenParserSpec extends FunSuite {
 
   import Pollen._
 
   def assertParseResult[A](s: String, a: NonEmptyList[Tag]): Unit = {
-    val reply = PollenParsers.parse(s)
+    val reply = PollenParser.tags(s).toEither
     assert(clue(reply) == Right(a))
   }
 
