@@ -11,16 +11,17 @@ object Read {
   sealed trait ReadError
 
   object ReadError {
-    case class Parse(error: ParseError) extends ReadError
+    case object Parse extends ReadError
     case class Decode(error: Decoder.Failure) extends ReadError
   }
 
   private def read[F[_], A](
       decoder: Decoder[NonEmptyList[Pollen.Tag], A]
   )(s: String): Either[ReadError, A] = {
-    PollenParsers
-      .parse(s)
-      .leftMap(ReadError.Parse(_))
+    PollenParser
+      .tags(s)
+      .toEither
+      .leftMap(_ => ReadError.Parse)
       .flatMap { tags => decoder(tags).leftMap(ReadError.Decode(_)) }
   }
 
