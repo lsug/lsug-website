@@ -235,14 +235,10 @@ private object PollenDecoders {
     }
   }
 
+  // TODO: Code is unused
   def markup: Decoder[Tag, NonEmptyList[Markup.Paragraph]] = {
     val text: Decoder[Pollen, Markup.Text] = pollenContents
       .map(c => Markup.Text.Plain(c.value): Markup.Text)
-      .or(
-        (pollenTag >>> name("code") >>> contents)
-          .map(Markup.Text.Styled.Code(_))
-      )
-      .map(_.merge)
       .or(
         (pollenTag >>> name("em") >>> contents)
           .map(Markup.Text.Styled.Strong(_))

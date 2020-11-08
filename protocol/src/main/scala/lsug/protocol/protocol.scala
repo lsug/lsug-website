@@ -93,7 +93,6 @@ object Markup {
 
     object Styled {
 
-      case class Code(text: String) extends Styled
       case class Strong(text: String) extends Styled
 
       implicit val codec: Codec[Styled] = deriveCodec[Styled]
@@ -186,6 +185,8 @@ object Speaker {
     }
 
     implicit val codec: Codec[SocialMedia] = deriveCodec[SocialMedia]
+
+    val empty: SocialMedia = SocialMedia(None, None, None)
   }
 
   case class Profile(
