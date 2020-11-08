@@ -5,6 +5,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import lsug.{protocol => P}
 import java.time.LocalDateTime
+import cats.data._
 import cats.implicits._
 
 object Summary {
@@ -29,7 +30,9 @@ object Summary {
               ^.cls := "small-heading",
               event.title
             ),
-            SpeakerProfiles((event.speakers, speakers)),
+            NonEmptyList.fromList(event.speakers).map { ss =>
+              SpeakerProfiles((ss.toList, speakers))
+            }.whenDefined,
             EventDescription(event.description)
           ),
           <.ul(

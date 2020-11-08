@@ -5,6 +5,7 @@ import lsug.{protocol => P}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import cats._
+import cats.data._
 import cats.implicits._
 import Function.const
 
@@ -184,14 +185,16 @@ object Event {
               <.header(
                 <.h2(^.cls := "event-header small-heading", event)
               ),
+
+              NonEmptyList.fromList(speakerIds).map { speakerIds =>
               <.div(
                 ^.cls := "speakers",
                 speakerIds.map { id =>
                   Speaker.Speaker(
                     speakers.get(id)
                   )
-                }.toTagMod
-              ),
+                }.toList.toTagMod
+              )}.whenDefined,
               tabs.makeTabs[S, Tab](tabProps)(
                 existingTabs,
                 tabProps.currentTab

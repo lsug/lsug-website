@@ -315,7 +315,7 @@ object ContentDecoders {
 
     val event: Decoder[Tag, Event] = childTagList >>> (
       tag("name") >>> contents,
-      tag("speakers") >>> contents >>> nel,
+      tag("speakers").optional.composeF(contents),
       tag("material").optional.composeF(childTagList >>> material.nel),
       tag("tags") >>> contents,
       tag("time") >>> contents >>> timeRange,
@@ -341,7 +341,10 @@ object ContentDecoders {
           ) =>
         Event(
           name = name,
-          speakers = speakers.map(new Speaker.Id(_)),
+          speakers =
+            speakers.map(_.split(",").toList)
+              .getOrElse(List.empty[String])
+          .map(new Speaker.Id(_)),
           material = material.fold(List.empty[PMeetup.Material])(_.toList),
           tags = tagList.split(",").toList,
           start = start,
