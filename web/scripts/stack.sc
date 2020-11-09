@@ -79,7 +79,8 @@ def main(
                 |Content-Transfer-Encoding: 7bit
                 |Content-Disposition: attachment; filename="userdata.txt"
                 |
-                |#!/bin/bash
+                |#!/bin/bash -xe
+              | exec > >(tee /var/log/user-data.log) 2>&1
                 |code_dir=$(mktemp -d)
                 |""".stripMargin +
               s"""aws s3 cp 's3://${asset.getS3BucketName}/${asset.getS3ObjectKey}' """ + """ "$code_dir/assets.zip" """ + """
