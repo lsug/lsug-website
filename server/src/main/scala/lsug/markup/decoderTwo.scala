@@ -92,6 +92,13 @@ private object Decoder {
 private object Decoders {
   import Decoder._
 
+  def strong: Decoder[Markup.Text.Styled.Strong] =
+    text.map(Markup.Text.Styled.Strong(_))
+
+  def link: Decoder[Markup.Text.Link] =
+    (child("text").andThen(contents), child("url").andThen(contents))
+  .mapN(Markup.Text.Link.apply)
+
   def markup: Decoder[List[Markup]] =
     children("p").map(_.map(_.children).map {
     /*
