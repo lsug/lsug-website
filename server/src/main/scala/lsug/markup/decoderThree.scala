@@ -56,18 +56,18 @@ private object Evaluator {
       .map(PMarkup.Paragraph(_))
   }
 
-  def from[A <: PMarkup](name: String, decoder: Decoder[A]): Function = { pairs =>
+  def from[A <: protocol.Markup](name: String, decoder: Decoder[A]): (String, Function) = (name, { pairs =>
     decoder(Pollen.Tag(name, pairs.map(_.input))).leftMap(Error.DecoderFailed(_))
-  }
+  })
 
   // createf = create a tag from children
-  def to[A](ctx: Context, createf: List[PMarkup] => Either[DecoderError, A]): Decoder[PMarkup] = Decoder[A] { tag =>
-    tag.children.traverse(evaluate(ctx, _))
-      .map(_.output match {
+  def to[A](ctx: Context, createf: List[PMarkup] => Either[DecoderError, A]): Decoder[A] = Decoder[A] { tag =>
+    tag.children.traverse(eval(ctx))
+      .flatMap(_.traverse(_.output match {
         case Markup(element) => Right(element)
-        case Text(text) => Right(P.Markup.Text.Plain(text))
+        case Text(text) => Right(PMarkup.Text.Plain(text))
         case NotEvaluated(name, _) => Left(Error.UnevaluatedChild(name))
-      }).leftMap(errorToDecoderError)
+      })).leftMap(DecoderError.EvaluatorFailed(_))
       .flatMap(createf)
   }
 

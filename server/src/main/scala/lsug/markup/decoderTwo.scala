@@ -15,11 +15,12 @@ import Pollen._
 
 sealed trait Error
 
-object Error {
-  case class TagNotFound(name: String) extends Error
-  case class UnexpectedTag(name: String) extends Error
-  case class MultipleTagsFound(name: String, number: Int) extends Error
-  case class InvalidContents(name: String, contents: String, message: String) extends Error
+private object Error {
+  final case class TagNotFound(name: String) extends Error
+  final case class UnexpectedTag(name: String) extends Error
+  final case class MultipleTagsFound(name: String, number: Int) extends Error
+  final case class InvalidContents(name: String, contents: String, message: String) extends Error
+  final case class EvaluatorFailed(error: Evaluator.Error) extends Error
 }
 
 private class Decoder[A](private val run: Kleisli[Either[Error, ?], Tag, A]) {
@@ -96,19 +97,24 @@ private object Decoders {
     text.map(Markup.Text.Styled.Strong(_))
 
   def link: Decoder[Markup.Text.Link] =
-    (child("text").andThen(text), child("url").andThen(text))
-  .mapN(Markup.Text.Link.apply)
+    (child("text").andThen(text), child("url").andThen(text)).mapN(Markup.Text.Link.apply)
+
+  def paragraph: Decoder[Markup.Paragraph] = {
+    val context = Map(Evaluator.from("em", strong), Evaluator.from("link", link))
+    Evaluator.to[Markup.Paragraph](context,
+      children => ( children.traverse {
+        case t: Markup.Text => Right(t)
+        case _ => Left(Error.TagNotFound("foo"))
+      } ).flatMap(cs => NonEmptyList.fromList(cs).toRight(Error.TagNotFound("foo")))
+        .map(Markup.Paragraph(_))
+    )
+    }
+
 
   def markup: Decoder[List[Markup]] =
-    children("p").map(_.map(_.children).map {
-    /*
-     Handle each child by recursing over it and looking for a corresponding decoder.
-// The decoder should accept as many elements as given
-     To register a new decoder, either we create a new entry or we use an existing one
-   Each decoder is a function from a name and list of markup to a markup
-*/
-    ???
-  })
+    children("p")
+      .andThenTraverse(paragraph)
+  .map(xs => xs.map(identity) )
 
   def socialMedia: Decoder[Speaker.SocialMedia] = {
     val blog = child("blog")
@@ -286,31 +292,4 @@ private object Decoders {
       .toRight(Error.InvalidContents(
         name, text, "Expected a time range in HH:MM-HH:MM form"))
   }
-
 }
-
-  // def tagsNamed(name: String): Decoder[NonEmptyList[Tag], NonEmptyList[Tag]] =
-  //   apply(tags => NonEmptyList.of(tags.filter(_.name === name))
-  //     .toRight(Error.TagNotFound(name)))
-
-  // What composition?
-  // andThen to compose multiple Kleislis
-  // local to contramap
-  // flatMapF to 
-
-  // ReaderT
-  // With specific erro
-
-  // All children named a value
-  // The first child named a value
-  // Enforce that there is only one child with this name
-
-  // The contents of the tag
-  // Enforce that there is only one contents, no other tags
-  // def contents: Getter[Tag, Option[Contents]]
-
-  // def text: Getter[Contents, String]
-
-  // All children
-  // def children(name: String): Getter[Tag, List[Pollen]]
-
