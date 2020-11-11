@@ -96,7 +96,7 @@ private object Decoders {
     text.map(Markup.Text.Styled.Strong(_))
 
   def link: Decoder[Markup.Text.Link] =
-    (child("text").andThen(contents), child("url").andThen(contents))
+    (child("text").andThen(text), child("url").andThen(text))
   .mapN(Markup.Text.Link.apply)
 
   def markup: Decoder[List[Markup]] =

@@ -1,56 +1,75 @@
 package lsug
 package markup
-package context
+package decoder2
 
-// A context free decoder
+import cats.data._
+import cats.implicits._
 
-sealed trait Error
+import lsug.protocol.{Markup => PMarkup}
+import lsug.markup.decoder2.{Error => DecoderError}
 
-object Error {
-  // We don't need all of these
-  final case object EmptyTagFound extends Error
-  final case class NestedTagsFound(elements: List[Markup]) extends Error
+private object Evaluator {
 
-  final case class TagFailedToDecode(error: Decoder.Error) extends Error
+  sealed trait Error
+  object Error {
+    final case object EmptyMarkupElement extends Error
+    final case class DecoderFailed(error: DecoderError) extends Error
+    final case class UnevaluatedChild(name: String) extends Error
+    final case class UnrecognisedMarkup(markup: PMarkup) extends Error
 }
 
-sealed trait Foo
+  sealed trait Output
 
-object Foo {
-  final case class NotFound(name: String, contents: List[Foo]) extends Foo
-  final case class Markup(element: PMarkup) extends Foo
-  final case class Text(text: String) extends Foo
+  object Output {
+    final case class NotEvaluated(name: String, contents: List[Output]) extends Output
+    final case class Markup(element: PMarkup) extends Output
+    final case class Text(text: String) extends Output
+  }
 
-  final case class Pair(original: Pollen, next: Foo)
-}
+  final case class Pair(input: Pollen, output: Output)
 
-object ContextFree {
+  import Output._
   type TagName = String
-  type Decoder = List[Pair] => Either[Error, Markup]
-  type Context = Map[TagName, Decoder]
+  type Function = List[Pair] => Either[Error, PMarkup]
 
-  def decode(ctx: Context)(pollen: Pollen): Either[Error, Foo] = {
-    pollen match {
-      case Pollen.Contents(text) => Right(Foo.Text(text))
+  type Context = Map[TagName, Function]
+
+  def eval(ctx: Context)(pollen: Pollen): Either[Error, Pair] = {
+    (pollen match {
+      case Pollen.Contents(text) => Right(Output.Text(text))
       case Pollen.Tag(name, children) =>
-        children.traverse(decode(ctx))
-          .map { childFoos =>
+        children.traverse(eval(ctx))
+          .flatMap { childOutputs =>
             ctx.get(name)
-            .fold(Right(Foo.NotFound(name, childFoos)))(_.apply(childFoos))
+              .fold[Either[Error, Output]](Right(Output.NotEvaluated(name, childOutputs.map(_.output))))(_.apply(childOutputs).map(Output.Markup(_)))
           }
-    }
+    }).map(Pair(pollen, _))
   }
 
-  def from[A <: Markup](name: String, decoder: TagDecoder[A]): Decoder = { pairs =>
-    decoder(Pollen.Tag(name, pairs.map(_.original))).leftMap(Error.TagFailedToDecode(_))
+  def paragraph: Function = { pairs =>
+    pairs.map(_.output).traverse {
+      case NotEvaluated(name, _) => Left(Error.UnevaluatedChild(name))
+      case Markup(element : PMarkup.Text) => Right(element)
+      case Text(text) => Right(PMarkup.Text.Plain(text))
+      case Markup(element) => Left(Error.UnrecognisedMarkup(element))
+    }.flatMap(els => NonEmptyList.fromList(els).toRight(Error.EmptyMarkupElement))
+      .map(PMarkup.Paragraph(_))
   }
 
-  def paragraph: Decoder = { pairs =>
-    val contents = pairs.traverse {
-      case NotFound(name, contents) => error
-      case Markup(element : Markup.Text) => element
-      case Text(text) => Text.Plain(text)
-    }.flatMap(els => NonEmptyList.fromList(els).toRight(EmptyTag))
-      .map(Markup.Paragraph)
+  def from[A <: PMarkup](name: String, decoder: Decoder[A]): Function = { pairs =>
+    decoder(Pollen.Tag(name, pairs.map(_.input))).leftMap(Error.DecoderFailed(_))
   }
+
+  // createf = create a tag from children
+  def to[A](ctx: Context, createf: List[PMarkup] => Either[DecoderError, A]): Decoder[PMarkup] = Decoder[A] { tag =>
+    tag.children.traverse(evaluate(ctx, _))
+      .map(_.output match {
+        case Markup(element) => Right(element)
+        case Text(text) => Right(P.Markup.Text.Plain(text))
+        case NotEvaluated(name, _) => Left(Error.UnevaluatedChild(name))
+      }).leftMap(errorToDecoderError)
+      .flatMap(createf)
+  }
+
+  // TODO: Hook in decoder to evaluator
 }
