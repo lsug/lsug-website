@@ -5,7 +5,6 @@ import cats.implicits._
 
 import lsug.protocol.{Markup => PMarkup}
 
-
 sealed trait EvaluatorError
 object EvaluatorError {
   final case object EmptyMarkupElement extends EvaluatorError
@@ -21,7 +20,8 @@ private object Evaluator {
   sealed trait Output
 
   object Output {
-    final case class NotEvaluated(name: String, contents: List[Output]) extends Output
+    final case class NotEvaluated(name: String, contents: List[Output])
+        extends Output
     final case class Markup(element: PMarkup) extends Output
     final case class Text(text: String) extends Output
   }
@@ -38,9 +38,11 @@ private object Evaluator {
     (pollen match {
       case Pollen.Contents(text) => Right(Text(text))
       case Pollen.Tag(name, children) =>
-        children.traverse(eval(ctx))
+        children
+          .traverse(eval(ctx))
           .flatMap { pairs =>
-            ctx.get(name)
+            ctx
+              .get(name)
               .fold[Either[Error, Output]](
                 Right(NotEvaluated(name, pairs.map(_.output)))
               )(_.apply(pairs).map(Markup(_)))
@@ -48,17 +50,26 @@ private object Evaluator {
     }).map(Pair(pollen, _))
   }
 
-  def from[A <: protocol.Markup](name: String, decoder: Decoder[A]): (String, Function) = (name, { pairs =>
-    decoder(pairs.map(_.input)).leftMap(Error.DecoderFailed(_))
-  })
+  def from[A <: protocol.Markup](
+      name: String,
+      decoder: Decoder[A]
+  ): (String, Function) =
+    (name, { pairs =>
+      decoder(pairs.map(_.input)).leftMap(Error.DecoderFailed(_))
+    })
 
-  def to[A](ctx: Context, convert: List[PMarkup] => Either[DecoderError, A]): Decoder[A] = Decoder[A] { children =>
-    children.traverse(eval(ctx))
+  def to[A](
+      ctx: Context,
+      convert: List[PMarkup] => Either[DecoderError, A]
+  ): Decoder[A] = Decoder[A] { children =>
+    children
+      .traverse(eval(ctx))
       .flatMap(_.traverse(_.output match {
-        case Markup(element) => Right(element)
-        case Text(text) => Right(PMarkup.Text.Plain(text))
+        case Markup(element)       => Right(element)
+        case Text(text)            => Right(PMarkup.Text.Plain(text))
         case NotEvaluated(name, _) => Left(Error.UnevaluatedChild(name))
-      })).leftMap(DecoderError.EvaluatorFailed(_))
+      }))
+      .leftMap(DecoderError.EvaluatorFailed(_))
       .flatMap(convert)
   }
 }
