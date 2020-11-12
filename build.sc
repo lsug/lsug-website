@@ -24,7 +24,8 @@ val commonScalacOptions =
     "-language:existentials",
     "-Wunused",
     "-encoding",
-    "UTF-8"
+    "UTF-8",
+    "-Yrangepos"
   )
 
 trait ProtocolModule extends ScalaModule {
@@ -33,7 +34,7 @@ trait ProtocolModule extends ScalaModule {
   def scalacOptions = commonScalacOptions
 
   def ivyDeps =
-    Agg(ivy"org.typelevel::cats-core::2.1.0") ++ Agg(
+    Agg(ivy"org.typelevel::cats-core::2.2.0") ++ Agg(
       "circe-core",
       "circe-parser",
       "circe-generic"
@@ -103,7 +104,7 @@ object client extends ScalaJSModule {
   def scalaJSVersion = "0.6.29"
   def scalacPluginIvyDeps =
     super.scalacPluginIvyDeps() ++ Agg(
-      ivy"com.olegpy:better-monadic-for_2.13:0.3.1"
+      ivy"com.olegpy:::better-monadic-for:0.3.1"
     )
   def scalacOptions = commonScalacOptions
   def moduleDeps = Seq(protocolJs)

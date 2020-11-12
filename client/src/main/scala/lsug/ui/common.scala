@@ -38,8 +38,6 @@ object common {
       markup match {
         case P.Markup.Text.Plain(s)         => s
         case P.Markup.Text.Styled.Strong(s) => <.strong(s)
-        case P.Markup.Text.Styled.Code(code) =>
-          <.pre(<.code(code))
         case P.Markup.Text.Link(text, loc) =>
           if (options.link) {
             <.a(^.cls := "external", ^.href := loc, ^.target := "_blank", text)

@@ -2,7 +2,6 @@ package lsug
 package markup
 
 import munit.{Tag => _, _}
-import cats.data._
 
 class PollenParserSpec extends FunSuite {
 
@@ -18,37 +17,35 @@ class PollenParserSpec extends FunSuite {
     Tag("foo", List(Tag("qux", List(Contents("baz"))),
       Tag("bar", List(Contents("baz"))))))
   checkTags("multiple tags", "◊foo{}◊bar{}",
-    NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil)))
+    List(Tag("foo", Nil), Tag("bar", Nil)))
   checkTags("spaces between", "◊foo{}\n ◊bar{}",
-      NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil)))
+      List(Tag("foo", Nil), Tag("bar", Nil)))
 
   checkTags("spaces before", "\n ◊foo{}◊bar{}",
-      NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil)))
+      List(Tag("foo", Nil), Tag("bar", Nil)))
 
   checkTags("spaces after", "◊foo{}◊bar{}\n ",
-      NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil)))
+      List(Tag("foo", Nil), Tag("bar", Nil)))
 
   checkTags("spaces inside", "◊foo{\n}◊bar{}\n ",
-      NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil)))
+      List(Tag("foo", Nil), Tag("bar", Nil)))
 
   checkTags("spaces around", "\n ◊foo{}\n ◊bar{}\n ",
-      NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil)))
+      List(Tag("foo", Nil), Tag("bar", Nil)))
 
-  def checkTags(name: String, text: String, expected: NonEmptyList[Tag]): Unit = {
-    val result = PollenParser.tags(text).toEither
+  def checkTags(name: String, text: String, expected: List[Pollen]): Unit = {
     test(s"$name - success") {
+      val result = PollenParser.pollens(text).toEither
       assertEquals(result.isRight, true)
-    }
 
-    result.foreach { tags =>
-      test(s"$name - correct value") {
+      result.foreach { tags =>
         assert(clue(tags) == expected)
       }
     }
   }
 
   def check(name: String, text: String, expected: Tag): Unit = {
-    checkTags(name, text, NonEmptyList.of(expected))
+    checkTags(name, text, List(expected))
   }
 
 }
