@@ -1,9 +1,7 @@
 package lsug
 package markup
 
-import munit.{Tag => _, _}
-
-class PollenParserSpec extends FunSuite {
+class PollenParserSpec extends LsugSuite {
 
   import Pollen._
 
@@ -63,16 +61,14 @@ class PollenParserSpec extends FunSuite {
   )
 
   def checkTags(name: String, text: String, expected: List[Pollen]): Unit = {
-    test(s"$name - success") {
+    (builder {
       val result = PollenParser.pollens(text).toEither
-      assertEquals(result.isRight, true)
-
+      assert(result.isRight, "parsing failed")
       result.foreach { tags => assert(clue(tags) == expected) }
-    }
+    }).label("success").build(name)
   }
 
   def check(name: String, text: String, expected: Tag): Unit = {
     checkTags(name, text, List(expected))
   }
-
 }
