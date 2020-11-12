@@ -30,53 +30,57 @@ object HttpServer extends IOApp {
     val sslCertificateFile = Paths.get(args(4)).toFile
     val sslPassword = args(5)
 
-    SSL.loadContextFromClasspath[IO](sslCertificateFile, sslPassword) >>= { ssl =>
-    Blocker[IO].use { blocker =>
-      BlazeClientBuilder[IO](ec)
-        .withUserAgent(`User-Agent`(AgentProduct("curl", "7.6.91".some)))
-        .withDefaultSslContext
-        .resource
-        .use { client =>
-          Server[IO](
-            resourceDir,
-            Meetup(new P.Meetup.MeetupDotCom.Group.Id("london-scala"), client)
-          ).use { server =>
-            val sslStream = BlazeServerBuilder[IO]
-              .bindHttp(httpsPort, "0.0.0.0")
-              .withSslContext(ssl)
-              .withHttpApp(
-                Router(
-                  "/api" -> GZip(Routes[IO](server)),
-                  "" ->
-                    Routes.orIndex(
-                      assetDir,
-                      GZip(
-                        fileService[IO](
-                          FileService.Config(
-                            assetDir.toString,
-                            blocker
-                          )
+    SSL.loadContextFromClasspath[IO](sslCertificateFile, sslPassword) >>= {
+      ssl =>
+        Blocker[IO].use { blocker =>
+          BlazeClientBuilder[IO](ec)
+            .withUserAgent(`User-Agent`(AgentProduct("curl", "7.6.91".some)))
+            .withDefaultSslContext
+            .resource
+            .use { client =>
+              Server[IO](
+                resourceDir,
+                Meetup(
+                  new P.Meetup.MeetupDotCom.Group.Id("london-scala"),
+                  client
+                )
+              ).use { server =>
+                val sslStream = BlazeServerBuilder[IO]
+                  .bindHttp(httpsPort, "0.0.0.0")
+                  .withSslContext(ssl)
+                  .withHttpApp(
+                    Router(
+                      "/api" -> GZip(Routes[IO](server)),
+                      "" ->
+                        Routes.orIndex(
+                          assetDir,
+                          GZip(
+                            fileService[IO](
+                              FileService.Config(
+                                assetDir.toString,
+                                blocker
+                              )
+                            )
+                          ),
+                          blocker
                         )
-                      ),
-                      blocker
-                    )
-                ).orNotFound
-              )
-              .serve
+                    ).orNotFound
+                  )
+                  .serve
 
-            val redirectStream = BlazeServerBuilder[IO]
-              .bindHttp(httpPort, "0.0.0.0")
-              .withHttpApp(SSL.redirectApp[IO](httpsPort))
-              .serve
+                val redirectStream = BlazeServerBuilder[IO]
+                  .bindHttp(httpPort, "0.0.0.0")
+                  .withHttpApp(SSL.redirectApp[IO](httpsPort))
+                  .serve
 
-            sslStream
-              .mergeHaltBoth(redirectStream)
-              .compile
-              .drain
-              .as(ExitCode.Success)
-          }
+                sslStream
+                  .mergeHaltBoth(redirectStream)
+                  .compile
+                  .drain
+                  .as(ExitCode.Success)
+              }
+            }
         }
-    }
     }
   }
 }
@@ -92,7 +96,9 @@ object SSL {
   import org.http4s.dsl.Http4sDsl
   import org.http4s.headers.{Host, Location}
 
-  def loadContextFromClasspath[F[_]](certFile: File, password: String)(implicit F: Sync[F]): F[SSLContext] =
+  def loadContextFromClasspath[F[_]](certFile: File, password: String)(
+      implicit F: Sync[F]
+  ): F[SSLContext] =
     F.delay {
       val ksStream = new FileInputStream(certFile)
       val ks = KeyStore.getInstance("PKCS12")
@@ -101,7 +107,8 @@ object SSL {
 
       val kmf = KeyManagerFactory.getInstance(
         Option(Security.getProperty("ssl.KeyManagerFactory.algorithm"))
-          .getOrElse(KeyManagerFactory.getDefaultAlgorithm))
+          .getOrElse(KeyManagerFactory.getDefaultAlgorithm)
+      )
 
       kmf.init(ks, password.toCharArray)
       val context = SSLContext.getInstance("TLS")
@@ -121,7 +128,10 @@ object SSL {
               Authority(
                 userInfo = request.uri.authority.flatMap(_.userInfo),
                 host = RegName(host),
-                port = securePort.some)))
+                port = securePort.some
+              )
+            )
+          )
           MovedPermanently(Location(baseUri.withPath(request.uri.path)))
         case _ => BadRequest()
       }

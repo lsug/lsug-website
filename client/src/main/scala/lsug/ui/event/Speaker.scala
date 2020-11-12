@@ -47,7 +47,8 @@ object Speaker {
   )
 
   private def picture(profile: P.Speaker.Profile, blog: Option[P.Link]) =
-    blog.map { link =>
+    blog
+      .map { link =>
         <.a(
           ^.href := link.show,
           ^.target := "_blank",
@@ -87,8 +88,8 @@ object Speaker {
                   <.div(
                     ^.cls := "bio",
                     bio.zipWithIndex.map {
-                      case (bio, index) => markup.Markup.withKey(index)(bio,
-                        markup.Options(true))
+                      case (bio, index) =>
+                        markup.Markup.withKey(index)(bio, markup.Options(true))
                     }.toTagMod
                   )
                 )

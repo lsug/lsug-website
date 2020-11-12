@@ -34,19 +34,17 @@ object Summary {
           ),
           <.ul(
             ^.cls := "event-tags",
-            event.tags.distinct.map { t =>
-              <.li(TagBadge(t))
-            }.toTagMod
+            event.tags.distinct.map { t => <.li(TagBadge(t)) }.toTagMod
           )
         )
     }
     .build
 
   case class Props(
-    now: LocalDateTime,
-    meetup: P.Meetup,
-    speakers: SpeakerProfiles,
-    venues: Venues
+      now: LocalDateTime,
+      meetup: P.Meetup,
+      speakers: SpeakerProfiles,
+      venues: Venues
   )
 
   val Summary = ScalaComponent
@@ -72,12 +70,12 @@ object Summary {
           ),
           meetup.events.map(e => EventSummary(e, speakers)).toTagMod,
           <.div(
-              ^.cls := "read-more",
-              <.a(
-                ^.href := page,
-                "read more"
-              )
+            ^.cls := "read-more",
+            <.a(
+              ^.href := page,
+              "read more"
             )
+          )
         )
     }
     .build

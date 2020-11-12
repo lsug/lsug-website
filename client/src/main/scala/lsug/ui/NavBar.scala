@@ -7,7 +7,7 @@ import japgolly.scalajs.react.vdom.html_<^._
 object NavBar {
 
   import common.MaterialIcon
-  
+
   val NavBar = ScalaComponent
     .builder[Unit]("NavBar")
     .renderStatic(
