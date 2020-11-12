@@ -29,13 +29,19 @@ case class Meetup(
       .fold(
         List(
           p.Markup.Paragraph(
-            NonEmptyList.of(p.Markup.Text.Plain("We look forward to seeing you at the London Scala User Group."))
+            NonEmptyList.of(
+              p.Markup.Text.Plain(
+                "We look forward to seeing you at the London Scala User Group."
+              )
+            )
           ): p.Markup,
           p.Markup.Paragraph(
             NonEmptyList.of(
               p.Markup.Text.Plain("We're Community Partners with "),
-            p.Markup.Text.Link("Meetup Mates", "https://meetup-mates.com"),
-            p.Markup.Text.Plain(". If you would like to attend this meetup but you feel overwhelmed by the idea of going and networking by yourself, Meetup Mates is a great way to connect with like-minded people to go to meetups with.")
+              p.Markup.Text.Link("Meetup Mates", "https://meetup-mates.com"),
+              p.Markup.Text.Plain(
+                ". If you would like to attend this meetup but you feel overwhelmed by the idea of going and networking by yourself, Meetup Mates is a great way to connect with like-minded people to go to meetups with."
+              )
             )
           )
         )

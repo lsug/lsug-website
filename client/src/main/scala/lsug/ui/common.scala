@@ -147,10 +147,13 @@ object common {
           .withKey(tab.show)
           .withChildren(
             <.span(tab.show)
-          )((
-            tab.show,
-            tabProps.currentTab === tab,
-            tabProps.modify(tabProps.lens.set(tab))))
+          )(
+            (
+              tab.show,
+              tabProps.currentTab === tab,
+              tabProps.modify(tabProps.lens.set(tab))
+            )
+          )
       }.toReactFragment)(tabs.indexOf(current))
     }
 
@@ -393,7 +396,8 @@ object common {
           )
         }.toTagMod
       )
-    }.build
+    }
+    .build
 
   val TagBadge =
     ScalaComponent

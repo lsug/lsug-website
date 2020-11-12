@@ -154,10 +154,13 @@ object Home {
             ^.cls := "screenreader-only",
             "Events by the London Scala User Group"
           ),
-          tabs.makeTabs(TabProps(
-            modify = $.modState,
-            lens = State._tab,
-            currentTab = state.tab))(
+          tabs.makeTabs(
+            TabProps(
+              modify = $.modState,
+              lens = State._tab,
+              currentTab = state.tab
+            )
+          )(
             List(Tab.Upcoming, Tab.Past),
             tab
           ),

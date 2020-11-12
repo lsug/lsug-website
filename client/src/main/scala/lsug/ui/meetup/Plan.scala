@@ -10,10 +10,7 @@ import java.time.LocalDateTime
 
 object plan {
 
-  import common.{
-    MaterialIcon,
-    Spinner
-  }
+  import common.{MaterialIcon, Spinner}
 
   val Time = {
 
@@ -33,7 +30,6 @@ object plan {
       }
       .build
   }
-
 
   val Meetup = {
 
@@ -70,7 +66,6 @@ object plan {
       }
       .build
   }
-
 
   val Schedule = {
     //TODO colour current

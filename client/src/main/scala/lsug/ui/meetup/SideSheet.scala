@@ -48,7 +48,6 @@ object SideSheet {
       .build
   }
 
-
   val SideSheet = ScalaComponent
     .builder[Unit]("SideSheet")
     .render_C(cs =>

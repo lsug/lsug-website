@@ -31,9 +31,12 @@ class ResourceSpec extends IOSuite with PathImplicits {
         s"$name $path",
         body = () =>
           munitValueTransform(
-            Server[IO](path.getParent.getParent.toAbsolutePath, new MeetupApi[IO] {
-              def event(id: P.Meetup.MeetupDotCom.Event.Id) = none.pure[IO]
-            }).use { server =>
+            Server[IO](
+              path.getParent.getParent.toAbsolutePath,
+              new MeetupApi[IO] {
+                def event(id: P.Meetup.MeetupDotCom.Event.Id) = none.pure[IO]
+              }
+            ).use { server =>
               val name = path.getFileName.baseName
               f(server, name).map { ev => assert(clue(ev).isDefined) }
             }
@@ -47,20 +50,20 @@ class ResourceSpec extends IOSuite with PathImplicits {
       "meetups",
       (server, id) => server.meetup(new P.Meetup.Id(id)).map(_.void)
     ) ++
-    tests(
-      "venues",
-      "venues",
-      (server, id) => server.venue(new P.Venue.Id(id)).map(_.void)
-    ) ++
-    tests(
-      "people",
-      "speaker",
-      (server, id) => server.speaker(new P.Speaker.Id(id)).map(_.void)
-    ) ++
-    tests(
-      "people",
-      "profile",
-      (server, id) => server.speakerProfile(new P.Speaker.Id(id)).map(_.void)
-    )
+      tests(
+        "venues",
+        "venues",
+        (server, id) => server.venue(new P.Venue.Id(id)).map(_.void)
+      ) ++
+      tests(
+        "people",
+        "speaker",
+        (server, id) => server.speaker(new P.Speaker.Id(id)).map(_.void)
+      ) ++
+      tests(
+        "people",
+        "profile",
+        (server, id) => server.speakerProfile(new P.Speaker.Id(id)).map(_.void)
+      )
 
 }

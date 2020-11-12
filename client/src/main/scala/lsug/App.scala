@@ -31,11 +31,14 @@ object App extends IOApp {
 
     def homeRoute =
       staticRoute(root, Page.Home) ~> renderR { ctl =>
-        page(now => lui.Home.Home(
+        page(now =>
+          lui.Home.Home(
             lui.Home.Props(
               ctl,
               now
-            )))
+            )
+          )
+        )
       }
 
     def sponsorsRoute =
@@ -53,14 +56,17 @@ object App extends IOApp {
         root / "events" / (string("[0-9\\-]+") / int).caseClass[Page.Event]
       ) ~> dynRenderR {
         case (Page.Event(meetupId, eventId), ctl) =>
-          page(const(
-            lui.event.EventPage.EventPage(
-              (
-                ctl.narrow,
-                new P.Meetup.Id(meetupId),
-                new P.Meetup.Event.Id(eventId)
+          page(
+            const(
+              lui.event.EventPage.EventPage(
+                (
+                  ctl.narrow,
+                  new P.Meetup.Id(meetupId),
+                  new P.Meetup.Event.Id(eventId)
+                )
               )
-            )))
+            )
+          )
       }
 
     def meetupRoute =
@@ -68,18 +74,22 @@ object App extends IOApp {
         root / "meetups" / (string("[0-9\\-]+")).caseClass[Page.Meetup]
       ) ~> dynRenderR {
         case (Page.Meetup(meetupId), ctl) =>
-          page(const(
-            lui.meetup.Meetup.Meetup(
-              (
-                ctl.narrow,
-                new P.Meetup.Id(meetupId)
+          page(
+            const(
+              lui.meetup.Meetup.Meetup(
+                (
+                  ctl.narrow,
+                  new P.Meetup.Id(meetupId)
+                )
               )
-            )))
+            )
+          )
       }
 
-    (homeRoute | eventRoute | meetupRoute | sponsorsRoute | aboutRoute).notFound(
-      redirectToPage(Page.Home)(SetRouteVia.HistoryReplace)
-    )
+    (homeRoute | eventRoute | meetupRoute | sponsorsRoute | aboutRoute)
+      .notFound(
+        redirectToPage(Page.Home)(SetRouteVia.HistoryReplace)
+      )
   }
 
   override def run(args: List[String]): IO[ExitCode] = {

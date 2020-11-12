@@ -253,7 +253,8 @@ private object PollenDecoders {
           (tag("url") >>> contents, tag("text") >>> contents).mapN {
             case (url, text) => Markup.Text.Link(text, url)
           })
-      ).map(_.merge)
+      )
+      .map(_.merge)
 
     val paragraph: Decoder[Tag, Markup.Paragraph] =
       (name("p") >>> childList >>> nelFromList >>> text.nel)
@@ -307,7 +308,8 @@ object ContentDecoders {
       }
   }
 
-  private[markup] def meetup: Decoder[NonEmptyList[Tag], PMeetup.Id => Meetup] = {
+  private[markup] def meetup
+      : Decoder[NonEmptyList[Tag], PMeetup.Id => Meetup] = {
 
     val material: Decoder[Tag, PMeetup.Material] =
       childTagList >>> (tag("url") >>> contents, tag("text") >>> contents)
@@ -341,10 +343,10 @@ object ContentDecoders {
           ) =>
         Event(
           name = name,
-          speakers =
-            speakers.map(_.split(",").toList)
-              .getOrElse(List.empty[String])
-          .map(new Speaker.Id(_)),
+          speakers = speakers
+            .map(_.split(",").toList)
+            .getOrElse(List.empty[String])
+            .map(new Speaker.Id(_)),
           material = material.fold(List.empty[PMeetup.Material])(_.toList),
           tags = tagList.split(",").toList,
           start = start,

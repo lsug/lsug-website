@@ -62,107 +62,77 @@ object Event {
       .builder[Props[S, I]]("Event")
       .render_P {
         case Props(
-              P.Meetup.Event(
-                event,
-                desc,
-                speakerIds,
-                tags,
-                material,
-                setup,
-                slides,
-                recording,
-                _
-              ),
-              speakers,
-              modalProps,
+            P.Meetup.Event(
+              event,
+              desc,
+              speakerIds,
+              tags,
+              material,
+              setup,
+              slides,
+              recording,
+              _
+            ),
+            speakers,
+            modalProps,
             modalId,
             tabProps
-              ) =>
-            val existingTabs =
-              List(
-                Tab.about.some,
-                setup.headOption.map(const(Tab.setup)),
-                slides.orElse(recording).map(const(Tab.media)),
-                material.headOption.map(const(Tab.material))
-              ).mapFilter(identity)
+            ) =>
+          val existingTabs =
+            List(
+              Tab.about.some,
+              setup.headOption.map(const(Tab.setup)),
+              slides.orElse(recording).map(const(Tab.media)),
+              material.headOption.map(const(Tab.material))
+            ).mapFilter(identity)
 
-            val makePanel = tabs.makeTabPanel[S, Tab](tabProps.currentTab) _
-            val aboutPanel = makePanel(
-              Tab.About,
+          val makePanel = tabs.makeTabPanel[S, Tab](tabProps.currentTab) _
+          val aboutPanel = makePanel(
+            Tab.About,
+            <.div(
               <.div(
-                <.div(
-                  ^.cls := "abstract",
-                  desc.map(markup.Markup(_, markupOpts)).toTagMod
-                ),
-                <.ul(
-                  ^.cls := "tags",
-                  tags.map(t => <.li(TagBadge(t))).toTagMod
-                )
+                ^.cls := "abstract",
+                desc.map(markup.Markup(_, markupOpts)).toTagMod
+              ),
+              <.ul(
+                ^.cls := "tags",
+                tags.map(t => <.li(TagBadge(t))).toTagMod
               )
             )
+          )
 
-            val setupPanel = makePanel(
-              Tab.Setup,
-              <.div(
-                ^.cls := "setup",
-                setup.map(markup.Markup(_, markupOpts)).toTagMod
-              )
+          val setupPanel = makePanel(
+            Tab.Setup,
+            <.div(
+              ^.cls := "setup",
+              setup.map(markup.Markup(_, markupOpts)).toTagMod
             )
+          )
 
-            val materialPanel = makePanel(
-              Tab.Material,
-              <.div(
-                ^.cls := "material",
-                <.ol(material.map { m =>
-                  <.li(
-                    <.a(
-                      ^.href := m.location,
-                      ^.target := "_blank",
-                      MaterialIcon("unfold_more"),
-                      <.span(m.text)
-                    )
+          val materialPanel = makePanel(
+            Tab.Material,
+            <.div(
+              ^.cls := "material",
+              <.ol(material.map { m =>
+                <.li(
+                  <.a(
+                    ^.href := m.location,
+                    ^.target := "_blank",
+                    MaterialIcon("unfold_more"),
+                    <.span(m.text)
                   )
-                }.toTagMod)
-              )
+                )
+              }.toTagMod)
             )
+          )
 
-            val mediaPanel = makePanel(
-              Tab.Media,
-              <.ol(
-                ^.cls := Tab.media.show.toLowerCase,
-                slides.map { link =>
-                  if (!link.openInNew) {
-                    val id = modalId(Media.slides)
-                    <.li(
-                      modal
-                        .control[S, I]
-                        .apply(
-                          modal.control.Props(
-                            modalProps,
-                            id,
-                            "slides",
-                            "description",
-                            link.link.show
-                          )
-                        )
-                    )
-                  } else {
-                    <.li(
-                      <.a(
-                        ^.cls := "open-media",
-                        ^.href := link.link.show,
-                        ^.target := "_blank",
-                        MaterialIcon("description"),
-                        <.div(
-                          <.span("slides"),
-                          MaterialIcon("open_in_new")
-                        )
-                      )
-                    )
-                  }
-                },
-                recording.map { recording =>
-                  val id = modalId(Media.video)
+          val mediaPanel = makePanel(
+            Tab.Media,
+            <.ol(
+              ^.cls := Tab.media.show.toLowerCase,
+              slides.map { link =>
+                if (!link.openInNew) {
+                  val id = modalId(Media.slides)
                   <.li(
                     modal
                       .control[S, I]
@@ -170,40 +140,76 @@ object Event {
                         modal.control.Props(
                           modalProps,
                           id,
-                          "video",
-                          "video_library",
-                          s"https://www.youtube.com/embed/${recording.show}?modestbranding=1"
+                          "slides",
+                          "description",
+                          link.link.show
                         )
                       )
                   )
-                }
-              )
-            )
-
-            <.article(
-              ^.cls := "event",
-              <.header(
-                <.h2(^.cls := "event-header small-heading", event)
-              ),
-
-              NonEmptyList.fromList(speakerIds).map { speakerIds =>
-              <.div(
-                ^.cls := "speakers",
-                speakerIds.map { id =>
-                  Speaker.Speaker(
-                    speakers.get(id)
+                } else {
+                  <.li(
+                    <.a(
+                      ^.cls := "open-media",
+                      ^.href := link.link.show,
+                      ^.target := "_blank",
+                      MaterialIcon("description"),
+                      <.div(
+                        <.span("slides"),
+                        MaterialIcon("open_in_new")
+                      )
+                    )
                   )
-                }.toList.toTagMod
-              )}.whenDefined,
-              tabs.makeTabs[S, Tab](tabProps)(
-                existingTabs,
-                tabProps.currentTab
-              ),
-              aboutPanel,
-              mediaPanel,
-              setupPanel,
-              materialPanel
+                }
+              },
+              recording.map { recording =>
+                val id = modalId(Media.video)
+                <.li(
+                  modal
+                    .control[S, I]
+                    .apply(
+                      modal.control.Props(
+                        modalProps,
+                        id,
+                        "video",
+                        "video_library",
+                        s"https://www.youtube.com/embed/${recording.show}?modestbranding=1"
+                      )
+                    )
+                )
+              }
             )
+          )
+
+          <.article(
+            ^.cls := "event",
+            <.header(
+              <.h2(^.cls := "event-header small-heading", event)
+            ),
+            NonEmptyList
+              .fromList(speakerIds)
+              .map { speakerIds =>
+                <.div(
+                  ^.cls := "speakers",
+                  speakerIds
+                    .map { id =>
+                      Speaker.Speaker(
+                        speakers.get(id)
+                      )
+                    }
+                    .toList
+                    .toTagMod
+                )
+              }
+              .whenDefined,
+            tabs.makeTabs[S, Tab](tabProps)(
+              existingTabs,
+              tabProps.currentTab
+            ),
+            aboutPanel,
+            mediaPanel,
+            setupPanel,
+            materialPanel
+          )
 
       }
       .build
