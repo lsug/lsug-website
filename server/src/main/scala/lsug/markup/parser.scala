@@ -107,4 +107,7 @@ object Result {
       case Success(value, rest) => Success(f(value), rest)
     }
   }
+
+  implicit def resultEq[A: Eq]: Eq[Result[A]] =
+    Eq.fromUniversalEquals[Result[A]]
 }

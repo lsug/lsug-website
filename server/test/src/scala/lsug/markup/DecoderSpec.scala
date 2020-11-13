@@ -1,121 +1,146 @@
 package lsug
 package markup
 
-import java.time._
-import munit.{Tag => _, _}
+import cats._
 import cats.implicits._
-import cats.data._
 
-class DecoderSpec extends FunSuite {
+private class DecoderSpec extends LsugSuite with DecoderAssertions {
+
+  import magnolify.cats.auto._
 
   import Pollen._
-  import PollenDecoders._
+  import Decoder._
+  import DecoderError._
 
-  def assertSuccess[A, B](
-      decoder: Decoder[A, B],
-      input: A,
-      expected: B
+  val line: String = "A truth that's told with bad intent"
+  val lineP: Pollen = Contents(line)
+  val secondLine: String = "\nBeats all the lies you can invent"
+  val secondLineP: Pollen = Contents(secondLine)
+  val verse: String = line |+| secondLine
+  val verseName: String = "verse"
+  val verseP: Tag = Tag(verseName, List(lineP, secondLineP))
+  val unexpectedName: String = "unexpected"
+  val unexpectedP: Tag = Tag(unexpectedName, Nil)
+  val unexpectedVerseP: Tag = Tag(verseName, List(unexpectedP))
+
+  checkText("single contents")(List(lineP), line)
+  checkText("multiple contents")(List(lineP, secondLineP), verse)
+  checkText("no contents")(Nil, "")
+  checkTextFails("tag")(List(verseP), UnexpectedTag(verseName))
+  checkTextFails("tag and contents")(
+    List(verseP, lineP),
+    UnexpectedTag(verseName)
+  )
+
+  checkChildren("tag")(verseName, List(verseP), List(verseP))
+  checkChildren("no tags")("hello", Nil, Nil)
+  checkChildren("other tags")(
+    verseName,
+    List(verseP, unexpectedP),
+    List(verseP)
+  )
+  checkChildren("other contents")(verseName, List(verseP, lineP), List(verseP))
+
+  checkChild("tag")(verseName, List(verseP), verseP)
+  checkChildFails("multiple tags")(
+    verseName,
+    List(verseP, verseP),
+    MultipleTagsFound(verseName, 2)
+  )
+  checkChildFails("no tags")(verseName, Nil, TagNotFound(verseName))
+
+  checkAndThen("nested text")(child(verseName), text, List(verseP), verse)
+
+  checkAndThenTraverse("nested texts")(
+    children(verseName),
+    text,
+    List(verseP, verseP),
+    List(verse, verse)
+  )
+  checkAndThenTraverseFails("unexpected tag")(
+    children(verseName),
+    text,
+    List(unexpectedVerseP),
+    UnexpectedTag(unexpectedName)
+  )
+
+  def checkText(
+      name: String
+  )(input: List[Pollen], output: String)(implicit loc: munit.Location): Unit = {
+    assertEither(text, input, Right(output))
+      .label("text")
+      .build(name)
+  }
+
+  def checkTextFails(name: String)(input: List[Pollen], expected: DecoderError)(
+      implicit loc: munit.Location
   ): Unit = {
-    assert(clue(decoder(input)) == Right(expected))
+    assertEither(text, input, Left(expected))
+      .label("text")
+      .build(name)
   }
 
-  def assertFailure[A, B](
-      decoder: Decoder[A, B],
-      input: A,
-      expected: Decoder.Failure
+  def checkChildren(
+      name: String
+  )(tagname: String, input: List[Pollen], output: List[Tag])(
+      implicit loc: munit.Location
   ): Unit = {
-    assert(clue(decoder(input)) == Left(expected))
+    assertEither(children(tagname), input, Right(output))
+      .label("children")
+      .build(name)
   }
 
-  test("root tag") {
-    assertSuccess(
-      tag("root"),
-      NonEmptyList.of(Tag("root", Nil)),
-      Tag("root", Nil)
-    )
+  def checkChild(
+      name: String
+  )(tagname: String, input: List[Pollen], output: Tag)(
+      implicit loc: munit.Location
+  ): Unit = {
+    assertEither(child(tagname), input, Right(output))
+      .label("child")
+      .build(name)
   }
 
-  test("wrong root tag") {
-    assertFailure(
-      tag("root"),
-      NonEmptyList.of(Tag("foo", Nil)),
-      Decoder.Failure(Decoder.Error.TagNotFound("root"), Nil)
-    )
+  def checkChildFails(name: String)(
+      tagname: String,
+      input: List[Pollen],
+      expected: DecoderError
+  )(implicit loc: munit.Location): Unit = {
+    assertEither(child(tagname), input, Left(expected))
+      .label("child")
+      .build(name)
   }
 
-  test("child tag") {
-    assertSuccess(
-      child("bar"),
-      Tag("foo", List(Tag("bar", Nil))),
-      Tag("bar", Nil)
-    )
+  def checkAndThen[A: Eq: Show](name: String)(
+      first: Decoder[Tag],
+      second: Decoder[A],
+      input: List[Pollen],
+      output: A
+  )(implicit loc: munit.Location): Unit = {
+    assertEither(first.andThen(second), input, Right(output))
+      .label("andThen")
+      .build(name)
   }
 
-  test("wrong child tag") {
-    assertFailure(
-      child("qux"),
-      Tag("foo", List(Tag("bar", Nil))),
-      Decoder.Failure(Decoder.Error.TagNotFound("qux"), Nil)
-    )
+  def checkAndThenTraverse[F[_]: Traverse, A](name: String)(
+      first: Decoder[F[Tag]],
+      second: Decoder[A],
+      input: List[Pollen],
+      output: F[A]
+  )(implicit loc: munit.Location, eq: Eq[F[A]], show: Show[F[A]]): Unit = {
+    assertEither(first.andThenTraverse(second), input, Right(output))
+      .label("andThenTraverse")
+      .build(name)
   }
 
-  test("nested child tag") {
-    assertSuccess(
-      child("bar") >>> child("baz"),
-      Tag("foo", List(Tag("bar", List(Tag("baz", Nil))))),
-      Tag("baz", Nil)
-    )
+  def checkAndThenTraverseFails[F[_]: Traverse, A](name: String)(
+      first: Decoder[F[Tag]],
+      second: Decoder[A],
+      input: List[Pollen],
+      output: DecoderError
+  )(implicit loc: munit.Location, eq: Eq[F[A]], show: Show[F[A]]): Unit = {
+    assertEither(first.andThenTraverse(second), input, Left(output))
+      .label("andThenTraverse")
+      .build(name)
   }
 
-  test("wrong nested child tag") {
-    assertFailure(
-      child("bar") >>> child("qux"),
-      Tag("foo", List(Tag("bar", List(Tag("baz", Nil))))),
-      Decoder.Failure(Decoder.Error.TagNotFound("qux"), List("bar"))
-    )
-  }
-
-  test("wrong parent of nested child tag") {
-    assertFailure(
-      child("bar") >>> child("qux"),
-      Tag("foo", List(Tag("cow", List(Tag("baz", Nil))))),
-      Decoder.Failure(Decoder.Error.TagNotFound("bar"), Nil)
-    )
-  }
-
-  test("contents") {
-    assertSuccess(contents, Tag("foo", List(Contents("bar"))), "bar")
-  }
-
-  test("nel contents") {
-    assertSuccess(
-      contents >>> nel,
-      Tag("foo", List(Contents("bar,baz"))),
-      NonEmptyList.of("bar", "baz")
-    )
-  }
-
-  test("date contents") {
-    assertSuccess(
-      contents >>> date,
-      Tag("foo", List(Contents("2000-11-10"))),
-      LocalDate.of(2000, 11, 10)
-    )
-  }
-
-  test("time range") {
-    assertSuccess(
-      contents >>> timeRange,
-      Tag("foo", List(Contents("19:30-20:45"))),
-      LocalTime.of(19, 30) -> LocalTime.of(20, 45)
-    )
-  }
-
-  test("optional tag") {
-    assertSuccess(
-      child("bar").optional.composeF(contents),
-      Tag("foo", Nil),
-      None
-    )
-  }
 }

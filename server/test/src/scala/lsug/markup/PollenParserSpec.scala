@@ -1,10 +1,7 @@
 package lsug
 package markup
 
-import munit.{Tag => _, _}
-import cats.data._
-
-class PollenParserSpec extends FunSuite {
+class PollenParserSpec extends LsugSuite {
 
   import Pollen._
 
@@ -31,57 +28,47 @@ class PollenParserSpec extends FunSuite {
   checkTags(
     "multiple tags",
     "◊foo{}◊bar{}",
-    NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil))
+    List(Tag("foo", Nil), Tag("bar", Nil))
   )
   checkTags(
     "spaces between",
     "◊foo{}\n ◊bar{}",
-    NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil))
+    List(Tag("foo", Nil), Tag("bar", Nil))
   )
 
   checkTags(
     "spaces before",
     "\n ◊foo{}◊bar{}",
-    NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil))
+    List(Tag("foo", Nil), Tag("bar", Nil))
   )
 
   checkTags(
     "spaces after",
     "◊foo{}◊bar{}\n ",
-    NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil))
+    List(Tag("foo", Nil), Tag("bar", Nil))
   )
 
   checkTags(
     "spaces inside",
     "◊foo{\n}◊bar{}\n ",
-    NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil))
+    List(Tag("foo", Nil), Tag("bar", Nil))
   )
 
   checkTags(
     "spaces around",
     "\n ◊foo{}\n ◊bar{}\n ",
-    NonEmptyList.of(Tag("foo", Nil), Tag("bar", Nil))
+    List(Tag("foo", Nil), Tag("bar", Nil))
   )
 
-  def checkTags(
-      name: String,
-      text: String,
-      expected: NonEmptyList[Tag]
-  ): Unit = {
-    val result = PollenParser.tags(text).toEither
-    test(s"$name - success") {
-      assertEquals(result.isRight, true)
-    }
-
-    result.foreach { tags =>
-      test(s"$name - correct value") {
-        assert(clue(tags) == expected)
-      }
-    }
+  def checkTags(name: String, text: String, expected: List[Pollen]): Unit = {
+    (builder {
+      val result = PollenParser.pollens(text).toEither
+      assert(result.isRight, "parsing failed")
+      result.foreach { tags => assert(clue(tags) == expected) }
+    }).label("success").build(name)
   }
 
   def check(name: String, text: String, expected: Tag): Unit = {
-    checkTags(name, text, NonEmptyList.of(expected))
+    checkTags(name, text, List(expected))
   }
-
 }

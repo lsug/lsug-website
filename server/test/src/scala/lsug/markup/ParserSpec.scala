@@ -3,14 +3,15 @@ package markup
 
 import scala.util.matching.Regex
 
+import cats._
 import cats.data._
-import munit._
+import cats.implicits._
 
 class ParserSpec extends ParserChecks {
 
   import Parser.{fail => pfail, _}
 
-  checkFailure("fail", pfail, "any text")
+  checkFailure[Unit](pfail, "any text").build("fail")
 
   checkPure("return the value", 1, "any text")
 
@@ -27,7 +28,7 @@ class ParserSpec extends ParserChecks {
     1,
     "any text"
   )
-  checkFailure("either", either(pfail, pfail), "any text")
+  checkFailure(either[Unit](pfail, pfail), "any text").build("either")
 
   checkProduct(
     "two characters",
@@ -41,13 +42,9 @@ class ParserSpec extends ParserChecks {
   checkProductFails("first character", pattern("a".r), pattern("b".r), "bb")
   checkProductFails("second character", pattern("a".r), pattern("b".r), "aa")
 
-  check(
-    "map - does not take characters",
-    map(pure(1))(identity),
-    "any text",
-    1,
-    "any text"
-  )
+  check(map(pure(1))(identity), "any text", 1, "any text")
+    .label("map")
+    .build("does not take characters")
 
   checkZeroOrMore("a single character", "a", List("a"), "")
   checkZeroOrMore("two characters", "aa", List("a", "a"), "")
@@ -60,74 +57,69 @@ class ParserSpec extends ParserChecks {
   checkOneOrMoreFails("a mismatching string", "b")
 }
 
-trait ParserChecks extends FunSuite {
+trait ParserChecks extends LsugSuite {
 
   import Parser._
 
+  def assertRest(rest: String, expected: String)(
+      implicit loc: munit.Location
+  ): Unit = {
+    assert(clue(rest) === clue(expected), "The rest of the text was incorrect")
+  }
+
   def check[A](
-      name: String,
       pa: Parser[A],
       text: String,
       expected: A,
       expectedRest: String
-  )(implicit loc: munit.Location): Unit = {
-    val result = pa(text)
+  )(implicit loc: munit.Location): TestBuilder =
+    (builder {
 
-    test(s"$name - parsing succeeds") {
-      result match {
-        case Result.Fail => fail("parsing failed")
-        case _           => ()
+      val result = pa(text) match {
+        case Result.Fail                 => None
+        case Result.Success(value, rest) => Some((value, rest))
       }
-    }
 
-    val option = result match {
-      case Result.Fail                 => None
-      case Result.Success(value, rest) => Some((value, rest))
-    }
+      assert(result.isDefined, "parsing failed")
 
-    option.foreach {
-      case (value, rest) =>
-        test(s"$name - remaining text") {
-          assertEquals(rest, expectedRest)
-        }
-
-        test(s"$name - value is correct") {
+      result.foreach {
+        case (value, rest) =>
+          assertRest(rest, expectedRest)
           assertEquals(value, expected)
-        }
-    }
-  }
-
-  def checkFailure[A](name: String, pa: Parser[A], text: String)(
-      implicit loc: munit.Location
-  ): Unit =
-    test(s"$name - fails") {
-      val result = pa(text)
-      result match {
-        case Result.Success(_, _) => fail("parsing succeeded")
-        case Result.Fail          => ()
       }
-    }
+    }).label("success")
+
+  def checkFailure[A: Eq](pa: Parser[A], text: String)(
+      implicit loc: munit.Location
+  ): TestBuilder =
+    (builder {
+      val result = pa(text)
+      assert(clue(result) === Result.Fail, "parsing succeeded")
+    }).label("fail")
 
   def checkPure[A](name: String, value: A, text: String)(
       implicit loc: munit.Location
   ): Unit =
-    check(s"pure - $name", pure(value), text, value, text)
+    check(pure(value), text, value, text)
+      .label("pure")
+      .build(name)
 
   def checkPattern(name: String, regex: Regex, text: String)(
       implicit loc: munit.Location
   ): Unit =
     check(
-      s"pattern - $name",
       pattern(regex),
       text,
       text.head.toString,
       text.tail
-    )
+    ).label("pattern").build(name)
 
   def checkPatternFails(name: String, regex: Regex, text: String)(
       implicit loc: munit.Location
   ): Unit =
-    checkFailure(s"pattern - $name", pattern(regex), text)
+    checkFailure(pattern(regex), text)
+      .label("pattern")
+      .build(name)
 
   def checkZeroOrMore(
       name: String,
@@ -135,7 +127,9 @@ trait ParserChecks extends FunSuite {
       value: List[String],
       rest: String
   )(implicit loc: munit.Location): Unit =
-    check(s"zeroOrMore - $name", zeroOrMore(pattern("a".r)), text, value, rest)
+    check(zeroOrMore(pattern("a".r)), text, value, rest)
+      .label("zeroOrMore")
+      .build(name)
 
   def checkOneOrMore(
       name: String,
@@ -143,12 +137,16 @@ trait ParserChecks extends FunSuite {
       value: NonEmptyList[String],
       rest: String
   )(implicit loc: munit.Location): Unit =
-    check(s"oneOrMore - $name", oneOrMore(pattern("a".r)), text, value, rest)
+    check(oneOrMore(pattern("a".r)), text, value, rest)
+      .label("oneOrMore")
+      .build(name)
 
   def checkOneOrMoreFails(name: String, text: String)(
       implicit loc: munit.Location
   ): Unit =
-    checkFailure(s"oneOrMore - $name", oneOrMore(pattern("a".r)), text)
+    checkFailure(oneOrMore(pattern("a".r)), text)
+      .label("oneOrMore")
+      .build(name)
 
   def checkEither[A](
       name: String,
@@ -158,7 +156,9 @@ trait ParserChecks extends FunSuite {
       value: A,
       rest: String
   )(implicit loc: munit.Location): Unit =
-    check(s"either - $name", either(left, right), text, value, rest)
+    check(either(left, right), text, value, rest)
+      .label("either")
+      .build(name)
 
   def checkProduct[A, B](
       name: String,
@@ -170,18 +170,20 @@ trait ParserChecks extends FunSuite {
       rest: String
   )(implicit loc: munit.Location): Unit =
     check(
-      s"product - $name",
       product(left, right),
       text,
       (leftValue, rightValue),
       rest
-    )
+    ).label("product")
+      .build(name)
 
-  def checkProductFails[A, B](
+  def checkProductFails[A: Eq, B: Eq](
       name: String,
       left: Parser[A],
       right: Parser[B],
       text: String
   )(implicit loc: munit.Location): Unit =
-    checkFailure(s"product - $name", product(left, right), text)
+    checkFailure(product(left, right), text)
+      .label("product")
+      .build(name)
 }
