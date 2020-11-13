@@ -5,7 +5,10 @@ import lsug.protocol._
 import cats.data._
 import cats._
 
+import magnolify.cats.auto._
+
 private class DecodersSpec extends LsugSuite with DecoderAssertions {
+
 
   import Pollen._
   import Decoders._

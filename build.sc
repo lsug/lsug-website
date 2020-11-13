@@ -66,7 +66,8 @@ object server extends ScalaModule {
     Agg(
       catsEffectDep,
       ivy"io.chrisdavenport::log4cats-slf4j::1.0.1",
-      ivy"ch.qos.logback:logback-classic:1.2.3"
+      ivy"ch.qos.logback:logback-classic:1.2.3",
+      ivy"com.spotify::magnolify-cats::0.3.0"
     ) ++ Agg(
       "http4s-dsl",
       "http4s-circe",

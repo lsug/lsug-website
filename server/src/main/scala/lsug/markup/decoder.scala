@@ -85,7 +85,7 @@ private object Decoder {
   }
 }
 
-trait DecoderError
+sealed trait DecoderError
 
 object DecoderError {
   final case class TagNotFound(name: String) extends DecoderError
@@ -100,8 +100,4 @@ object DecoderError {
       message: String
   ) extends DecoderError
   final case class EmptyContents(name: String) extends DecoderError
-
-  implicit val decoderErrorEq: Eq[DecoderError] = Eq.fromUniversalEquals
-  implicit val decoderErrorShow: Show[DecoderError] = Show.fromToString
-
 }

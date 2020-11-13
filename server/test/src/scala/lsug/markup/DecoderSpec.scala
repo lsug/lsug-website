@@ -6,6 +6,8 @@ import cats.implicits._
 
 private class DecoderSpec extends LsugSuite with DecoderAssertions {
 
+  import magnolify.cats.auto._
+
   import Pollen._
   import Decoder._
   import DecoderError._
@@ -144,6 +146,8 @@ private class DecoderSpec extends LsugSuite with DecoderAssertions {
 }
 
 trait DecoderAssertions { self: LsugSuite =>
+
+  import magnolify.cats.auto._
 
   def assertEither[A: Eq: Show](
       decoder: Decoder[A],
