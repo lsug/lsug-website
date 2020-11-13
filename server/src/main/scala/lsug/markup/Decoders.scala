@@ -12,6 +12,7 @@ import lsug.protocol.{Meetup => PMeetup, _}
 private object Decoders {
   import Decoder._
   import lsug.markup.{DecoderError => Error}
+  import lsug.markup.{EvaluatorOutput => Output}
 
   def strong: Decoder[Markup.Text.Styled.Strong] =
     text.map(Markup.Text.Styled.Strong(_))
@@ -28,14 +29,14 @@ private object Decoders {
       children =>
         (children
           .traverse {
-            case t: Markup.Text => Right(t)
-            case _              => Left(Error.TagNotFound("foo"))
+            case Output.Text(text) => Right(Markup.Text.Plain(text))
+            case Output.Markup(_, text: Markup.Text) => Right(text)
+            case Output.Markup(name, _) => Left(Error.UnexpectedTag(name))
           })
           .flatMap(cs =>
-            NonEmptyList.fromList(cs).toRight(Error.TagNotFound("foo"))
+            NonEmptyList.fromList(cs).toRight(Error.EmptyContents("p"))
           )
-          .map(Markup.Paragraph(_))
-    )
+          .map(Markup.Paragraph(_)))
   }
 
   def markup: Decoder[List[Markup]] =

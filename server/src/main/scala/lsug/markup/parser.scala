@@ -108,5 +108,6 @@ object Result {
     }
   }
 
-  implicit def resultEq[A: Eq]: Eq[Result[A]] = Eq.fromUniversalEquals[Result[A]]
+  implicit def resultEq[A: Eq]: Eq[Result[A]] =
+    Eq.fromUniversalEquals[Result[A]]
 }

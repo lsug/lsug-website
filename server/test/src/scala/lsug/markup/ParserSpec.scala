@@ -42,11 +42,8 @@ class ParserSpec extends ParserChecks {
   checkProductFails("first character", pattern("a".r), pattern("b".r), "bb")
   checkProductFails("second character", pattern("a".r), pattern("b".r), "aa")
 
-  check(map(pure(1))(identity),
-    "any text",
-    1,
-    "any text"
-  ).label("map")
+  check(map(pure(1))(identity), "any text", 1, "any text")
+    .label("map")
     .build("does not take characters")
 
   checkZeroOrMore("a single character", "a", List("a"), "")
@@ -64,7 +61,9 @@ trait ParserChecks extends LsugSuite {
 
   import Parser._
 
-  def assertRest(rest: String, expected: String)(implicit loc: munit.Location): Unit = {
+  def assertRest(rest: String, expected: String)(
+      implicit loc: munit.Location
+  ): Unit = {
     assert(clue(rest) === clue(expected), "The rest of the text was incorrect")
   }
 
@@ -73,21 +72,22 @@ trait ParserChecks extends LsugSuite {
       text: String,
       expected: A,
       expectedRest: String
-  )(implicit loc: munit.Location): TestBuilder = (builder {
+  )(implicit loc: munit.Location): TestBuilder =
+    (builder {
 
-    val result = pa(text) match {
-      case Result.Fail                 => None
-      case Result.Success(value, rest) => Some((value, rest))
-    }
+      val result = pa(text) match {
+        case Result.Fail                 => None
+        case Result.Success(value, rest) => Some((value, rest))
+      }
 
-    assert(result.isDefined, "parsing failed")
+      assert(result.isDefined, "parsing failed")
 
-    result.foreach {
-      case (value, rest) =>
-        assertRest(rest, expectedRest)
-        assertEquals(value, expected)
-    }
-  }).label("success")
+      result.foreach {
+        case (value, rest) =>
+          assertRest(rest, expectedRest)
+          assertEquals(value, expected)
+      }
+    }).label("success")
 
   def checkFailure[A: Eq](pa: Parser[A], text: String)(
       implicit loc: munit.Location
@@ -122,13 +122,14 @@ trait ParserChecks extends LsugSuite {
       .build(name)
 
   def checkZeroOrMore(
-    name: String,
-    text: String,
-    value: List[String],
-    rest: String
+      name: String,
+      text: String,
+      value: List[String],
+      rest: String
   )(implicit loc: munit.Location): Unit =
     check(zeroOrMore(pattern("a".r)), text, value, rest)
-      .label("zeroOrMore").build(name)
+      .label("zeroOrMore")
+      .build(name)
 
   def checkOneOrMore(
       name: String,
@@ -160,13 +161,13 @@ trait ParserChecks extends LsugSuite {
       .build(name)
 
   def checkProduct[A, B](
-    name: String,
-    left: Parser[A],
-    right: Parser[B],
-    text: String,
-    leftValue: A,
-    rightValue: B,
-    rest: String
+      name: String,
+      left: Parser[A],
+      right: Parser[B],
+      text: String,
+      leftValue: A,
+      rightValue: B,
+      rest: String
   )(implicit loc: munit.Location): Unit =
     check(
       product(left, right),

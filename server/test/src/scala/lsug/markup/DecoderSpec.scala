@@ -4,7 +4,7 @@ package markup
 import cats._
 import cats.implicits._
 
-private class DecoderSpec extends LsugSuite {
+private class DecoderSpec extends LsugSuite with DecoderAssertions {
 
   import Pollen._
   import Decoder._
@@ -32,7 +32,11 @@ private class DecoderSpec extends LsugSuite {
 
   checkChildren("tag")(verseName, List(verseP), List(verseP))
   checkChildren("no tags")("hello", Nil, Nil)
-  checkChildren("other tags")(verseName, List(verseP, unexpectedP), List(verseP))
+  checkChildren("other tags")(
+    verseName,
+    List(verseP, unexpectedP),
+    List(verseP)
+  )
   checkChildren("other contents")(verseName, List(verseP, lineP), List(verseP))
 
   checkChild("tag")(verseName, List(verseP), verseP)
@@ -57,32 +61,6 @@ private class DecoderSpec extends LsugSuite {
     List(unexpectedVerseP),
     UnexpectedTag(unexpectedName)
   )
-
-  def assertOutput[A](result: A, expected: A)(
-      implicit loc: munit.Location
-  ): Unit = {
-    assert(clue(result) == clue(expected), "Result of decoding is incorrect")
-  }
-
-  def assertEither[A](
-      decoder: Decoder[A],
-      input: List[Pollen],
-      expected: Either[DecoderError, A]
-  )(implicit loc: munit.Location): TestBuilder = {
-    val result = decoder(input)
-    expected match {
-      case Right(expected) =>
-        (builder {
-          assert(clue(result.isRight), "Failed to decode")
-          result.foreach(assertOutput(_, expected))
-        }).label("success")
-      case Left(expected) =>
-        builder({
-          assert(clue(result.isLeft), "Decoding succeeded")
-          result.swap.foreach(assertOutput(_, expected))
-        }).label("fail")
-    }
-  }
 
   def checkText(
       name: String
@@ -161,6 +139,36 @@ private class DecoderSpec extends LsugSuite {
     assertEither(first.andThenTraverse(second), input, Left(output))
       .label("andThenTraverse")
       .build(name)
+  }
+
+}
+
+trait DecoderAssertions { self: LsugSuite =>
+
+  def assertEither[A](
+      decoder: Decoder[A],
+      input: List[Pollen],
+      expected: Either[DecoderError, A]
+  )(implicit loc: munit.Location): TestBuilder = {
+    val result = decoder(input)
+    expected match {
+      case Right(expected) =>
+        (builder {
+          assert(clue(result.isRight), "Failed to decode")
+          result.foreach(assertOutput(_, expected))
+        }).label("success")
+      case Left(expected) =>
+        builder({
+          assert(clue(result.isLeft), "Decoding succeeded")
+          result.swap.foreach(assertOutput(_, expected))
+        }).label("fail")
+    }
+  }
+
+  private def assertOutput[A](result: A, expected: A)(
+      implicit loc: munit.Location
+  ): Unit = {
+    assert(clue(result) == clue(expected), "Result of decoding is incorrect")
   }
 
 }

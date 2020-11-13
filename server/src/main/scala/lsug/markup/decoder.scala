@@ -92,10 +92,13 @@ object DecoderError {
   final case class UnexpectedTag(name: String) extends DecoderError
   final case class MultipleTagsFound(name: String, number: Int)
       extends DecoderError
+  final case class EvaluatorFailed(error: EvaluatorError) extends DecoderError
+
   final case class InvalidContents(
       name: String,
       contents: String,
       message: String
   ) extends DecoderError
-  final case class EvaluatorFailed(error: EvaluatorError) extends DecoderError
+  final case class EmptyContents(name: String) extends DecoderError
+
 }
