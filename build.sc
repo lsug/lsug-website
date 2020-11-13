@@ -50,7 +50,7 @@ object protocolJs extends ProtocolModule with ScalaJSModule {
 
 object protocolJvm extends ProtocolModule
 
-object server extends ScalaModule with ScalafmtModule {
+object server extends ScalaModule {
 
   def scalaVersion = "2.13.1"
   def moduleDeps = Seq(protocolJvm)

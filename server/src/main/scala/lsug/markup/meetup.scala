@@ -63,7 +63,7 @@ case class Meetup(
 
 private[markup] case class Event(
     name: String,
-    speakers: NonEmptyList[p.Speaker.Id],
+    speakers: List[p.Speaker.Id],
     tags: List[String],
     start: LocalTime,
     end: LocalTime,
@@ -77,7 +77,7 @@ private[markup] case class Event(
   def event: p.Meetup.Event = p.Meetup.Event(
     title = name,
     description = description.toList,
-    speakers = speakers.toList,
+    speakers = speakers,
     tags = tags,
     material = material,
     setup = setup,
