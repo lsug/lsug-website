@@ -139,8 +139,9 @@ private object Decoders {
       .optional
     val material = child("material")
       .andThen(materials)
-    (
-      name,
+      .optional
+      .map(_.getOrElse(List.empty[PMeetup.Material]))
+    (name,
       speakers,
       material,
       tags,
@@ -198,7 +199,8 @@ private object Decoders {
       .optional
       .map(_.fold(List.empty[Markup])(_.toList))
 
-    val events = oneOrMoreChildren("events")
+    val events = child("events")
+      .andThen(oneOrMoreChildren("event"))
       .andThenTraverse(event)
     (meetupDotCom, venue, hosts, meetupDate, time, welcome, events).mapN {
       case (meetupDotCom, venue, hosts, date, (start, end), welcome, events) =>

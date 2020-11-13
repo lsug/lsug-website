@@ -34,7 +34,7 @@ trait ProtocolModule extends ScalaModule {
   def scalacOptions = commonScalacOptions
 
   def ivyDeps =
-    Agg(ivy"org.typelevel::cats-core::2.2.0") ++ Agg(
+    Agg(ivy"org.typelevel::cats-core::2.2.0-M2") ++ Agg(
       "circe-core",
       "circe-parser",
       "circe-generic"
@@ -105,7 +105,7 @@ object client extends ScalaJSModule {
   def scalaJSVersion = "0.6.29"
   def scalacPluginIvyDeps =
     super.scalacPluginIvyDeps() ++ Agg(
-      ivy"com.olegpy:::better-monadic-for:0.3.1"
+      ivy"com.olegpy::better-monadic-for:0.3.1"
     )
   def scalacOptions = commonScalacOptions
   def moduleDeps = Seq(protocolJs)
