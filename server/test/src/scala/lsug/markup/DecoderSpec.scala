@@ -144,4 +144,3 @@ private class DecoderSpec extends LsugSuite with DecoderAssertions {
   }
 
 }
-

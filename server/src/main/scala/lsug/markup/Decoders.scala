@@ -141,7 +141,8 @@ private object Decoders {
       .andThen(materials)
       .optional
       .map(_.getOrElse(List.empty[PMeetup.Material]))
-    (name,
+    (
+      name,
       speakers,
       material,
       tags,
