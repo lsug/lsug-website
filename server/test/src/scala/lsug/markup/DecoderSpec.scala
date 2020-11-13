@@ -108,7 +108,7 @@ private class DecoderSpec extends LsugSuite with DecoderAssertions {
       .build(name)
   }
 
-  def checkAndThen[A](name: String)(
+  def checkAndThen[A: Eq: Show](name: String)(
       first: Decoder[Tag],
       second: Decoder[A],
       input: List[Pollen],
@@ -124,7 +124,7 @@ private class DecoderSpec extends LsugSuite with DecoderAssertions {
       second: Decoder[A],
       input: List[Pollen],
       output: F[A]
-  )(implicit loc: munit.Location): Unit = {
+  )(implicit loc: munit.Location, eq: Eq[F[A]], show: Show[F[A]]): Unit = {
     assertEither(first.andThenTraverse(second), input, Right(output))
       .label("andThenTraverse")
       .build(name)
@@ -135,7 +135,7 @@ private class DecoderSpec extends LsugSuite with DecoderAssertions {
       second: Decoder[A],
       input: List[Pollen],
       output: DecoderError
-  )(implicit loc: munit.Location): Unit = {
+  )(implicit loc: munit.Location, eq: Eq[F[A]], show: Show[F[A]]): Unit = {
     assertEither(first.andThenTraverse(second), input, Left(output))
       .label("andThenTraverse")
       .build(name)
@@ -145,7 +145,7 @@ private class DecoderSpec extends LsugSuite with DecoderAssertions {
 
 trait DecoderAssertions { self: LsugSuite =>
 
-  def assertEither[A](
+  def assertEither[A: Eq: Show](
       decoder: Decoder[A],
       input: List[Pollen],
       expected: Either[DecoderError, A]
@@ -165,10 +165,18 @@ trait DecoderAssertions { self: LsugSuite =>
     }
   }
 
-  private def assertOutput[A](result: A, expected: A)(
+  private def assertOutput[A: Eq: Show](result: A, expected: A)(
       implicit loc: munit.Location
   ): Unit = {
-    assert(clue(result) == clue(expected), "Result of decoding is incorrect")
+    if (result =!= expected) {
+      fail(
+        "Result of decoding is incorrect",
+        clues(
+          result.show,
+          expected.show
+        )
+      )
+    }
   }
 
 }

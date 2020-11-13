@@ -91,9 +91,19 @@ object Markup {
 
     case class Link(text: String, location: String) extends Text
 
+    object Link {
+      implicit val eq: Eq[Link] = Eq.fromUniversalEquals[Link]
+      implicit val linkShow: Show[Link] = Show.fromToString
+    }
+
     object Styled {
 
       case class Strong(text: String) extends Styled
+
+      object Strong {
+        implicit val eq: Eq[Strong] = Eq.fromUniversalEquals[Strong]
+        implicit val strongShow: Show[Strong] = Show.fromToString
+      }
 
       implicit val codec: Codec[Styled] = deriveCodec[Styled]
 
@@ -103,6 +113,7 @@ object Markup {
 
     object Plain {
       implicit val codec: Codec[Plain] = deriveCodec[Plain]
+      implicit val eq: Eq[Plain] = Eq.fromUniversalEquals[Plain]
     }
 
     implicit val codec: Codec[Text] = deriveCodec[Text]
@@ -113,10 +124,14 @@ object Markup {
 
   object Paragraph {
     implicit val codec: Codec[Paragraph] = deriveCodec[Paragraph]
+    implicit val eq: Eq[Paragraph] = Eq.fromUniversalEquals[Paragraph]
+    implicit val paragraphShow: Show[Paragraph] = Show.fromToString
+
   }
 
   implicit val codec: Codec[Markup] = deriveCodec[Markup]
   implicit val eq: Eq[Markup] = Eq.fromUniversalEquals[Markup]
+  implicit val markupShow: Show[Markup] = Show.fromToString
 
 }
 
@@ -159,6 +174,7 @@ case class Speaker(
 object Speaker {
 
   implicit val codec: Codec[Speaker] = deriveCodec[Speaker]
+  implicit val eq: Eq[Speaker] = Eq.fromUniversalEquals
 
   final class Id(val value: String) extends AnyVal
 
@@ -183,6 +199,7 @@ object Speaker {
       case (SocialMedia(b, t, g), SocialMedia(bb, tt, gg)) =>
         b === bb && tt === t && g === gg
     }
+    implicit val socialMediaShow: Show[SocialMedia] = Show.fromToString
 
     implicit val codec: Codec[SocialMedia] = deriveCodec[SocialMedia]
 
@@ -322,12 +339,16 @@ object Meetup {
 
   object Media {
     implicit val codec: Codec[Media] = deriveCodec[Media]
+    implicit val eq: Eq[Media] = Eq.fromUniversalEquals[Media]
+    implicit val show: Show[Media] = Show.fromToString
   }
 
   case class Material(text: String, location: String)
 
   object Material {
     implicit val codec: Codec[Material] = deriveCodec[Material]
+    implicit val eq: Eq[Material] = Eq.fromUniversalEquals[Material]
+    implicit val show: Show[Material] = Show.fromToString
   }
 
   case class Event(

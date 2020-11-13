@@ -29,14 +29,15 @@ private object Decoders {
       children =>
         (children
           .traverse {
-            case Output.Text(text) => Right(Markup.Text.Plain(text))
+            case Output.Text(text)                   => Right(Markup.Text.Plain(text))
             case Output.Markup(_, text: Markup.Text) => Right(text)
-            case Output.Markup(name, _) => Left(Error.UnexpectedTag(name))
+            case Output.Markup(name, _)              => Left(Error.UnexpectedTag(name))
           })
           .flatMap(cs =>
             NonEmptyList.fromList(cs).toRight(Error.EmptyContents("p"))
           )
-          .map(Markup.Paragraph(_)))
+          .map(Markup.Paragraph(_))
+    )
   }
 
   def markup: Decoder[List[Markup]] =
@@ -96,7 +97,7 @@ private object Decoders {
   }
 
   def materials: Decoder[List[PMeetup.Material]] = {
-    val link = (child("url").andThen(text), child("text").andThen(text))
+    val link = (child("text").andThen(text), child("url").andThen(text))
       .mapN(PMeetup.Material.apply)
     children("link").andThenTraverse(link)
   }
@@ -115,7 +116,9 @@ private object Decoders {
     val speakers = child("speakers")
       .andThen(text)
       .mapError(commaSeparated("speakers", _))
-      .map(_.map(new Speaker.Id(_)))
+      .map(_.map(new Speaker.Id(_)).toList)
+      .optional
+      .map(_.getOrElse(List.empty[Speaker.Id]))
     val tags = child("tags")
       .andThen(text)
       .mapError(commaSeparated("tags", _))
@@ -134,11 +137,12 @@ private object Decoders {
       .andThen(text)
       .map(new Link(_))
       .optional
-
+    val material = child("material")
+      .andThen(materials)
     (
       name,
       speakers,
-      materials,
+      material,
       tags,
       time,
       description,

@@ -1,6 +1,7 @@
 package lsug
 package markup
 
+import cats._
 import cats.implicits._
 
 import lsug.protocol.{Markup => PMarkup}
@@ -11,6 +12,8 @@ object EvaluatorError {
   final case class DecoderFailed(error: DecoderError) extends EvaluatorError
   final case class UnevaluatedChild(name: String) extends EvaluatorError
   final case class UnrecognisedMarkup(markup: PMarkup) extends EvaluatorError
+
+  implicit val evaluatorErrorEq: Eq[EvaluatorError] = Eq.fromUniversalEquals
 }
 
 sealed trait EvaluatorOutput
@@ -72,7 +75,7 @@ private object Evaluator {
     children
       .traverse(eval(ctx))
       .flatMap(_.traverse(_.output match {
-        case Evaluated(output)       => Right(output)
+        case Evaluated(output)     => Right(output)
         case NotEvaluated(name, _) => Left(Error.UnevaluatedChild(name))
       }))
       .leftMap(DecoderError.EvaluatorFailed(_))

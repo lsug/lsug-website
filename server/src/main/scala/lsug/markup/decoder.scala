@@ -101,4 +101,7 @@ object DecoderError {
   ) extends DecoderError
   final case class EmptyContents(name: String) extends DecoderError
 
+  implicit val decoderErrorEq: Eq[DecoderError] = Eq.fromUniversalEquals
+  implicit val decoderErrorShow: Show[DecoderError] = Show.fromToString
+
 }
