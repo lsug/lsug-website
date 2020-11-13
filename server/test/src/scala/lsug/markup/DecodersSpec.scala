@@ -9,7 +9,6 @@ import magnolify.cats.auto._
 
 private class DecodersSpec extends LsugSuite with DecoderAssertions {
 
-
   import Pollen._
   import Decoders._
   import DecoderError._
