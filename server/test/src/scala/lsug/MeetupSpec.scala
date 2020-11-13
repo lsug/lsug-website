@@ -9,8 +9,6 @@ import lsug.protocol.Meetup.{MeetupDotCom => P}
 
 final class MeetupSpec extends IOSuite {
 
-
-
   test("can get attendence") {
     BlazeClientBuilder[IO](ec)
       .withUserAgent(`User-Agent`(AgentProduct("curl", "7.6.91".some)))

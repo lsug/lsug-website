@@ -18,17 +18,22 @@ private object PollenParser {
   private val contents: Parser[Contents] = pattern("[^◊}]+".r).map(Contents)
 
   def tag: Parser[Tag] =
-    map(product(
-    tagname,
-     children <* close
-    )) { case (name, children) => Tag(name, children)}
+    map(
+      product(
+        tagname,
+        children <* close
+      )
+    ) { case (name, children) => Tag(name, children) }
 
   private def pollen: Parser[Pollen] = either(contents, tag)
-  private def children: Parser[List[Pollen]] = zeroOrMore(pollen)
-    .map {_.filter {
-      case Contents(text) => !text.trim.isEmpty
-      case _ => true
-   }}
+  private def children: Parser[List[Pollen]] =
+    zeroOrMore(pollen)
+      .map {
+        _.filter {
+          case Contents(text) => !text.trim.isEmpty
+          case _              => true
+        }
+      }
 
   def tags: Parser[NonEmptyList[Tag]] =
     oneOrMore(zeroOrMore(whitespace) *> tag <* zeroOrMore(whitespace))

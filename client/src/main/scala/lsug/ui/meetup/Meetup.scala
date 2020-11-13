@@ -69,60 +69,60 @@ object Meetup {
           Welcome.Welcome((s.meetup, s.speakers)),
           s.meetup
             .map { meetup =>
-                <.section(
-                  ^.cls := "events",
-                  meetup.events.zipWithIndex.map {
-                    case (event, i) =>
-                      val eventId = new P.Meetup.Event.Id(i)
-                      UIEvent
-                        .Event[State, ModalId]
-                        .withKey(s"event-${eventId.show}")(
-                          UIEvent.Props(
-                            event = event,
-                            speakers = s.speakers.view
-                              .filterKeys(event.speakers.contains(_))
-                              .toMap,
-                            modalId = ModalId(new P.Meetup.Event.Id(i), _),
-                            modalProps = ModalProps(
-                              currentModal = s.modal,
-                              lens = State._modal,
-                              modify = $.modState
-                            ),
-                            tabProps = TabProps(
-                              currentTab = s.tab,
-                              lens = State._tab,
-                              modify = $.modState
-                            )
+              <.section(
+                ^.cls := "events",
+                meetup.events.zipWithIndex.map {
+                  case (event, i) =>
+                    val eventId = new P.Meetup.Event.Id(i)
+                    UIEvent
+                      .Event[State, ModalId]
+                      .withKey(s"event-${eventId.show}")(
+                        UIEvent.Props(
+                          event = event,
+                          speakers = s.speakers.view
+                            .filterKeys(event.speakers.contains(_))
+                            .toMap,
+                          modalId = ModalId(new P.Meetup.Event.Id(i), _),
+                          modalProps = ModalProps(
+                            currentModal = s.modal,
+                            lens = State._modal,
+                            modify = $.modState
+                          ),
+                          tabProps = TabProps(
+                            currentTab = s.tab,
+                            lens = State._tab,
+                            modify = $.modState
                           )
                         )
-                  }.toTagMod
-                )
+                      )
+                }.toTagMod
+              )
             }
             .getOrElse(<.div(^.cls := "placeholder")),
           SideSheet.SideSheet.withChildren(
             SideSheet.Panel.Panel.withChildren(
               s.meetup
                 .map { meetup =>
-                    React.Fragment(
-                      <.div(
-                        ^.cls := "date",
-                        <.span(^.cls := "material-icons", "event"),
-                        <.span(meetup.setting.time.start.format(pattern))
+                  React.Fragment(
+                    <.div(
+                      ^.cls := "date",
+                      <.span(^.cls := "material-icons", "event"),
+                      <.span(meetup.setting.time.start.format(pattern))
+                    ),
+                    SideSheet.Panel.Summary.withChildren(
+                      plan.Time(
+                        meetup.setting.time.start,
+                        meetup.setting.time.end
                       ),
-                      SideSheet.Panel.Summary.withChildren(
-                        plan.Time(
-                          meetup.setting.time.start,
-                          meetup.setting.time.end
-                        ),
-                        <.div(
-                          ^.cls := "panel-toggle-icon",
-                          MaterialIcon("expand_more")
-                        )
-                      )((s.showSchedule, toggleSchedule)),
-                      SideSheet.Panel.Details.withChildren(
-                        plan.Schedule(meetup.schedule)
-                      )(s.showSchedule)
-                    )
+                      <.div(
+                        ^.cls := "panel-toggle-icon",
+                        MaterialIcon("expand_more")
+                      )
+                    )((s.showSchedule, toggleSchedule)),
+                    SideSheet.Panel.Details.withChildren(
+                      plan.Schedule(meetup.schedule)
+                    )(s.showSchedule)
+                  )
                 }
                 .getOrElse {
                   <.div(^.cls := "placeholder")
@@ -135,7 +135,10 @@ object Meetup {
 
       def load: Callback = {
 
-        def resource[R: Decoder](lens: Lens[State, Option[R]], path: String): AsyncCallback[R] = {
+        def resource[R: Decoder](
+            lens: Lens[State, Option[R]],
+            path: String
+        ): AsyncCallback[R] = {
           Resource.load[R, State]($.modState)(lens, path)
         }
 
@@ -144,16 +147,23 @@ object Meetup {
           meetup <- resource(_meetup, s"meetups/${id.show}")
           _ <- {
             val speakerIds = (meetup.hosts ++ meetup.events.flatMap(_.speakers))
-            Resource.speakers[State]($.modState, State._speaker)(speakerIds.toList)
+            Resource.speakers[State]($.modState, State._speaker)(
+              speakerIds.toList
+            )
           }
-          _ <- resource(_meetupDotCom, s"meetups/${meetup.setting.id.show}/meetup-dot-com")
+          _ <- resource(
+            _meetupDotCom,
+            s"meetups/${meetup.setting.id.show}/meetup-dot-com"
+          )
         } yield ()).toCallback
       }
     }
 
     ScalaComponent
       .builder[(RouterCtl[Page.Home.type], P.Meetup.Id)]("Meetup")
-      .initialState[State](State(none, none, false, Map(), none, UIEvent.Tab.about))
+      .initialState[State](
+        State(none, none, false, Map(), none, UIEvent.Tab.about)
+      )
       .renderBackend[Backend]
       .componentDidMount(_.backend.load)
       .build
