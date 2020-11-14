@@ -18,6 +18,12 @@ We look forward to seeing you at another round of London Scala Talks.
 ◊link{◊url{https://my/link/}◊text{the-link-title}}
 ◊link{◊url{https://my/other/link/}◊text{the-other-link-title}}
 }
+◊setup{
+◊p{This is a link to the ◊link{◊text{GitHub repository}◊url{https://github.com/lsug/lsug-webiste.git}}.
+Follow the instructions on the README.
+}
+◊p{Don’t hesitate to reach out to the Gitter channel if you have any problems.}
+}
 ◊description{
 ◊p{This is the event abstract.  The first paragraph is shown on the home page.}
 ◊p{The remaining paragraphs are shown on the detail page.
