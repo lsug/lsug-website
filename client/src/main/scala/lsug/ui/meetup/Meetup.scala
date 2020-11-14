@@ -2,7 +2,7 @@ package lsug.ui
 package meetup
 
 import io.circe.Decoder
-import monocle.Lens
+import monocle.{Lens, Iso}
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -30,7 +30,7 @@ object Meetup {
       showSchedule: Boolean,
       speakers: Speakers,
       modal: Option[ModalId],
-      tab: UIEvent.Tab
+      tabs: Map[P.Meetup.Event.Id, UIEvent.Tab]
   )
 
   object State {
@@ -40,7 +40,18 @@ object Meetup {
     val _modal = GenLens[State](_.modal)
     val _meetupDotCom = GenLens[State](_.meetupDotCom)
     val _meetup = GenLens[State](_.meetup)
-    val _tab = GenLens[State](_.tab)
+    val _tabs = GenLens[State](_.tabs)
+
+    // Technically, this is an unlawful `Iso` under the default `Eq` — but we define an `Eq[Option[A]]` where
+    // ```None == default```
+    def _non[A](a: A) =
+      Iso[Option[A], A] {
+        case Some(aa) => aa
+        case None     => a
+      }(Some(_))
+
+    def _tab(e: P.Meetup.Event.Id) =
+      _tabs ^|-> _at(e) ^<-> _non(UIEvent.Tab.about)
   }
 
   import State._
@@ -89,8 +100,8 @@ object Meetup {
                             modify = $.modState
                           ),
                           tabProps = TabProps(
-                            currentTab = s.tab,
-                            lens = State._tab,
+                            currentTab = State._tab(eventId).get(s),
+                            lens = State._tab(eventId),
                             modify = $.modState
                           )
                         )
@@ -162,7 +173,7 @@ object Meetup {
     ScalaComponent
       .builder[(RouterCtl[Page.Home.type], P.Meetup.Id)]("Meetup")
       .initialState[State](
-        State(none, none, false, Map(), none, UIEvent.Tab.about)
+        State(none, none, false, Map(), none, Map.empty)
       )
       .renderBackend[Backend]
       .componentDidMount(_.backend.load)
