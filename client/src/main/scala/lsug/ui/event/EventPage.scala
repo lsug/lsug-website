@@ -1,7 +1,7 @@
 package lsug.ui
 package event
 
-import monocle.{Lens, Iso}
+import monocle.Lens
 import io.circe.Decoder
 import lsug.{protocol => P}
 import japgolly.scalajs.react._
@@ -23,7 +23,7 @@ object EventPage {
       meetup: Option[P.Meetup.MeetupDotCom.Event],
       speakers: Speakers,
       modal: Option[Event.Media],
-      tabs: Map[P.Meetup.Event.Id, Event.Tab]
+      tab: Event.Tab
   )
 
   object State {
@@ -32,18 +32,7 @@ object EventPage {
     val _speakers = GenLens[State](_.speakers)
     def _speaker(s: P.Speaker.Id) = _speakers ^|-> _at(s)
     val _modal = GenLens[State](_.modal)
-    val _tabs = GenLens[State](_.tabs)
-
-    // Technically, this is an unlawful `Iso` under the default `Eq` — but we define an `Eq[Option[A]]` where
-    // ```None == default```
-    def _non[A](a: A) =
-      Iso[Option[A], A] {
-        case Some(aa) => aa
-        case None     => a
-      }(Some(_))
-
-    def _tab(e: P.Meetup.Event.Id) =
-      _tabs ^|-> _at(e) ^<-> _non(Event.Tab.about)
+    val _tab = GenLens[State](_.tab)
   }
 
   final class Backend(
@@ -60,7 +49,7 @@ object EventPage {
         ^.cls := "event-page",
         s.event
           .map {
-            case P.Meetup.EventWithSetting(_, event, eventId) =>
+            case P.Meetup.EventWithSetting(_, event, _) =>
               <.section(
                 Event
                   .Event[State, Event.Media]
@@ -77,10 +66,8 @@ object EventPage {
                       ),
                       modalId = identity,
                       tabProps = TabProps(
-                        currentTab = State
-                          ._tab(eventId)
-                          .get(s),
-                        lens = State._tab(eventId),
+                        currentTab = s.tab,
+                        lens = State._tab,
                         modify = $.modState
                       )
                     )
@@ -130,7 +117,7 @@ object EventPage {
     .builder[(RouterCtl[Page.Home.type], P.Meetup.Id, P.Meetup.Event.Id)](
       "Event"
     )
-    .initialState[State](State(none, none, Map(), none, Map()))
+    .initialState[State](State(none, none, Map(), none, Event.Tab.about))
     .renderBackend[Backend]
     .componentDidMount(_.backend.load)
     .build
