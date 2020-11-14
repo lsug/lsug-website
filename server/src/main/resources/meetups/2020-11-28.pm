@@ -40,10 +40,4 @@
 ◊description{
 ◊p{Make your first pull request in  the ◊link{◊text{Typelevel ecosystem}◊url{https://typelevel.org/projects/}}}
 }}
-◊event{
-◊name{And many more!}
-◊tags{open-source}
-◊time{14:00-17:30}
-◊description{
-◊p{There are a wealth of projects in need of new contributors.  Join us to find out more.}
-}}}
+}
