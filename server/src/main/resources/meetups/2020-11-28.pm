@@ -23,6 +23,30 @@
 ◊setup{◊p{Please run through the ◊link{◊text{contributor’s guide}◊url{https://github.com/scala/scala/blob/2.13.x/CONTRIBUTING.md}} to get set up.}}
 ◊description{
 ◊p{Make your first pull request to the ◊link{◊text{Scala language}◊url{https://github.com/scala/scala}}}
+◊p{Chris can help you to navigate the scala/scala codebase, plan your change and write tests for it.}}
+}}
+◊event{
+◊name{cats-retry}
+◊speakers{chrisbirchall}
+◊tags{open-source}
+◊time{14:00-17:30}
+◊setup{◊p{Please clone the ◊link{◊text{repo}◊url{https://github.com/cb372/cats-retry}} and run "sbt test" to get set up.}}
+◊description{
+◊p{Make your first pull request to the ◊link{◊text{cats-retry project}◊url{https://github.com/cb372/cats-retry}}.}
+◊p{cats-retry is a library for retrying actions that can fail.}
+◊p{Take a look at ◊link{◊text{issues with the LSUG label}◊url{https://github.com/cb372/cats-retry/labels/LSUG}} for inspiration.}
+}}
+◊event{
+◊name{scala-typed-holes}
+◊speakers{chrisbirchall}
+◊tags{open-source}
+◊time{14:00-17:30}
+◊setup{◊p{Please clone the ◊link{◊text{repo}◊url{https://github.com/cb372/scala-typed-holes}} and run "sbt test" to get set up.}}
+◊description{
+◊p{Make your first pull request to the ◊link{◊text{scala-typed-holes project}◊url{https://github.com/cb372/scala-typed-holes}}.}
+◊p{scala-typed-holes is a compiler plugin to turn ??? into a 'typed hole', enabling type-driven development.}
+◊p{Take a look at ◊link{◊text{issues with the LSUG label}◊url{https://github.com/cb372/scala-typed-holes/labels/LSUG}} for inspiration.}
+◊p{Be warned: this one is not for the faint-hearted! Some familiarity with the Scala AST and compiler internals required.}
 }}
 ◊event{
 ◊name{ScalaJS}
