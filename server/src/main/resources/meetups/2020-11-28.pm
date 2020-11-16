@@ -24,7 +24,7 @@
 ◊description{
 ◊p{Make your first pull request to the ◊link{◊text{Scala language}◊url{https://github.com/scala/scala}}}
 ◊p{Chris can help you to navigate the scala/scala codebase, plan your change and write tests for it.}}
-}}
+}
 ◊event{
 ◊name{cats-retry}
 ◊speakers{chrisbirchall}
