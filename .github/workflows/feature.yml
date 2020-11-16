@@ -19,6 +19,8 @@ jobs:
       uses: jodersky/setup-mill@v0.2.2
       with:
         mill-version: 0.8.0
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Check formatting
       run: mill mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources
     - name: Setup up Node
