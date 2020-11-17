@@ -57,10 +57,14 @@ jobs:
       with:
         ammonite-version: 2.0.4
         scala-version: 2.13
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Set up Mill
       uses: jodersky/setup-mill@v0.2.2
       with:
         mill-version: 0.8.0
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Setup up Node
       uses: actions/setup-node@v1
       with:
