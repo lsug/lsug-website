@@ -8,7 +8,6 @@ import java.io.File
 
 object HttpServer extends IOApp {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
   import org.http4s.server.blaze._
   import org.http4s.server.middleware.GZip
   import org.http4s.server.staticcontent._
@@ -46,7 +45,7 @@ object HttpServer extends IOApp {
                   client
                 )
               ).use { server =>
-                val sslStream = BlazeServerBuilder[IO](global)
+                val sslStream = BlazeServerBuilder[IO]
                   .bindHttp(httpsPort, "0.0.0.0")
                   .withSslContext(ssl)
                   .withHttpApp(
@@ -69,7 +68,7 @@ object HttpServer extends IOApp {
                   )
                   .serve
 
-                val redirectStream = BlazeServerBuilder[IO](global)
+                val redirectStream = BlazeServerBuilder[IO]
                   .bindHttp(httpPort, "0.0.0.0")
                   .withHttpApp(SSL.redirectApp[IO](httpsPort))
                   .serve
