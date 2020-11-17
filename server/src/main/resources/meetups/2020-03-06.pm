@@ -20,7 +20,7 @@ We look forward to seeing you at another London Scala Workshop.
 Christmas is long gone, but it's never too late to celebrate functional programming. And there's no better way to celebrate than by solving the Advent of Code.
 }
 ◊p{
-Join us and have a crack at the first three advent of code challenges. Starting with pure functions, recursion, collections and error handling, we'll work our way up to using functional libraries such as ◊link{◊text{cats}◊url{https://index.scala-lang.org/typelevel/cats}}, ◊link{◊text{spire}◊url{https://index.scala-lang.org/typelevel/spire}}, ◊link{◊text{monocle}◊url{https://index.scala-lang.org/julien-truffaut/monocle}} and ◊link{◊text{fs2}◊url{https://index.scala-lang.org/functional-streams-for-scala/fs2}}.
+Join us and have a crack at the first three advent of code challenges. Starting with pure functions, recursion, collections and error handling, we'll work our way up to using functional libraries such as ◊scaladex{◊org{typelevel}◊repo{cats}}, ◊scaladex{◊org{typelevel}◊repo{spire}}, ◊scaladex{◊org{optics-dev}◊repo{monocle}} and ◊scaladex{◊org{functional-streams-for-scala}◊repo{fs2}}.
 }
 }
 ◊setup{

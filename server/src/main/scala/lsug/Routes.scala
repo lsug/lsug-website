@@ -90,6 +90,21 @@ object Routes {
       .out(jsonBody[Meetup.MeetupDotCom.Event])
       .get
 
+    private val org =
+      path[String]("org")
+        .map[Github.Org](new Github.Org(_))(_.value)
+
+    private val repo =
+      path[String]("repo")
+        .map[Github.Repo](new Github.Repo(_))(_.value)
+
+    val scaladexProject = endpoint
+      .name("Scaladex project")
+      .description("Scaladex project entry")
+      .in("scaladex" / org / repo)
+      .out(jsonBody[Scaladex.Project])
+      .get
+
     val endpoints = List(
       upcomingMeetups,
       pastEvents,
@@ -98,12 +113,14 @@ object Routes {
       venue,
       meetupDotComEvent,
       meetup,
-      event
+      event,
+      scaladexProject
     )
   }
 
   def apply[F[_]: Functor: Sync: ContextShift](
-      server: Server[F]
+      server: Server[F],
+      scaladex: Scaladex[F]
   ): HttpRoutes[F] = {
 
     import sttp.tapir.server.http4s._
@@ -135,6 +152,9 @@ object Routes {
       ) <+>
       E.meetupDotComEvent.toRoutes(
         (server.meetupDotCom _).andThen(orVoid)
+      ) <+>
+      E.scaladexProject.toRoutes(
+        (scaladex.project _).tupled.andThen(orVoid)
       ) <+> new RedocHttp4s("London Scala User Group", yaml).routes
   }
 

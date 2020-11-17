@@ -29,6 +29,7 @@ object Github {
     implicit val decoder: Decoder[Org] = Decoder[String].map(new Org(_))
     implicit val encoder: Encoder[Org] = Encoder[String].contramap(_.value)
     implicit val eq: Eq[Org] = Eq[String].contramap(_.value)
+    implicit val show: Show[Org] = Show[String].contramap(_.value)
   }
 
   final class User(val value: String) extends AnyVal
@@ -40,6 +41,28 @@ object Github {
     implicit val show: Show[User] = Show[String].contramap(_.value)
   }
 
+  final class Repo(val value: String) extends AnyVal
+
+  object Repo {
+    implicit val decoder: Decoder[Repo] = Decoder[String].map(new Repo(_))
+    implicit val encoder: Encoder[Repo] = Encoder[String].contramap(_.value)
+    implicit val eq: Eq[Repo] = Eq[String].contramap(_.value)
+    implicit val show: Show[Repo] = Show[String].contramap(_.value)
+  }
+
+}
+
+object Scaladex {
+
+  case class Project(
+      organization: Github.Org,
+      repository: Github.Repo,
+      logo: Link
+  )
+
+  object Project {
+    implicit val codec: Codec[Project] = deriveCodec[Project]
+  }
 }
 
 final class Email(val value: String) extends AnyVal
