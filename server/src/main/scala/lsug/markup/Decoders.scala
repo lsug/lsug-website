@@ -5,6 +5,7 @@ import scala.util.Try
 
 import java.time._
 
+import org.http4s.implicits._
 import cats.data._
 import cats.implicits._
 import lsug.protocol.{Meetup => PMeetup, _}
@@ -21,9 +22,22 @@ private object Decoders {
     (child("text").andThen(text), child("url").andThen(text))
       .mapN(Markup.Text.Link.apply)
 
+  def scaladex: Decoder[Markup.Text.Link] =
+    (child("org").andThen(text), child("repo").andThen(text))
+      .mapN((org, repo) =>
+        Markup.Text.Link(
+          repo,
+          uri"https://index.scala-lang.org".withPath(s"/$org/$repo").toString
+        )
+      )
+
   def paragraph: Decoder[Markup.Paragraph] = {
     val context =
-      Map(Evaluator.from("em", strong), Evaluator.from("link", link))
+      Map(
+        Evaluator.from("em", strong),
+        Evaluator.from("link", link),
+        Evaluator.from("scaladex", scaladex)
+      )
     Evaluator.to[Markup.Paragraph](
       context,
       children =>

@@ -51,7 +51,7 @@ object HttpServer extends IOApp {
                   .withSslContext(ssl)
                   .withHttpApp(
                     Router(
-                      "/api" -> GZip(Routes[IO](server)),
+                      "/api" -> GZip(Routes[IO](server, Scaladex(client))),
                       "" ->
                         Routes.orIndex(
                           assetDir,
