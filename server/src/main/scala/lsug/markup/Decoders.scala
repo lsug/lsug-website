@@ -27,7 +27,9 @@ private object Decoders {
       .mapN((org, repo) =>
         Markup.Text.Link(
           repo,
-          uri"https://index.scala-lang.org".withPath(s"/$org/$repo").toString
+          uri"https://index.scala-lang.org"
+            .withPath(s"/${org.toLowerCase}/${repo.toLowerCase}")
+            .toString
         )
       )
 
