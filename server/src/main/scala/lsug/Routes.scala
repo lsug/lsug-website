@@ -158,14 +158,24 @@ object Routes {
       ) <+> new RedocHttp4s("London Scala User Group", yaml).routes
   }
 
-  def orIndex[F[_]: Sync: ContextShift](
+}
+
+object Index {
+
+  def apply[F[_]: Sync: ContextShift](
       path: Path,
-      routes: HttpRoutes[F],
+      service: HttpRoutes[F],
+      redirect: Uri => Boolean,
       blocker: Blocker
-  ): HttpRoutes[F] =
-    Kleisli { r =>
-      routes.run(r).orElse {
-        StaticFile.fromFile(path.resolve("index.html").toFile, blocker)
+  ): HttpRoutes[F] = {
+    val index = StaticFile.fromFile(path.resolve("index.html").toFile, blocker)
+    Kleisli { req =>
+      service(req).flatMap {
+        case Status.Successful(resp) => OptionT.pure[F](resp)
+        case _ if redirect(req.uri)  => index
+        case resp                    => OptionT.pure[F](resp)
       }
     }
+  }
+
 }
