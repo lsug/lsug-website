@@ -170,11 +170,8 @@ object Index {
   ): HttpRoutes[F] = {
     val index = StaticFile.fromFile(path.resolve("index.html").toFile, blocker)
     Kleisli { req =>
-      service(req).flatMap {
-        case Status.Successful(resp) => OptionT.pure[F](resp)
-        case _ if redirect(req.uri)  => index
-        case resp                    => OptionT.pure[F](resp)
-      }
+      val resp = service(req)
+      if(redirect(req.uri)) resp.orElse(index) else resp
     }
   }
 
