@@ -171,7 +171,7 @@ object Index {
     val index = StaticFile.fromFile(path.resolve("index.html").toFile, blocker)
     Kleisli { req =>
       val resp = service(req)
-      if(redirect(req.uri)) resp.orElse(index) else resp
+      if (redirect(req.uri)) resp.orElse(index) else resp
     }
   }
 
