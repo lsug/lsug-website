@@ -6,6 +6,32 @@ import cats.effect._
 import java.nio.file.Paths
 import java.io.File
 
+object PublicCache {
+
+  import org.http4s._
+  import org.http4s.headers.`Cache-Control`
+  import org.http4s.CacheDirective.{`public`, `max-age`}
+  import cats._
+  import cats.data._
+  import scala.concurrent.duration._
+
+  def apply[F[_]: Functor](
+      service: HttpRoutes[F],
+      duration: Duration
+  ): HttpRoutes[F] = {
+    Kleisli { req =>
+      service(req).map {
+        case Status.Successful(resp) =>
+          resp.putHeaders(
+            `Cache-Control`(NonEmptyList(`public`, List(`max-age`(duration))))
+          )
+        case resp => resp
+      }
+    }
+  }
+
+}
+
 object HttpServer extends IOApp {
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -16,6 +42,7 @@ object HttpServer extends IOApp {
   import org.http4s.client.blaze.BlazeClientBuilder
   import org.http4s.headers.{`User-Agent`, AgentProduct}
   import lsug.{protocol => P}
+  import scala.concurrent.duration._
 
   import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
   val ec = scala.concurrent.ExecutionContext.global
@@ -30,6 +57,7 @@ object HttpServer extends IOApp {
     val httpPort = args(3).toInt
     val sslCertificateFile = Paths.get(args(4)).toFile
     val sslPassword = args(5)
+    val apiPath = "/api"
 
     SSL.loadContextFromClasspath[IO](sslCertificateFile, sslPassword) >>= {
       ssl =>
@@ -51,19 +79,27 @@ object HttpServer extends IOApp {
                   .withSslContext(ssl)
                   .withHttpApp(
                     Router(
-                      "/api" -> GZip(Routes[IO](server, Scaladex(client))),
+                      apiPath ->
+                        PublicCache(
+                          GZip(Routes[IO](server, Scaladex(client))),
+                          5.minutes
+                        ),
                       "" ->
-                        Routes.orIndex(
-                          assetDir,
+                        PublicCache(
                           GZip(
-                            fileService[IO](
-                              FileService.Config(
-                                assetDir.toString,
-                                blocker
-                              )
+                            Index(
+                              assetDir,
+                              fileService[IO](
+                                FileService.Config(
+                                  assetDir.toString,
+                                  blocker
+                                )
+                              ),
+                              !_.path.startsWith(apiPath),
+                              blocker
                             )
                           ),
-                          blocker
+                          5.minutes
                         )
                     ).orNotFound
                   )
