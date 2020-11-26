@@ -64,4 +64,15 @@
 ◊description{
 ◊p{Make your first pull request in  the ◊link{◊text{Typelevel ecosystem}◊url{https://typelevel.org/projects/}}}
 }}
+◊event{
+◊name{Circe}
+◊speakers{travisbrown}
+◊tags{open-source}
+◊time{14:00-17:30}
+◊setup{◊p{Please clone the ◊link{◊text{Circe repository}◊url{https://github.com/circe/circe}} and see the ◊link{◊text{contributor’s guide}◊url{https://github.com/circe/circe/blob/master/CONTRIBUTING.md}} to get set up.}}
+◊description{
+◊p{Make your first pull request to the ◊link{◊text{Circe project}◊url{https://github.com/circe/circe}}.}
+◊p{We’ll be focusing on three sets of tasks (updating Scala 3 support, migrating tests to MUnit, and moving to GitHub Actions), but any other ideas for contributions are more than welcome.}
+◊p{Take a look at issues with the ◊link{◊text{LSUG}◊url{https://github.com/circe/circe/labels/LSUG}} and ◊link{◊text{help wanted}◊url{https://github.com/circe/circe/labels/help%20wanted}} labels for inspiration.}
+}}
 }
