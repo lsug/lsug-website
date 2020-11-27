@@ -30,7 +30,7 @@ jobs:
     - name: Compile
       run: |
         mill server.compile
-        mill client.compile
+        mill client.fastOpt
         mill web.vendor
         mill web.sass
     - name: Run unit tests
