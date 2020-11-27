@@ -9,6 +9,7 @@
 ◊name{Lessons learnt with van Laarhoven lenses}
 ◊speakers{joewarren}
 ◊tags{optics,functional}
+◊recording{b7qQv898cPk}
 ◊time{19:00-19:50}
 ◊description{
 ◊p{
