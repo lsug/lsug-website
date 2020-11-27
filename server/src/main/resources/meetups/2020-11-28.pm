@@ -49,13 +49,14 @@
 ◊p{Be warned: this one is not for the faint-hearted! Some familiarity with the Scala AST and compiler internals required.}
 }}
 ◊event{
-◊name{ScalaJS}
+◊name{Scala.js}
 ◊speakers{sebastiendoeraene}
 ◊tags{open-source}
 ◊time{14:00-17:30}
 ◊setup{◊p{Please run through the ◊link{◊text{developer’s guide}◊url{https://github.com/scala-js/scala-js/blob/master/DEVELOPING.md}} to get set up.}}
 ◊description{
-◊p{Make your first pull request to ◊link{◊text{ScalaJS}◊url{https://github.com/scala-js/scala-js}}}
+◊p{Make your first pull request to ◊link{◊text{Scala.js}◊url{https://github.com/scala-js/scala-js}}.}
+◊p{Search for ◊link{◊text{good first issues}◊url{https://github.com/scala-js/scala-js/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22}} or tackle ◊link{◊text{one of the harder help-wanted issues}◊url{https://github.com/scala-js/scala-js/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22}}.}
 }}
 ◊event{
 ◊name{The Typelevel ecosystem}
