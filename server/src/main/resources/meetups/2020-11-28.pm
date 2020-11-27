@@ -76,4 +76,15 @@
 ◊p{We’ll be focusing on three sets of tasks (updating Scala 3 support, migrating tests to MUnit, and moving to GitHub Actions), but any other ideas for contributions are more than welcome.}
 ◊p{Take a look at issues with the ◊link{◊text{LSUG}◊url{https://github.com/circe/circe/labels/LSUG}} and ◊link{◊text{help wanted}◊url{https://github.com/circe/circe/labels/help%20wanted}} labels for inspiration.}
 }}
+
+◊event{
+◊name{http4s}
+◊speakers{rossbaker}
+◊tags{open-source}
+◊time{14:00-17:30}
+◊setup{◊p{Please clone the ◊link{◊text{http4s repository}◊url{https://github.com/http4s/http4s}} and run through the ◊link{◊text{contributor’s guide}◊url{https://github.com/http4s/http4s/blob/main/CONTRIBUTING.md}} to get set up.}}
+◊description{
+◊p{Make your first pull request to ◊link{◊text{http4s}◊url{https://github.com/http4s/http4s}} and related projects.}
+◊p{Browse through the issues with the ◊link{◊text{lsug label}◊url{https://github.com/http4s/http4s/labels/lsug}}.}
+}}
 }
