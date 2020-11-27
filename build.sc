@@ -14,6 +14,8 @@ val monocleDeps = Agg(
   "monocle-macro"
 ).map { dep => ivy"com.github.julien-truffaut::${dep}::2.0.5" }
 
+val sjsVersion = "1.0.0"
+
 val commonScalacOptions =
   Seq(
     "-language:implicitConversions",
@@ -45,7 +47,7 @@ trait ProtocolModule extends ScalaModule {
 }
 
 object protocolJs extends ProtocolModule with ScalaJSModule {
-  def scalaJSVersion = "1.1.0"
+  def scalaJSVersion = sjsVersion
 }
 
 object protocolJvm extends ProtocolModule
@@ -102,7 +104,7 @@ object server extends ScalaModule {
 
 object client extends ScalaJSModule {
   def scalaVersion = "2.13.1"
-  def scalaJSVersion = "1.1.0"
+  def scalaJSVersion = sjsVersion
   def scalacPluginIvyDeps =
     super.scalacPluginIvyDeps() ++ Agg(
       ivy"com.olegpy::better-monadic-for:0.3.1"
