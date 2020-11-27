@@ -7,12 +7,14 @@ import scalafmt._
 import mill.scalajslib._
 import webpack.{WebpackModule, NpmDependency}
 
-val catsEffectDep = ivy"org.typelevel::cats-effect::2.1.0"
+val catsEffectDep = ivy"org.typelevel::cats-effect::2.1.4"
 
 val monocleDeps = Agg(
   "monocle-core",
   "monocle-macro"
-).map { dep => ivy"com.github.julien-truffaut::${dep}::2.0.1" }
+).map { dep => ivy"com.github.julien-truffaut::${dep}::2.0.5" }
+
+val sjsVersion = "1.3.1"
 
 val commonScalacOptions =
   Seq(
@@ -45,7 +47,7 @@ trait ProtocolModule extends ScalaModule {
 }
 
 object protocolJs extends ProtocolModule with ScalaJSModule {
-  def scalaJSVersion = "0.6.32"
+  def scalaJSVersion = sjsVersion
 }
 
 object protocolJvm extends ProtocolModule
@@ -102,7 +104,7 @@ object server extends ScalaModule {
 
 object client extends ScalaJSModule {
   def scalaVersion = "2.13.1"
-  def scalaJSVersion = "0.6.29"
+  def scalaJSVersion = sjsVersion
   def scalacPluginIvyDeps =
     super.scalacPluginIvyDeps() ++ Agg(
       ivy"com.olegpy::better-monadic-for:0.3.1"
@@ -117,7 +119,7 @@ object client extends ScalaJSModule {
       "core",
       "extra",
       "ext-cats"
-    ).map { dep => ivy"com.github.japgolly.scalajs-react::${dep}::1.6.0" }
+    ).map { dep => ivy"com.github.japgolly.scalajs-react::${dep}::1.7.0" }
 }
 
 trait WebModule extends WebpackModule {
