@@ -186,7 +186,7 @@ object Home {
 
         (for {
           now <- $.props.async.map(_.now)
-          instant <- AsyncCallback.point(
+          instant <- AsyncCallback.delay(
             now.atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT)
           )
           upcoming <- resource(State._upcoming, s"meetups?after=$instant")
