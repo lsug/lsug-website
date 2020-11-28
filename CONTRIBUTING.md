@@ -46,9 +46,13 @@ This project requires quite a few tools to get up and running. Don’t worry if 
 By this point, you should have already used GitHub, git and a terminal. If not, get set up with the [first-contributions project](https://github.com/firstcontributions/first-contributions).
 
 You’ll now need to install:
- - [mill version 0.8.0](http://www.lihaoyi.com/mill/)
- - [nodejs version 10](https://nodejs.org/)
- - [yarn version 1.22](https://yarnpkg.com/)
+  
+### Mill for Windows
+[mill version 0.8.0](http://www.lihaoyi.com/mill/)
+
+ 
+### [nodejs version 10](https://nodejs.org/)
+### [yarn version 1.22](https://yarnpkg.com/)
 
 You will also need an IDE. If you’re undecided on one, we recommend [VSCode](https://code.visualstudio.com/) with the following extensions:
  - the Live Share Extension Pack
