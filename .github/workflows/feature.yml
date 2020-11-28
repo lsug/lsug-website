@@ -33,7 +33,7 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Check formatting
-      run: mill mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources
+      run: ${{ matrix.mill }} mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources
     - name: Setup up Node
       uses: actions/setup-node@v1
       with:
