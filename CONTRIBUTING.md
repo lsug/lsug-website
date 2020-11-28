@@ -48,6 +48,7 @@ By this point, you should have already used GitHub, git and a terminal. If not, 
 You’ll now need to install:
   
 ### Mill for Windows
+Version: version 0.8.0
 [mill version 0.8.0](http://www.lihaoyi.com/mill/)
 
  
