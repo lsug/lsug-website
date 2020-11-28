@@ -34,10 +34,13 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Check formatting
       run: ${{ matrix.mill }} mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources
-    - name: Setup up Node
+    - name: Setup Node
       uses: actions/setup-node@v1
       with:
         node-version: '10.x'
+    - name: Install Yarn
+      run: |
+        npm -g install yarn
     - name: Compile
       run: |
         ${{ matrix.mill }} server.compile
