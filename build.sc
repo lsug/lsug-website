@@ -7,12 +7,12 @@ import scalafmt._
 import mill.scalajslib._
 import webpack.{WebpackModule, NpmDependency}
 
-val catsEffectDep = ivy"org.typelevel::cats-effect::2.1.4"
+val catsEffectDep = ivy"org.typelevel::cats-effect::2.3.0"
 
 val monocleDeps = Agg(
   "monocle-core",
   "monocle-macro"
-).map { dep => ivy"com.github.julien-truffaut::${dep}::2.0.5" }
+).map { dep => ivy"com.github.julien-truffaut::${dep}::2.1.0" }
 
 val sjsVersion = "1.3.1"
 
@@ -36,7 +36,7 @@ trait ProtocolModule extends ScalaModule {
   def scalacOptions = commonScalacOptions
 
   def ivyDeps =
-    Agg(ivy"org.typelevel::cats-core::2.2.0-M2") ++ Agg(
+    Agg(ivy"org.typelevel::cats-core::2.2.0") ++ Agg(
       "circe-core",
       "circe-parser",
       "circe-generic"
@@ -67,7 +67,7 @@ object server extends ScalaModule {
   def ivyDeps =
     Agg(
       catsEffectDep,
-      ivy"io.chrisdavenport::log4cats-slf4j::1.0.1",
+      ivy"io.chrisdavenport::log4cats-slf4j::1.1.1",
       ivy"ch.qos.logback:logback-classic:1.2.3",
       ivy"com.spotify::magnolify-cats::0.3.0"
     ) ++ Agg(
@@ -75,17 +75,17 @@ object server extends ScalaModule {
       "http4s-circe",
       "http4s-blaze-server",
       "http4s-blaze-client"
-    ).map { dep => ivy"org.http4s::${dep}::0.21.9" } ++ Agg(
+    ).map { dep => ivy"org.http4s::${dep}::0.21.13" } ++ Agg(
       "tapir-core",
       "tapir-json-circe",
       "tapir-http4s-server",
       "tapir-openapi-docs",
       "tapir-openapi-circe-yaml",
-      "tapir-redoc-http4s" 
+      "tapir-redoc-http4s"
     ).map { dep => ivy"com.softwaremill.sttp.tapir::${dep}::0.16.16" } ++ Agg(
       "fs2-io",
       "fs2-core"
-    ).map { dep => ivy"co.fs2::${dep}::2.3.0" } ++ monocleDeps ++
+    ).map { dep => ivy"co.fs2::${dep}::2.4.6" } ++ monocleDeps ++
       Agg(ivy"io.chrisdavenport::cats-time::0.3.4")
 
   def assetDir = T.source {
@@ -97,7 +97,7 @@ object server extends ScalaModule {
   }
 
   object test extends Tests {
-    def ivyDeps = Agg(ivy"org.scalameta::munit::0.7.1")
+    def ivyDeps = Agg(ivy"org.scalameta::munit::0.7.19")
     def testFrameworks = Seq("munit.Framework")
   }
 }
@@ -113,7 +113,7 @@ object client extends ScalaJSModule {
   def moduleDeps = Seq(protocolJs)
   def ivyDeps =
     monocleDeps ++ Agg(
-      ivy"io.github.cquiroz::scala-java-time::2.0.0-RC5",
+      ivy"io.github.cquiroz::scala-java-time::2.0.0",
       catsEffectDep
     ) ++ Agg(
       "core",
@@ -159,14 +159,19 @@ object web extends WebModule {
     val r2 = r(t2).map(_.asInstanceOf[PathRef])
 
     (r0, r1, r2) match {
-      case (Result.Success(bundle), Result.Success(assetDir), Result.Success(sslKey)) =>
+      case (
+          Result.Success(bundle),
+          Result.Success(assetDir),
+          Result.Success(sslKey)
+          ) =>
         server.runBackground(
           bundle.path.toString,
           assetDir.path.toString,
           "8443",
           "8080",
           sslKey.path.toString,
-          "password")
+          "password"
+        )
     }
 
   }
@@ -181,14 +186,19 @@ object web extends WebModule {
     val r2 = r(t2).map(_.asInstanceOf[PathRef])
 
     (r0, r1, r2) match {
-      case (Result.Success(bundle), Result.Success(assetDir), Result.Success(sslKey)) =>
+      case (
+          Result.Success(bundle),
+          Result.Success(assetDir),
+          Result.Success(sslKey)
+          ) =>
         server.run(
           bundle.path.toString,
           assetDir.path.toString,
           "8443",
           "8080",
           sslKey.path.toString,
-          "password")
+          "password"
+        )
     }
 
   }
@@ -248,7 +258,7 @@ object ci extends WebModule {
               account(),
               region(),
               upload.toString,
-              sslPassword(),
+              sslPassword()
             ).mkString(" ")
         )
         .render(2)
