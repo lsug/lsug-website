@@ -85,7 +85,7 @@ object server extends ScalaModule {
     ).map { dep => ivy"com.softwaremill.sttp.tapir::${dep}::0.16.16" } ++ Agg(
       "fs2-io",
       "fs2-core"
-    ).map { dep => ivy"co.fs2::${dep}::2.3.0" } ++ monocleDeps ++
+    ).map { dep => ivy"co.fs2::${dep}::2.4.6" } ++ monocleDeps ++
       Agg(ivy"io.chrisdavenport::cats-time::0.3.4")
 
   def assetDir = T.source {
