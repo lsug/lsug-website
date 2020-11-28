@@ -75,7 +75,7 @@ object server extends ScalaModule {
       "http4s-circe",
       "http4s-blaze-server",
       "http4s-blaze-client"
-    ).map { dep => ivy"org.http4s::${dep}::0.21.9" } ++ Agg(
+    ).map { dep => ivy"org.http4s::${dep}::0.21.13" } ++ Agg(
       "tapir-core",
       "tapir-json-circe",
       "tapir-http4s-server",
