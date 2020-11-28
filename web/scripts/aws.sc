@@ -24,7 +24,11 @@ object Eip {
       instance: String
   ): Resource[AWS] = { scope =>
     {
-      ec2.CfnEIP.Builder.create(scope, id).domain("vpc").instanceId(instance).build
+      ec2.CfnEIP.Builder
+        .create(scope, id)
+        .domain("vpc")
+        .instanceId(instance)
+        .build
     }
   }
 }
@@ -44,8 +48,7 @@ object Vpc {
         .natGateways(0)
         .subnetConfiguration(
           List(
-            ec2.SubnetConfiguration
-              .builder
+            ec2.SubnetConfiguration.builder
               .cidrMask(24)
               .subnetType(ec2.SubnetType.PUBLIC)
               .name("egress")

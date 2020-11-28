@@ -81,7 +81,7 @@ object server extends ScalaModule {
       "tapir-http4s-server",
       "tapir-openapi-docs",
       "tapir-openapi-circe-yaml",
-      "tapir-redoc-http4s" 
+      "tapir-redoc-http4s"
     ).map { dep => ivy"com.softwaremill.sttp.tapir::${dep}::0.16.16" } ++ Agg(
       "fs2-io",
       "fs2-core"
@@ -159,14 +159,19 @@ object web extends WebModule {
     val r2 = r(t2).map(_.asInstanceOf[PathRef])
 
     (r0, r1, r2) match {
-      case (Result.Success(bundle), Result.Success(assetDir), Result.Success(sslKey)) =>
+      case (
+          Result.Success(bundle),
+          Result.Success(assetDir),
+          Result.Success(sslKey)
+          ) =>
         server.runBackground(
           bundle.path.toString,
           assetDir.path.toString,
           "8443",
           "8080",
           sslKey.path.toString,
-          "password")
+          "password"
+        )
     }
 
   }
@@ -181,14 +186,19 @@ object web extends WebModule {
     val r2 = r(t2).map(_.asInstanceOf[PathRef])
 
     (r0, r1, r2) match {
-      case (Result.Success(bundle), Result.Success(assetDir), Result.Success(sslKey)) =>
+      case (
+          Result.Success(bundle),
+          Result.Success(assetDir),
+          Result.Success(sslKey)
+          ) =>
         server.run(
           bundle.path.toString,
           assetDir.path.toString,
           "8443",
           "8080",
           sslKey.path.toString,
-          "password")
+          "password"
+        )
     }
 
   }
@@ -248,7 +258,7 @@ object ci extends WebModule {
               account(),
               region(),
               upload.toString,
-              sslPassword(),
+              sslPassword()
             ).mkString(" ")
         )
         .render(2)

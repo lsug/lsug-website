@@ -17,9 +17,12 @@ def instanceId = {
 
 def reboot(instanceId: String) = {
   val client = Ec2Client.create()
-  client.rebootInstances(
-    RebootInstancesRequest.builder()
-      .instanceIds(instanceId)
-      .build()
-  ).toString
+  client
+    .rebootInstances(
+      RebootInstancesRequest
+        .builder()
+        .instanceIds(instanceId)
+        .build()
+    )
+    .toString
 }

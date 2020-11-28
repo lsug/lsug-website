@@ -45,7 +45,9 @@ trait WebpackModule extends Module {
   def npmDeps: T[Agg[NpmDependency]]
   def devDependencies: T[Agg[(String, String)]] = T { Agg() }
   def mainJS: T[PathRef]
-  def mainStylesheet: T[PathRef] = T.source { PathRef(millSourcePath / "stylesheets" / "main.scss") }
+  def mainStylesheet: T[PathRef] = T.source {
+    PathRef(millSourcePath / "stylesheets" / "main.scss")
+  }
 
   def entryPoint = T {
     val path = T.ctx.dest / "entrypoint.js"
@@ -100,7 +102,9 @@ trait WebpackModule extends Module {
   }
 
   def stylesheets = T.sources {
-    os.walk(millSourcePath / "stylesheets").filter(_.ext == "scss").map(PathRef(_))
+    os.walk(millSourcePath / "stylesheets")
+      .filter(_.ext == "scss")
+      .map(PathRef(_))
   }
 
   def assets = T.source {
