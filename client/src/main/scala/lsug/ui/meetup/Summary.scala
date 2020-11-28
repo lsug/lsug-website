@@ -21,26 +21,25 @@ object Summary {
 
   val EventSummary = ScalaComponent
     .builder[(P.Meetup.Event, SpeakerProfiles)]("EventSummary")
-    .render_P {
-      case (event, speakers) =>
-        <.div(
-          ^.cls := "card-body",
-          <.section(
-            <.h2(
-              ^.cls := "small-heading",
-              event.title
-            ),
-            NonEmptyList
-              .fromList(event.speakers)
-              .map { ss => SpeakerProfiles((ss.toList, speakers)) }
-              .whenDefined,
-            EventDescription(event.description)
+    .render_P { case (event, speakers) =>
+      <.div(
+        ^.cls := "card-body",
+        <.section(
+          <.h2(
+            ^.cls := "small-heading",
+            event.title
           ),
-          <.ul(
-            ^.cls := "event-tags",
-            event.tags.distinct.map { t => <.li(TagBadge(t)) }.toTagMod
-          )
+          NonEmptyList
+            .fromList(event.speakers)
+            .map { ss => SpeakerProfiles((ss.toList, speakers)) }
+            .whenDefined,
+          EventDescription(event.description)
+        ),
+        <.ul(
+          ^.cls := "event-tags",
+          event.tags.distinct.map { t => <.li(TagBadge(t)) }.toTagMod
         )
+      )
     }
     .build
 
@@ -55,10 +54,10 @@ object Summary {
     .builder[Props]("MeetupSummary")
     .render_P {
       case Props(
-          now,
-          meetup,
-          speakers,
-          venues
+            now,
+            meetup,
+            speakers,
+            venues
           ) =>
         val page = s"meetups/${meetup.setting.id.show}"
         <.div(

@@ -133,8 +133,8 @@ object SSL {
   import org.http4s.dsl.Http4sDsl
   import org.http4s.headers.{Host, Location}
 
-  def loadContextFromClasspath[F[_]](certFile: File, password: String)(
-      implicit F: Sync[F]
+  def loadContextFromClasspath[F[_]](certFile: File, password: String)(implicit
+      F: Sync[F]
   ): F[SSLContext] =
     F.delay {
       val ksStream = new FileInputStream(certFile)

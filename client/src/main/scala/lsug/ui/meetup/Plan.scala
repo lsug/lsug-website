@@ -18,15 +18,14 @@ object plan {
 
     ScalaComponent
       .builder[(LocalDateTime, LocalDateTime)]("EventTime")
-      .render_P {
-        case (start, end) =>
-          <.div(
-            ^.cls := "event-time",
-            MaterialIcon("schedule"),
-            <.span(start.format(pattern)),
-            <.span("-"),
-            <.span(end.format(pattern))
-          )
+      .render_P { case (start, end) =>
+        <.div(
+          ^.cls := "event-time",
+          MaterialIcon("schedule"),
+          <.span(start.format(pattern)),
+          <.span("-"),
+          <.span(end.format(pattern))
+        )
       }
       .build
   }
@@ -49,14 +48,13 @@ object plan {
         <.section(
           ^.cls := "meetup-dot-com",
           props
-            .map {
-              case P.Meetup.MeetupDotCom.Event(link, attendees) =>
-                <.a(
-                  ^.href := link.show,
-                  ^.target := "_blank",
-                  <.h2(Logo(), <.span(s"${attendees} attendees")),
-                  <.div(<.span(^.cls := "sign-up", "sign up"))
-                )
+            .map { case P.Meetup.MeetupDotCom.Event(link, attendees) =>
+              <.a(
+                ^.href := link.show,
+                ^.target := "_blank",
+                <.h2(Logo(), <.span(s"${attendees} attendees")),
+                <.div(<.span(^.cls := "sign-up", "sign up"))
+              )
             }
             .getOrElse {
               Spinner()
@@ -75,25 +73,24 @@ object plan {
       .builder[P.Meetup.Schedule]("EventSchedule")
       .render_P {
         case P.Meetup.Schedule(
-            items
+              items
             ) =>
           <.ol(
             ^.cls := "event-schedule",
             items
-              .map {
-                case P.Meetup.Schedule.Item(name, start, end) =>
-                  <.li(
-                    <.span(
-                      ^.cls := "event-time",
-                      start.format(format),
-                      "-",
-                      end.format(format)
-                    ),
-                    <.span(
-                      ^.cls := "event-name",
-                      name
-                    )
+              .map { case P.Meetup.Schedule.Item(name, start, end) =>
+                <.li(
+                  <.span(
+                    ^.cls := "event-time",
+                    start.format(format),
+                    "-",
+                    end.format(format)
+                  ),
+                  <.span(
+                    ^.cls := "event-name",
+                    name
                   )
+                )
               }
               .toList
               .toTagMod

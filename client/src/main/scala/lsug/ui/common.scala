@@ -64,15 +64,14 @@ object common {
 
     val Tab = ScalaComponent
       .builder[(String, Boolean, Callback)]("Tab")
-      .render_PC {
-        case ((label, selected, onSelect), children) =>
-          <.button(
-            ^.role := "tab",
-            ^.aria.selected := selected,
-            ^.aria.controls := label,
-            ^.onClick --> onSelect,
-            children
-          )
+      .render_PC { case ((label, selected, onSelect), children) =>
+        <.button(
+          ^.role := "tab",
+          ^.aria.selected := selected,
+          ^.aria.controls := label,
+          ^.onClick --> onSelect,
+          children
+        )
       }
       .build
 
@@ -117,14 +116,13 @@ object common {
 
     val TabPanel = ScalaComponent
       .builder[(String, Boolean)]("TabPanel")
-      .render_PC {
-        case ((label, selected), children) =>
-          <.div(
-            ^.id := label,
-            ^.role := "tabpanel",
-            ^.hidden := !selected,
-            children
-          )
+      .render_PC { case ((label, selected), children) =>
+        <.div(
+          ^.id := label,
+          ^.role := "tabpanel",
+          ^.hidden := !selected,
+          children
+        )
       }
       .build
 
@@ -180,26 +178,25 @@ object common {
 
     val Modal = ScalaComponent
       .builder[(Boolean, Callback)]("Modal")
-      .render_PC {
-        case ((open, onClose), children) =>
+      .render_PC { case ((open, onClose), children) =>
+        <.div(
+          ^.cls := "modal",
+          Overlay(open),
           <.div(
-            ^.cls := "modal",
-            Overlay(open),
+            ^.role := "dialog",
+            ^.cls := (if (open) "open" else "hidden"),
             <.div(
-              ^.role := "dialog",
-              ^.cls := (if (open) "open" else "hidden"),
-              <.div(
-                ^.cls := "header",
-                <.button(
-                  ^.cls := "close",
-                  MaterialIcon("close"),
-                  ^.onClick --> onClose
-                )
-              ),
-              // delay loading of children
-              children.when(open)
-            )
+              ^.cls := "header",
+              <.button(
+                ^.cls := "close",
+                MaterialIcon("close"),
+                ^.onClick --> onClose
+              )
+            ),
+            // delay loading of children
+            children.when(open)
           )
+        )
       }
       .build
 
@@ -222,33 +219,32 @@ object common {
       def apply[S, I: Eq] =
         ScalaComponent
           .builder[Props[S, I]]("ModalControl")
-          .render_P {
-            case Props(props, id, label, icon, src) =>
-              <.div(
-                ^.cls := "modal-control",
-                <.button(
-                  ^.cls := "open-media",
-                  ^.onClick --> props.modify(props.lens.set(id.some)),
-                  MaterialIcon(icon),
-                  <.span(
-                    ^.cls := "modal-control-label",
-                    label
-                  )
-                ),
-                Modal.withChildren(
-                  <.div(
-                    ^.cls := label,
-                    <.iframe(
-                      ^.src := src,
-                      ^.frameBorder := "0",
-                      ^.allowFullScreen := true
-                    )
-                  )
-                )(
-                  props.currentModal.map(_ === id).getOrElse(false),
-                  props.modify(props.lens.set(none))
+          .render_P { case Props(props, id, label, icon, src) =>
+            <.div(
+              ^.cls := "modal-control",
+              <.button(
+                ^.cls := "open-media",
+                ^.onClick --> props.modify(props.lens.set(id.some)),
+                MaterialIcon(icon),
+                <.span(
+                  ^.cls := "modal-control-label",
+                  label
                 )
+              ),
+              Modal.withChildren(
+                <.div(
+                  ^.cls := label,
+                  <.iframe(
+                    ^.src := src,
+                    ^.frameBorder := "0",
+                    ^.allowFullScreen := true
+                  )
+                )
+              )(
+                props.currentModal.map(_ === id).getOrElse(false),
+                props.modify(props.lens.set(none))
               )
+            )
 
           }
           .build
@@ -312,15 +308,14 @@ object common {
       .builder[(LocalDateTime, LocalDateTime, LocalDateTime)](
         "TimeRange"
       )
-      .render_P {
-        case (now, start, end) =>
-          <.div(
-            ^.cls := "event-time",
-            MaterialIcon("event"),
-            <.span(
-              display(now, start, end)
-            )
+      .render_P { case (now, start, end) =>
+        <.div(
+          ^.cls := "event-time",
+          MaterialIcon("event"),
+          <.span(
+            display(now, start, end)
           )
+        )
       }
       .configure(Reusability.shouldComponentUpdate)
       .build
@@ -356,27 +351,26 @@ object common {
 
   val SpeakerProfiles = ScalaComponent
     .builder[(List[P.Speaker.Id], SpeakerProfiles)]("Speakers")
-    .render_P {
-      case (ids, speakers) =>
-        <.section(
-          ^.cls := "speakers",
-          <.ul(
-            ids.map { id =>
-              <.li(
-                <.div(
-                  ^.cls := "speaker",
-                  speakers
-                    .get(id)
-                    .map(s => <.span(^.cls := "name", s.name))
-                    .getOrElse(
-                      <.span(^.cls := "name placeholder")
-                    ),
-                  ProfilePicture(speakers.get(id))
-                )
+    .render_P { case (ids, speakers) =>
+      <.section(
+        ^.cls := "speakers",
+        <.ul(
+          ids.map { id =>
+            <.li(
+              <.div(
+                ^.cls := "speaker",
+                speakers
+                  .get(id)
+                  .map(s => <.span(^.cls := "name", s.name))
+                  .getOrElse(
+                    <.span(^.cls := "name placeholder")
+                  ),
+                ProfilePicture(speakers.get(id))
               )
-            }.toTagMod
-          )
+            )
+          }.toTagMod
         )
+      )
     }
     .build
 

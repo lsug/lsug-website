@@ -28,8 +28,8 @@ trait DecoderAssertions { self: LsugSuite =>
     }
   }
 
-  private def assertOutput[A: Eq: Show](result: A, expected: A)(
-      implicit loc: munit.Location
+  private def assertOutput[A: Eq: Show](result: A, expected: A)(implicit
+      loc: munit.Location
   ): Unit = {
     if (result =!= expected) {
       fail(

@@ -82,8 +82,8 @@ private class DecoderSpec extends LsugSuite with DecoderAssertions {
 
   def checkChildren(
       name: String
-  )(tagname: String, input: List[Pollen], output: List[Tag])(
-      implicit loc: munit.Location
+  )(tagname: String, input: List[Pollen], output: List[Tag])(implicit
+      loc: munit.Location
   ): Unit = {
     assertEither(children(tagname), input, Right(output))
       .label("children")
@@ -92,8 +92,8 @@ private class DecoderSpec extends LsugSuite with DecoderAssertions {
 
   def checkChild(
       name: String
-  )(tagname: String, input: List[Pollen], output: Tag)(
-      implicit loc: munit.Location
+  )(tagname: String, input: List[Pollen], output: Tag)(implicit
+      loc: munit.Location
   ): Unit = {
     assertEither(child(tagname), input, Right(output))
       .label("child")

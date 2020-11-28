@@ -18,9 +18,8 @@ object about {
 
   private val Action = ScalaComponent
     .builder[(String, String)]("Action")
-    .render_P {
-      case (text, location) =>
-        <.div(^.cls := "button-container", <.a(^.href := location, text))
+    .render_P { case (text, location) =>
+      <.div(^.cls := "button-container", <.a(^.href := location, text))
     }
     .build
 

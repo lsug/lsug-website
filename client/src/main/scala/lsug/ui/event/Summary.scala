@@ -23,21 +23,20 @@ object Summary {
 
   private val Content = ScalaComponent
     .builder[(P.Meetup.Event, SpeakerProfiles, String)]("EventContent")
-    .render_P {
-      case (event: P.Meetup.Event, speakers, eventPage) =>
-        <.section(
-          <.header(
-            <.h2(
-              ^.cls := "small-heading",
-              <.a(
-                ^.href := eventPage,
-                event.title
-              )
+    .render_P { case (event: P.Meetup.Event, speakers, eventPage) =>
+      <.section(
+        <.header(
+          <.h2(
+            ^.cls := "small-heading",
+            <.a(
+              ^.href := eventPage,
+              event.title
             )
-          ),
-          SpeakerProfiles((event.speakers, speakers)),
-          EventDescription(event.description)
-        )
+          )
+        ),
+        SpeakerProfiles((event.speakers, speakers)),
+        EventDescription(event.description)
+      )
     }
     .build
 
@@ -52,20 +51,19 @@ object Summary {
     ](
       "EventRecording"
     )
-    .render_P {
-      case (modalProps, meetupId, eventId, recording) =>
-        val id = Home.ModalId(meetupId, eventId, Home.Media.Video)
-        modal
-          .control[Home.State, Home.ModalId]
-          .apply(
-            modal.control.Props(
-              modalProps,
-              id,
-              "video",
-              "video_library",
-              s"https://www.youtube.com/embed/${recording.show}?modestbranding=1"
-            )
+    .render_P { case (modalProps, meetupId, eventId, recording) =>
+      val id = Home.ModalId(meetupId, eventId, Home.Media.Video)
+      modal
+        .control[Home.State, Home.ModalId]
+        .apply(
+          modal.control.Props(
+            modalProps,
+            id,
+            "video",
+            "video_library",
+            s"https://www.youtube.com/embed/${recording.show}?modestbranding=1"
           )
+        )
     }
     .build
 
@@ -73,33 +71,32 @@ object Summary {
     .builder[(Home.ModalProps, P.Meetup.Id, String, P.Meetup.Media)](
       "EventSlides"
     )
-    .render_P {
-      case (modalProps, meetupId, eventId, link) =>
-        val id = Home.ModalId(meetupId, eventId, Home.Media.Slides)
-        if (!link.openInNew) {
-          modal
-            .control[Home.State, Home.ModalId]
-            .apply(
-              modal.control.Props(
-                modalProps,
-                id,
-                "slides",
-                "description",
-                link.link.show
-              )
-            )
-        } else {
-          <.a(
-            ^.cls := "open-media",
-            ^.href := link.link.show,
-            ^.target := "_blank",
-            MaterialIcon("description"),
-            <.div(
-              <.span("slides"),
-              MaterialIcon("open_in_new")
+    .render_P { case (modalProps, meetupId, eventId, link) =>
+      val id = Home.ModalId(meetupId, eventId, Home.Media.Slides)
+      if (!link.openInNew) {
+        modal
+          .control[Home.State, Home.ModalId]
+          .apply(
+            modal.control.Props(
+              modalProps,
+              id,
+              "slides",
+              "description",
+              link.link.show
             )
           )
-        }
+      } else {
+        <.a(
+          ^.cls := "open-media",
+          ^.href := link.link.show,
+          ^.target := "_blank",
+          MaterialIcon("description"),
+          <.div(
+            <.span("slides"),
+            MaterialIcon("open_in_new")
+          )
+        )
+      }
     }
     .build
 
@@ -115,11 +112,11 @@ object Summary {
     .builder[Props]("EventSummary")
     .render_P {
       case Props(
-          now,
-          event,
-          speakers,
-          venues,
-          modal
+            now,
+            event,
+            speakers,
+            venues,
+            modal
           ) =>
         val eventPage = s"events/${event.setting.id.show}/${event.eventId.show}"
         <.div(

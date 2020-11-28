@@ -61,9 +61,12 @@ private object Evaluator {
       name: String,
       decoder: Decoder[A]
   ): (String, Function) =
-    (name, { pairs =>
-      decoder(pairs.map(_.input)).leftMap(Error.DecoderFailed(_))
-    })
+    (
+      name,
+      { pairs =>
+        decoder(pairs.map(_.input)).leftMap(Error.DecoderFailed(_))
+      }
+    )
 
   def to[A](
       ctx: Context,

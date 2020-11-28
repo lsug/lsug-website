@@ -17,7 +17,11 @@ case class Yarn(nodeModules: PathRef, packageJson: PathRef, lockFile: PathRef) {
     os.copy.over(packageJson.path, wd / "package.json")
     os.copy.over(lockFile.path, wd / "yarn.lock")
     val exec = Command(
-      (Vector[Shellable]("yarn", "--modules-folder", nodeModules.path) ++ cmd.toVector)
+      (Vector[Shellable](
+        "yarn",
+        "--modules-folder",
+        nodeModules.path
+      ) ++ cmd.toVector)
         .map(_.s.toVector)
         .reduce(_ ++ _),
       Map.empty,
@@ -53,8 +57,8 @@ trait WebpackModule extends Module {
     val path = T.ctx.dest / "entrypoint.js"
 
     val require = npmDeps()
-      .map {
-        case NpmDependency(n, _, g) => s"global['$g'] = require('$n')"
+      .map { case NpmDependency(n, _, g) =>
+        s"global['$g'] = require('$n')"
       }
       .mkString("\n")
 

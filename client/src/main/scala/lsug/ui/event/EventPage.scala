@@ -48,31 +48,30 @@ object EventPage {
       <.main(
         ^.cls := "event-page",
         s.event
-          .map {
-            case P.Meetup.EventWithSetting(_, event, _) =>
-              <.section(
-                Event
-                  .Event[State, Event.Media]
-                  .apply(
-                    Event.Props(
-                      event = event,
-                      speakers = s.speakers.view
-                        .filterKeys(event.speakers.contains(_))
-                        .toMap,
-                      modalProps = ModalProps(
-                        currentModal = s.modal,
-                        lens = State._modal,
-                        modify = $.modState
-                      ),
-                      modalId = identity,
-                      tabProps = TabProps(
-                        currentTab = s.tab,
-                        lens = State._tab,
-                        modify = $.modState
-                      )
+          .map { case P.Meetup.EventWithSetting(_, event, _) =>
+            <.section(
+              Event
+                .Event[State, Event.Media]
+                .apply(
+                  Event.Props(
+                    event = event,
+                    speakers = s.speakers.view
+                      .filterKeys(event.speakers.contains(_))
+                      .toMap,
+                    modalProps = ModalProps(
+                      currentModal = s.modal,
+                      lens = State._modal,
+                      modify = $.modState
+                    ),
+                    modalId = identity,
+                    tabProps = TabProps(
+                      currentTab = s.tab,
+                      lens = State._tab,
+                      modify = $.modState
                     )
                   )
-              )
+                )
+            )
           }
           .getOrElse(<.div(^.cls := "placeholder"))
       )
