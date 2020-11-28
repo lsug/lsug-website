@@ -12,7 +12,7 @@ val catsEffectDep = ivy"org.typelevel::cats-effect::2.1.4"
 val monocleDeps = Agg(
   "monocle-core",
   "monocle-macro"
-).map { dep => ivy"com.github.julien-truffaut::${dep}::2.0.5" }
+).map { dep => ivy"com.github.julien-truffaut::${dep}::2.1.0" }
 
 val sjsVersion = "1.3.1"
 
