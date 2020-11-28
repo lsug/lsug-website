@@ -4,12 +4,19 @@ on:
   pull_request:
     branches: [ master ]
 
+
 jobs:
   build:
+    strategy:
+      matrix:
+        include:
+        - name: Windows
+          os: windows-latest
+        - name: Linux
+          os: ubuntu-latest
 
-    runs-on:
-    - ubuntu-latest
-    - windows-latest
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
