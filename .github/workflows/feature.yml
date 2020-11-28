@@ -12,8 +12,10 @@ jobs:
         include:
         - name: Windows
           os: windows-latest
+          mill: 'mill --no-server'
         - name: Linux
           os: ubuntu-latest
+          mill: 'mill'
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -38,9 +40,9 @@ jobs:
         node-version: '10.x'
     - name: Compile
       run: |
-        mill server.compile
-        mill client.fastOpt
-        mill web.vendor
-        mill web.sass
+        ${{ matrix.mill }} server.compile
+        ${{ matrix.mill }} client.fastOpt
+        ${{ matrix.mill }} web.vendor
+        ${{ matrix.mill }} web.sass
     - name: Run unit tests
-      run: mill server.test
+      run: ${{ matrix.mill }} server.test
