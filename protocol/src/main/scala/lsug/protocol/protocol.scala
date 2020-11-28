@@ -99,6 +99,7 @@ object Asset {
   }
 
   val twitter = new Asset("twitter.svg")
+  val scaladex = new Asset("scaladex.svg")
   val github = new Asset("github.png")
 }
 

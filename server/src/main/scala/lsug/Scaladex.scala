@@ -51,9 +51,8 @@ object Scaladex {
           )
         )(jsonOf[F, List[P.Project]])
         response.map(
-          _.headOption.filter(p =>
-            p.organization === org && p.repository === repo
-          )
+          // Search rankings are fuzzy which means even an exact match may not be at the head position
+          _.filter(p => p.organization === org && p.repository === repo).headOption
         )
       }
     }

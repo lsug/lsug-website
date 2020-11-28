@@ -30,7 +30,7 @@ We will walk through a case study of creating an API in Scala for searches throu
 ◊recording{MARrVJOXyc4}
 ◊description{
 ◊p{
-mockito‑scala started as a simple wrapper of mockito-core to provide a more usable API and solve some Java-Scala interop issues, but since then it has evolved to become a full blown Scala mocking framework that encourages Scala best practices, provides integration with major Scala libraries and allows us to write more declarative, clearer and concise tests. In this talk we’ll go over some of the most popular fixes/additions over the Java API and also the new features that will make our tests better and simpler
+◊scaladex{◊org{mockito}◊repo{mockito-scala}} started as a simple wrapper of mockito-core to provide a more usable API and solve some Java-Scala interop issues, but since then it has evolved to become a full blown Scala mocking framework that encourages Scala best practices, provides integration with major Scala libraries and allows us to write more declarative, clearer and concise tests. In this talk we’ll go over some of the most popular fixes/additions over the Java API and also the new features that will make our tests better and simpler
 }
 }
 }

@@ -43,7 +43,7 @@ https://higherkindness.io/mu-scala/}◊text{Mu}}, a microservices framework deve
 }
 ◊description{
 ◊p{Talk about some common patterns specific to microservices and streaming architectures.}
-◊p{I will show how to integrate Kafka in your microservices and why Akka and especially Akka Streams are great tool for that. Also, I will code a few Akka based services and show how interservice communication can be implemented with Akka Http or Alpakka Kafka.}
+◊p{I will show how to integrate ◊scaladex{◊org{apache}◊repo{Kafka}} in your microservices and why ◊scaladex{◊org{akka}◊repo{Akka}} and especially Akka Streams are great tool for that. Also, I will code a few Akka based services and show how interservice communication can be implemented with ◊scaladex{◊org{akka}◊repo{akka-http}} or ◊scaladex{◊org{akka}◊repo{alpakka-kafka}}.}
 ◊p{Finally, I will review our Akka and Kafka based architecture and of course code will be available on GitHub.}
 }
 }

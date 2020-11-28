@@ -56,6 +56,23 @@ object Event {
       tabProps: TabProps[S, Tab]
   )
 
+  val scaladexLink = raw"https://index.scala-lang.org/([^/]+)/([^/]+)".r
+
+  def scaladexProjects(
+      markup: P.Markup
+  ): List[(P.Github.Org, P.Github.Repo)] = {
+    markup match {
+      case P.Markup.Paragraph(text) => text.foldMap(scaladexProjects)
+      case P.Markup.Text.Link(_, loc) =>
+        loc.show match {
+          case scaladexLink(org, repo) =>
+            List(new P.Github.Org(org) -> new P.Github.Repo(repo))
+          case _ => List()
+        }
+      case _ => List()
+    }
+  }
+
   def Event[S, I: Eq] = {
 
     ScalaComponent
@@ -97,6 +114,13 @@ object Event {
               <.ul(
                 ^.cls := "tags",
                 tags.map(t => <.li(TagBadge(t))).toTagMod
+              ),
+              <.ul(
+                ^.cls := "scaladex-badges",
+                desc
+                  .foldMap(scaladexProjects)
+                  .map(b => <.li(Scaladex.Badge(b)))
+                  .toTagMod
               )
             )
           )

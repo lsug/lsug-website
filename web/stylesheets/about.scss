@@ -1,6 +1,25 @@
 @use "font";
 @use "color";
 
+.scaladex-badges {
+    
+    list-style: none;
+    padding: 0px;
+
+    .scaladex-badge {
+	display: flex;
+	align-items: center;
+	a {
+	    font-size: 1.2rem;
+	    text-decoration: none;
+	    color: color.$foreground;
+	}
+	&:hover, &:focus {
+	    background-color: color.$background-1;
+	}
+    }
+}
+
 .about-page {
     // padding: 3rem 0 3rem 0;
     display: flex;
