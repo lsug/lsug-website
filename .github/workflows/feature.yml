@@ -4,10 +4,21 @@ on:
   pull_request:
     branches: [ master ]
 
+
 jobs:
   build:
+    strategy:
+      matrix:
+        include:
+        - name: Windows
+          os: windows-latest
+          mill: 'mill --no-server'
+        - name: Linux
+          os: ubuntu-latest
+          mill: 'mill'
 
-    runs-on: ubuntu-latest
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
@@ -16,22 +27,25 @@ jobs:
       with:
         java-version: 1.8
     - name: Set up Mill
-      uses: jodersky/setup-mill@v0.2.2
+      uses: yilinwei/setup-mill@master
       with:
         mill-version: 0.8.0
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Check formatting
-      run: mill mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources
-    - name: Setup up Node
+      run: ${{ matrix.mill }} mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources
+    - name: Setup Node
       uses: actions/setup-node@v1
       with:
         node-version: '10.x'
+    - name: Install Yarn
+      run: |
+        npm -g install yarn
     - name: Compile
       run: |
-        mill server.compile
-        mill client.fastOpt
-        mill web.vendor
-        mill web.sass
+        ${{ matrix.mill }} server.compile
+        ${{ matrix.mill }} client.fastOpt
+        ${{ matrix.mill }} web.vendor
+        ${{ matrix.mill }} web.sass
     - name: Run unit tests
-      run: mill server.test
+      run: ${{ matrix.mill }} server.test
