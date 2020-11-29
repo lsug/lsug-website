@@ -58,7 +58,6 @@ object Speaker {
       }
       .getOrElse(ProfilePicture(profile.some): TagMod)
 
-
   private def pronoun(profile: P.Speaker.Profile) =
     profile.pronoun.map { p => <.h4(s"${p.show}") }
 

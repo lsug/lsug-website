@@ -90,7 +90,10 @@ private object Decoders {
       child("name").andThen(text),
       child("photo").andThen(text).optional.map(_.map(new Asset(_))),
       child("pronoun").andThen(text).optional.map(_.map(new Speaker.Pronoun(_)))
-    ).mapN { case (name, photo, pronoun) => id => Speaker.Profile(id, name, photo, pronoun) }
+    ).mapN {
+      case (name, photo, pronoun) =>
+        id => Speaker.Profile(id, name, photo, pronoun)
+    }
   }
 
   def speaker: Decoder[Speaker.Id => Speaker] = {

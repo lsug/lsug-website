@@ -91,15 +91,20 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
     Speaker(
       bio = markupEl,
       socialMedia = socialMediaEl,
-      profile =
-        Speaker.Profile(id = id, name = text, photo = Some(new Asset(text)), pronoun = Some(new Speaker.Pronoun(text)))
+      profile = Speaker.Profile(
+        id = id,
+        name = text,
+        photo = Some(new Asset(text)),
+        pronoun = Some(new Speaker.Pronoun(text))
+      )
     )
 
   val nameOnlySpeakerEl = (id: Speaker.Id) =>
     Speaker(
       bio = Nil,
       socialMedia = unsocialMediaEl,
-      profile = Speaker.Profile(id = id, name = text, photo = None, pronoun = None)
+      profile =
+        Speaker.Profile(id = id, name = text, photo = None, pronoun = None)
     )
   val unnamedSpeakerP = emptyTag("speaker")
   val csvList = NonEmptyList.of("a", "csv", "value")
@@ -169,7 +174,11 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
     somewhatSocialSpeakerP,
     somewhatSocialMediaEl
   )
-  check("speaker", "has name, photo, profile and pronoun")(speaker, speakerP, speakerEl)
+  check("speaker", "has name, photo, profile and pronoun")(
+    speaker,
+    speakerP,
+    speakerEl
+  )
   check("speaker", "name only")(speaker, nameOnlySpeakerP, nameOnlySpeakerEl)
   checkFailed("speaker", "missing name")(
     speaker,

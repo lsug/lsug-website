@@ -195,7 +195,6 @@ object Speaker {
     implicit val show: Show[Id] = Show[String].contramap(_.value)
   }
 
-
   class Pronoun(val value: String) extends AnyVal
 
   object Pronoun {
