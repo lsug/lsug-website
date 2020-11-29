@@ -1,4 +1,4 @@
-#!/ usr / bin / env amm
+#!/usr/bin/env amm
 
 import $file.aws
 import aws.{
