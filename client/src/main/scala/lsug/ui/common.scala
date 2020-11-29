@@ -262,7 +262,7 @@ object common {
         <.div(
           ^.cls := "profile-picture",
           (for {
-            P.Speaker.Profile(_, _, asset) <- profile
+            P.Speaker.Profile(_, _, asset, _) <- profile
           } yield asset
             .map { pic => <.img(^.src := pic.show, ^.alt := "") }
             .getOrElse[TagMod](MaterialIcon("person"))).getOrElse(

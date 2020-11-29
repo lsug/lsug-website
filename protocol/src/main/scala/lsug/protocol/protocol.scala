@@ -195,6 +195,16 @@ object Speaker {
     implicit val show: Show[Id] = Show[String].contramap(_.value)
   }
 
+
+  class Pronoun(val value: String) extends AnyVal
+
+  object Pronoun {
+    implicit val decoder: Decoder[Pronoun] = Decoder[String].map(new Pronoun(_))
+    implicit val encoder: Encoder[Pronoun] = Encoder[String].contramap(_.value)
+    implicit val eq: Eq[Pronoun] = Eq[String].contramap(_.value)
+    implicit val show: Show[Pronoun] = Show[String].contramap(_.value)
+  }
+
   case class SocialMedia(
       blog: Option[Link],
       twitter: Option[Twitter.Handle],
@@ -216,14 +226,15 @@ object Speaker {
   case class Profile(
       id: Id,
       name: String,
-      photo: Option[Asset]
+      photo: Option[Asset],
+      pronoun: Option[Pronoun]
   )
 
   object Profile {
     implicit val codec: Codec[Profile] = deriveCodec[Profile]
     implicit val eq: Eq[Profile] = Eq.instance {
-      case (Profile(i, n, p), Profile(ii, nn, pp)) =>
-        i === ii && n === nn && p === pp
+      case (Profile(i, n, p, q), Profile(ii, nn, pp, qq)) =>
+        i === ii && n === nn && p === pp && q === qq
     }
   }
 }

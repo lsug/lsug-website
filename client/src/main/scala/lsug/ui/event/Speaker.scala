@@ -58,6 +58,10 @@ object Speaker {
       }
       .getOrElse(ProfilePicture(profile.some): TagMod)
 
+
+  private def pronoun(profile: P.Speaker.Profile) =
+    profile.pronoun.map { p => <.h4(s"${p.show}") }
+
   val Speaker =
     ScalaComponent
       .builder[Option[P.Speaker]]("Speaker")
@@ -67,7 +71,7 @@ object Speaker {
           speaker
             .map {
               case P.Speaker(
-                  p @ P.Speaker.Profile(_, name, _),
+                  p @ P.Speaker.Profile(_, name, _, _),
                   bio,
                   P.Speaker.SocialMedia(
                     blog,
@@ -78,6 +82,7 @@ object Speaker {
                 React.Fragment(
                   <.header(
                     <.h3(name),
+                    pronoun(p),
                     <.div(
                       ^.cls := "social-media",
                       picture(p, blog),
