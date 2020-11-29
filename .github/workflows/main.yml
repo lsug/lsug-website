@@ -23,10 +23,12 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Check formatting
       run: mill mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources
-    - name: Setup up Node
+    - name: Setup Node
       uses: actions/setup-node@v1
       with:
         node-version: '10.x'
+    - name: Setup Yarn
+      uses: Borales/actions-yarn@v2.3.0
     - name: Compile
       run: |
         mill server.compile
