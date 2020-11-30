@@ -10,7 +10,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    needs: build
     env:
       LSUG_SSL_PASSWORD: ${{ secrets.LSUG_SSL_PASSWORD }}
     steps:
