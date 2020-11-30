@@ -1,9 +1,10 @@
-name: Feature CI
+name: Build
 
 on:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
-
 
 jobs:
   build:
@@ -34,11 +35,11 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Check formatting
       run: ${{ matrix.mill }} mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources
-    - name: Setup Node
+    - name: Set up Node
       uses: actions/setup-node@v1
       with:
         node-version: '10.x'
-    - name: Install Yarn
+    - name: Set up Yarn
       run: |
         npm -g install yarn
     - name: Compile
