@@ -24,7 +24,7 @@ def main(
     account: String,
     region: String,
     assetPath: Path,
-    sslPassword: String,
+    sslPassword: String
 ) = {
   App(
     pwd,
@@ -83,7 +83,7 @@ def main(
               | exec > >(tee /var/log/user-data.log) 2>&1
                 |code_dir=$(mktemp -d)
                 |""".stripMargin +
-              s"""aws s3 cp 's3://${asset.getS3BucketName}/${asset.getS3ObjectKey}' """ + """ "$code_dir/assets.zip" """ + """
+                s"""aws s3 cp 's3://${asset.getS3BucketName}/${asset.getS3ObjectKey}' """ + """ "$code_dir/assets.zip" """ + """
                 |aws s3 cp 's3://lsug-website-config/fullchain.pkcs12' """.stripMargin + """ "$code_dir/fullchain.pkcs12" """ + """
                 |cd $code_dir
                 |unzip assets.zip

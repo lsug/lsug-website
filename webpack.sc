@@ -8,7 +8,7 @@ object NpmDependency {
     upickle.default.macroRW
 }
 
-case class Yarn(nodeModules: PathRef, packageJson: PathRef, lockFile: PathRef) {
+case class Yarn(yarnCmd: String, nodeModules: PathRef, packageJson: PathRef, lockFile: PathRef) {
 
   import ammonite.ops._
   import ammonite.ops.ImplicitWd._
@@ -17,7 +17,7 @@ case class Yarn(nodeModules: PathRef, packageJson: PathRef, lockFile: PathRef) {
     os.copy.over(packageJson.path, wd / "package.json")
     os.copy.over(lockFile.path, wd / "yarn.lock")
     val exec = Command(
-      (Vector[Shellable]("yarn", "--modules-folder", nodeModules.path) ++ cmd.toVector)
+      (Vector[Shellable](yarnCmd, "--modules-folder", nodeModules.path) ++ cmd.toVector)
         .map(_.s.toVector)
         .reduce(_ ++ _),
       Map.empty,
@@ -45,7 +45,9 @@ trait WebpackModule extends Module {
   def npmDeps: T[Agg[NpmDependency]]
   def devDependencies: T[Agg[(String, String)]] = T { Agg() }
   def mainJS: T[PathRef]
-  def mainStylesheet: T[PathRef] = T.source { PathRef(millSourcePath / "stylesheets" / "main.scss") }
+  def mainStylesheet: T[PathRef] = T.source {
+    PathRef(millSourcePath / "stylesheets" / "main.scss")
+  }
 
   def entryPoint = T {
     val path = T.ctx.dest / "entrypoint.js"
@@ -86,13 +88,17 @@ trait WebpackModule extends Module {
         )
         .render(2)
     )
+    val yarnCmd =
+      if (System.getProperty("os.name").startsWith("Windows"))
+        // Strictly speaking, this isn't quite true; this works for `Powershell` (and possibly `cmd`)  but
+        // will possibly fail catastrophically for any other Windows shells
+        "yarn.cmd"
+      else
+        "yarn"
+        
+    %(yarnCmd, "install")(wd = T.ctx.dest)
     Yarn(
-      PathRef(T.ctx.dest / "node_modules"),
-      PathRef(path),
-      PathRef(lock)
-    )
-    %('yarn, "install")(wd = T.ctx.dest)
-    Yarn(
+      yarnCmd,
       PathRef(T.ctx.dest / "node_modules"),
       PathRef(path),
       PathRef(lock)
@@ -100,7 +106,9 @@ trait WebpackModule extends Module {
   }
 
   def stylesheets = T.sources {
-    os.walk(millSourcePath / "stylesheets").filter(_.ext == "scss").map(PathRef(_))
+    os.walk(millSourcePath / "stylesheets")
+      .filter(_.ext == "scss")
+      .map(PathRef(_))
   }
 
   def assets = T.source {
