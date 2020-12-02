@@ -36,7 +36,7 @@ trait ProtocolModule extends ScalaModule {
   def scalacOptions = commonScalacOptions
 
   def ivyDeps =
-    Agg(ivy"org.typelevel::cats-core::2.2.0") ++ Agg(
+    Agg(ivy"org.typelevel::cats-core::2.3.0") ++ Agg(
       "circe-core",
       "circe-parser",
       "circe-generic"
