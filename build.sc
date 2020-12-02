@@ -119,7 +119,7 @@ object client extends ScalaJSModule {
       "core",
       "extra",
       "ext-cats"
-    ).map { dep => ivy"com.github.japgolly.scalajs-react::${dep}::1.7.0" }
+    ).map { dep => ivy"com.github.japgolly.scalajs-react::${dep}::1.7.7" }
 }
 
 trait WebModule extends WebpackModule {
