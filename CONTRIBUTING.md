@@ -47,13 +47,36 @@ By this point, you should have already used GitHub, git and a terminal. If not, 
 
 You’ll now need to install:
   
-### Mill for Windows
-Version: version 0.8.0
-[mill version 0.8.0](http://www.lihaoyi.com/mill/)
+### Mill
+[Version  0.8.0](http://www.lihaoyi.com/mill/)
 
+####Windows
+You have a few options here:
++ download Mill from: https://github.com/lihaoyi/mill/releases/download/0.9.3/0.9.3-assembly, and save it as **mill.bat**. You should copy file where it will be used or add it to Path
++ install Mill via [Scoop](https://scoop.sh/) and start use it immediately. You can install Scoop by following [these instructions](https://github.com/lukesampson/scoop/wiki/Quick-Start).
+
+`scoop install mill`
+
+Note that in some environments (such as WSL), mill might have to be run without a server (using -i, --interactive, --no-server, or --repl.)
  
-### [nodejs version 10](https://nodejs.org/)
-### [yarn version 1.22](https://yarnpkg.com/)
+### nodejs
+[Version 10](https://nodejs.org/)
+
+####Windows
+You can download an installer for a preferable version on [releases page](https://nodejs.org/en/download/releases/) 
+
+###yarn
+[Version 1.22](https://yarnpkg.com/)
+####Windows
+There are few options for installing Yarn on Windows.
++ download the installer from an (official page)(https://classic.yarnpkg.com/en/docs/install/#windows-stable)
++ install via Scoop by running the following code in your console:
+
+`scoop install yarn`
+
+If Node.js is not installed, scoop will give you a suggestion to install it. Example:
+
+`scoop install nodejs`
 
 You will also need an IDE. If you’re undecided on one, we recommend [VSCode](https://code.visualstudio.com/) with the following extensions:
  - the Live Share Extension Pack
@@ -85,6 +108,10 @@ Check that the server tests pass.
 ```sh
 mill server.test
 ```
+
+Note: if you are Windows user you might use --no-service optione, like:
+
+`mill server.test --no-service`
 
 ### NodeJS and Yarn
 
@@ -145,6 +172,7 @@ Navigate to https://localhost:8443/ in any browser. You should see a security wa
 
 We use a fake, hence insecure, certificate for local development. You can safely bypass the warning. This is done in different ways depending on your browser.
  - In Firefox, click `Advanced…`, then `Accept the risk and continue`.
+ - In Chrome, click `Advanced…`, then `Proceed to localhost (unsafe)`.
  - Let us know if you have a different browser. We’ll update this list with better instructions.
 
 Finally, you should see the website home page:
