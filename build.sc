@@ -36,7 +36,7 @@ trait ProtocolModule extends ScalaModule {
   def scalacOptions = commonScalacOptions
 
   def ivyDeps =
-    Agg(ivy"org.typelevel::cats-core::2.2.0") ++ Agg(
+    Agg(ivy"org.typelevel::cats-core::2.3.0") ++ Agg(
       "circe-core",
       "circe-parser",
       "circe-generic"
@@ -119,7 +119,7 @@ object client extends ScalaJSModule {
       "core",
       "extra",
       "ext-cats"
-    ).map { dep => ivy"com.github.japgolly.scalajs-react::${dep}::1.7.0" }
+    ).map { dep => ivy"com.github.japgolly.scalajs-react::${dep}::1.7.7" }
 }
 
 trait WebModule extends WebpackModule {
