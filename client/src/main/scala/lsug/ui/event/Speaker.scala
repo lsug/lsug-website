@@ -58,8 +58,15 @@ object Speaker {
       }
       .getOrElse(ProfilePicture(profile.some): TagMod)
 
-  private def pronoun(profile: P.Speaker.Profile) =
-    profile.pronoun.map { p => <.h4(s"${p.show}") }
+  // TODO: add styling to class
+  private def pronoun(p: Option[P.Speaker.Pronoun]) =
+    p.map { pn =>
+      <.p(
+        ^.cls := "pronoun",
+        "Referred to as: ",
+        <.b(s"${pn.subjective}/${pn.objective}")
+      )
+    }
 
   val Speaker =
     ScalaComponent
@@ -70,18 +77,18 @@ object Speaker {
           speaker
             .map {
               case P.Speaker(
-                  p @ P.Speaker.Profile(_, name, _, _),
+                  p @ P.Speaker.Profile(_, name, _),
                   bio,
                   P.Speaker.SocialMedia(
                     blog,
                     twitter,
                     github
-                  )
+                  ),
+                  pr
                   ) =>
                 React.Fragment(
                   <.header(
                     <.h3(name),
-                    pronoun(p),
                     <.div(
                       ^.cls := "social-media",
                       picture(p, blog),
@@ -89,6 +96,7 @@ object Speaker {
                       twitter.map(Twitter(_))
                     )
                   ),
+                  pronoun(pr),
                   <.div(
                     ^.cls := "bio",
                     bio.zipWithIndex.map {

@@ -88,25 +88,77 @@ private object Decoders {
   def speakerProfile: Decoder[Speaker.Id => Speaker.Profile] = {
     (
       child("name").andThen(text),
-      child("photo").andThen(text).optional.map(_.map(new Asset(_))),
-      child("pronoun").andThen(text).optional.map(_.map(new Speaker.Pronoun(_)))
+      child("photo").andThen(text).optional.map(_.map(new Asset(_)))
     ).mapN {
-      case (name, photo, pronoun) =>
-        id => Speaker.Profile(id, name, photo, pronoun)
+      case (name, photo) =>
+        id => Speaker.Profile(id, name, photo)
+    }
+  }
+
+  val recognizedPronouns: List[Speaker.Pronoun] = List(
+    Speaker.Pronoun("he", "him"),
+    Speaker.Pronoun("she", "her"),
+    Speaker.Pronoun("they", "them")
+  )
+
+  // TODO: this is a mess - refactor
+  def pronoun(text: Option[String]): Either[Error, Option[Speaker.Pronoun]] = {
+    text match {
+      case Some(p) =>
+        val pns = p.split("/").toList
+
+        if (pns.length != 2) {
+          Left(
+            Error.InvalidContents(
+              "pronoun",
+              p,
+              "Not found - please check the existing list and add your preference if it's missing"
+            )
+          )
+        }
+
+        val x = recognizedPronouns
+          .find(p => {
+            Speaker.Pronoun(pns(0), pns(1)).equals(p)
+          })
+
+        x match {
+          case Some(p) => Either.right(Some(p))
+          case None =>
+            Either.left(
+              Error.InvalidContents(
+                "pronoun",
+                p,
+                "Not found - please check the existing list and add your preference if it's missing"
+              )
+            )
+        }
+
+      case None => Either.right(None)
     }
   }
 
   def speaker: Decoder[Speaker.Id => Speaker] = {
-    (speakerProfile, socialMedia, child("bio").andThen(markup).optional).mapN {
-      case (profilef, social, bio) =>
+    (
+      speakerProfile,
+      socialMedia,
+      child("bio").andThen(markup).optional,
+      child("pronoun")
+        .andThen(text)
+        .optional
+        .mapError(pronoun(_))
+    ).mapN {
+      case (profilef, social, bio, pronoun) =>
         id =>
           Speaker(
             profilef(id),
             bio.toList.flatten,
-            social
+            social,
+            pronoun
           )
     }
   }
+
   def address: Decoder[NonEmptyList[String]] =
     child("address").andThen(text).mapError(commaSeparated("address", _))
 

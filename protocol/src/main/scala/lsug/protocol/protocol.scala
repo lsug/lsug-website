@@ -174,10 +174,13 @@ object Sponsor {
 
 }
 
+
+
 case class Speaker(
     profile: Speaker.Profile,
     bio: List[Markup],
-    socialMedia: Speaker.SocialMedia
+    socialMedia: Speaker.SocialMedia,
+    pronoun: Option[Speaker.Pronoun]
 )
 
 object Speaker {
@@ -193,15 +196,6 @@ object Speaker {
 
     implicit val eq: Eq[Speaker.Id] = Eq[String].contramap(_.value)
     implicit val show: Show[Id] = Show[String].contramap(_.value)
-  }
-
-  class Pronoun(val value: String) extends AnyVal
-
-  object Pronoun {
-    implicit val decoder: Decoder[Pronoun] = Decoder[String].map(new Pronoun(_))
-    implicit val encoder: Encoder[Pronoun] = Encoder[String].contramap(_.value)
-    implicit val eq: Eq[Pronoun] = Eq[String].contramap(_.value)
-    implicit val show: Show[Pronoun] = Show[String].contramap(_.value)
   }
 
   case class SocialMedia(
@@ -226,16 +220,26 @@ object Speaker {
       id: Id,
       name: String,
       photo: Option[Asset],
-      pronoun: Option[Pronoun]
   )
 
   object Profile {
     implicit val codec: Codec[Profile] = deriveCodec[Profile]
     implicit val eq: Eq[Profile] = Eq.instance {
-      case (Profile(i, n, p, q), Profile(ii, nn, pp, qq)) =>
-        i === ii && n === nn && p === pp && q === qq
+      case (Profile(i, n, p), Profile(ii, nn, pp)) =>
+        i === ii && n === nn && p === pp
     }
   }
+
+  case class Pronoun(subjective: String, objective: String)
+
+  object Pronoun {
+    implicit val codec: Codec[Pronoun] = deriveCodec[Pronoun]
+    implicit val eq: Eq[Pronoun] = Eq.instance {
+      case (Pronoun(s, o), Pronoun(ss, oo)) =>
+        s === ss && o === oo
+    }
+  }
+
 }
 
 object Venue {
