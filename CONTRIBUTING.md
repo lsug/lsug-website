@@ -50,7 +50,7 @@ You’ll now need to install:
 ### Mill
 [Version  0.8.0](http://www.lihaoyi.com/mill/)
 
-####Windows
+#### Windows
 You have a few options here:
 + download Mill from: https://github.com/lihaoyi/mill/releases/download/0.9.3/0.9.3-assembly, and save it as **mill.bat**. You should copy file where it will be used or add it to Path
 + install Mill via [Scoop](https://scoop.sh/) and start use it immediately. You can install Scoop by following [these instructions](https://github.com/lukesampson/scoop/wiki/Quick-Start).
@@ -62,12 +62,12 @@ Note that in some environments (such as WSL), mill might have to be run without 
 ### nodejs
 [Version 10](https://nodejs.org/)
 
-####Windows
+#### Windows
 You can download an installer for a preferable version on [releases page](https://nodejs.org/en/download/releases/) 
 
-###yarn
+### yarn
 [Version 1.22](https://yarnpkg.com/)
-####Windows
+#### Windows
 There are few options for installing Yarn on Windows.
 + download the installer from an (official page)(https://classic.yarnpkg.com/en/docs/install/#windows-stable)
 + install via Scoop by running the following code in your console:
