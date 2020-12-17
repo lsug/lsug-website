@@ -5,14 +5,15 @@ import fs2._
 import fs2.io
 import fs2.text
 import protocol._
+
 import java.nio.file.{Path, Paths}
 import cats.data._
 import cats._
 import cats.effect._
 import cats.implicits._
 import markup.Read
-import java.time.ZonedDateTime
-import java.time.ZoneId
+
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import lsug.{Meetup => MeetupApi}
 
 object Server {
@@ -74,8 +75,10 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       .compile
       .foldMonoid
   }
+  implicit private val localDateOrdering: Ordering[LocalDateTime] =
+    _.compareTo(_)
 
-  def eventsBefore(time: ZonedDateTime): F[List[Meetup.EventWithSetting]] = {
+  def eventsBefore(time: ZonedDateTime): F[List[Meetup.EventWithSetting]] =
     meetups
       .filter { meetup =>
         ZonedDateTime.of(meetup.setting.time.end, BST).isBefore(time)
@@ -88,7 +91,13 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       )
       .compile
       .foldMonoid
-  }
+      .map(e => {
+        e.map(t => t.setting.time.start -> t)
+          .toMap
+          .toList
+          .sortBy(_._1)(Ordering[LocalDateTime].reverse)
+          .map(_._2)
+      })
 
   def event(
       meetupId: Meetup.Id,
