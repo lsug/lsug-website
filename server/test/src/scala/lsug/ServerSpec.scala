@@ -50,26 +50,34 @@ final class ServerSpec extends IOSuite {
     }
   }
 
-  test("meetupsAfter return a list of future events ordered by time") {
+  test("meetupsAfter return a list of future events with the soonest first") {
     Blocker[IO].use { blocker =>
       val server: Server[IO] = new Server[IO](
         Paths.get("./server/src/main/resources").toAbsolutePath,
         mockedMeetup,
         blocker
       )
-      val result: IO[List[protocol.Meetup]] = server.meetupsAfter(
-        ZonedDateTime.of(
-          LocalDate.of(2018, 8, 20),
-          LocalTime.of(9, 30, 15),
-          ZoneId.of("UTC")
-        )
+
+      val veryOldTime = ZonedDateTime.of(
+        LocalDate.of(2000, 1, 1),
+        LocalTime.of(9, 0, 0),
+        ZoneId.of("UTC")
       )
 
-      result.map { events =>
-        val listOfEventTimes: List[LocalDateTime] =
-          events.map(e => e.setting.time.start)
-        println(listOfEventTimes.mkString("\n"))
-        assert(events.nonEmpty)
+      val result: IO[List[protocol.Meetup]] = server.meetupsAfter(veryOldTime)
+
+      result.map { meetups =>
+        val listOfMeetupTimes: List[LocalDateTime] =
+          meetups.map(m => m.setting.time.start)
+
+        def areMeetupsSorted(meetupTimes: List[LocalDateTime]): Unit = {
+          meetupTimes.foldLeft(veryOldTime.toLocalDateTime)((ctx, c) => {
+            assert(clue(ctx).isBefore(clue(c)))
+            c
+          })
+        }
+        areMeetupsSorted(listOfMeetupTimes)
+        assert(meetups.nonEmpty)
       }
     }
 

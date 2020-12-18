@@ -66,6 +66,9 @@ final class Server[F[_]: Sync: ContextShift: Logger](
 
   private val BST: ZoneId = ZoneId.of("Europe/London")
 
+  implicit private val localDateOrdering: Ordering[LocalDateTime] =
+    _.compareTo(_)
+
   def meetupsAfter(time: ZonedDateTime): F[List[Meetup]] = {
     meetups
       .filter { meetup =>
@@ -74,9 +77,12 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       .map(_.pure[List])
       .compile
       .foldMonoid
+      .map(l =>
+        l.map(m => m.setting.time.start -> m)
+          .sortBy(_._1)(Ordering[LocalDateTime])
+          .map(_._2)
+      )
   }
-  implicit private val localDateOrdering: Ordering[LocalDateTime] =
-    _.compareTo(_)
 
   def eventsBefore(time: ZonedDateTime): F[List[Meetup.EventWithSetting]] =
     meetups
@@ -93,8 +99,6 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       .foldMonoid
       .map(e => {
         e.map(t => t.setting.time.start -> t)
-          .toMap
-          .toList
           .sortBy(_._1)(Ordering[LocalDateTime].reverse)
           .map(_._2)
       })
