@@ -1,60 +1,64 @@
 package scala.lsug
 
 import cats.effect.{Blocker, IO}
-import lsug.protocol.Meetup.MeetupDotCom
-import lsug.protocol.Meetup.MeetupDotCom.Event
-import lsug.{IOSuite, Meetup, Server, protocol}
+import lsug.{IOSuite, Server}
 
 import java.nio.file.Paths
-import java.time.{LocalDate, LocalDateTime, LocalTime, ZoneId, ZonedDateTime}
+import java.time._
+import scala.lsug.markup.FakeMeetup
 
 final class ServerSpec extends IOSuite {
 
-  class MockedMeetup extends Meetup[IO] {
-    override def event(id: Event.Id): IO[Option[MeetupDotCom.Event]] = IO(None)
-  }
-  val mockedMeetup = new MockedMeetup
-
-  test("eventsBefore return a list of past events ordered by time") {
-
-    Blocker[IO].use { blocker =>
-      val server: Server[IO] = new Server[IO](
-        Paths.get("./server/src/main/resources").toAbsolutePath,
-        mockedMeetup,
-        blocker
-      )
-      val result = server.eventsBefore(
-        ZonedDateTime.of(
-          LocalDate.now(),
-          LocalTime.now(),
-          ZoneId.of("UTC")
-        )
-      )
-
-      result.map { events =>
-        val listOfEventTimes: List[LocalDateTime] =
-          events.map(e => e.setting.time.start)
-
-        def checkSorting(eventTimes: List[LocalDateTime]): Unit = {
-          eventTimes.foldLeft(LocalDateTime.now())((ctx, x) =>
-            if (ctx.isEqual(x)) x
-            else {
-              assert(clue(ctx).isAfter(clue(x)))
-              x
-            }
-          )
-        }
-        assert(events.nonEmpty)
-        checkSorting(listOfEventTimes)
-      }
+  /** Check that all elements paired with their adjacent satisfy a predicate.
+    *
+    * The 'adjacent' element is the next element. For example the adjacent
+    * element to `2` in `List(1, 2, 3)` is `3`.
+    *
+    * @param as      The list to check
+    * @param initial The value to check the head of the list against. This is
+    *                passed to the predicate as the first parameter. The head
+    *                is passed as the second.
+    * @param pred    The predicate
+    */
+  private def checkAdjacent[A](as: List[A], initial: A)(
+      pred: (A, A) => Boolean
+  )(implicit loc: munit.Location): Unit = {
+    as.foldLeft(initial) { (prev, cur) =>
+      assert(pred(clue(prev), clue(cur)))
+      cur
     }
   }
 
-  test("meetupsAfter return a list of future events with the soonest first") {
+  test("eventsBefore returns past events ordered newest to oldest") {
+
     Blocker[IO].use { blocker =>
       val server: Server[IO] = new Server[IO](
         Paths.get("./server/src/main/resources").toAbsolutePath,
-        mockedMeetup,
+        FakeMeetup,
+        blocker
+      )
+      val timeUTC = LocalDateTime.now().atZone(ZoneId.of("Europe/London"))
+      val localTimeLondon =
+        timeUTC.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime
+
+      server
+        .eventsBefore(
+          timeUTC
+        )
+        .map(_.map(_.setting.time.start))
+        .map {
+          checkAdjacent(_, localTimeLondon)((timeAbove, timeBelow) =>
+            timeAbove.isAfter(timeBelow) || timeAbove.isEqual(timeBelow)
+          )
+        }
+    }
+  }
+
+  test("meetupsAfter returns future meetups ordered sooner to later") {
+    Blocker[IO].use { blocker =>
+      val server: Server[IO] = new Server[IO](
+        Paths.get("./server/src/main/resources").toAbsolutePath,
+        FakeMeetup,
         blocker
       )
 
@@ -64,21 +68,14 @@ final class ServerSpec extends IOSuite {
         ZoneId.of("UTC")
       )
 
-      val result: IO[List[protocol.Meetup]] = server.meetupsAfter(veryOldTime)
-
-      result.map { meetups =>
-        val listOfMeetupTimes: List[LocalDateTime] =
-          meetups.map(m => m.setting.time.start)
-
-        def areMeetupsSorted(meetupTimes: List[LocalDateTime]): Unit = {
-          meetupTimes.foldLeft(veryOldTime.toLocalDateTime)((ctx, c) => {
-            assert(clue(ctx).isBefore(clue(c)))
-            c
-          })
+      server
+        .meetupsAfter(veryOldTime)
+        .map(_.map(_.setting.time.start))
+        .map {
+          checkAdjacent(_, veryOldTime.toLocalDateTime)(
+            (timeAbove, timeBelow) => timeAbove.isBefore(timeBelow)
+          )
         }
-        areMeetupsSorted(listOfMeetupTimes)
-        assert(meetups.nonEmpty)
-      }
     }
 
   }

@@ -64,7 +64,7 @@ final class Server[F[_]: Sync: ContextShift: Logger](
     }.value
   }
 
-  private val BST: ZoneId = ZoneId.of("Europe/London")
+  private val londonZoneId: ZoneId = ZoneId.of("Europe/London")
 
   implicit private val localDateOrdering: Ordering[LocalDateTime] =
     _.compareTo(_)
@@ -72,22 +72,18 @@ final class Server[F[_]: Sync: ContextShift: Logger](
   def meetupsAfter(time: ZonedDateTime): F[List[Meetup]] = {
     meetups
       .filter { meetup =>
-        ZonedDateTime.of(meetup.setting.time.end, BST).isAfter(time)
+        ZonedDateTime.of(meetup.setting.time.end, londonZoneId).isAfter(time)
       }
       .map(_.pure[List])
       .compile
       .foldMonoid
-      .map(l =>
-        l.map(m => m.setting.time.start -> m)
-          .sortBy(_._1)(Ordering[LocalDateTime])
-          .map(_._2)
-      )
+      .map(_.sortBy(_.setting.time.start)(Ordering[LocalDateTime]))
   }
 
   def eventsBefore(time: ZonedDateTime): F[List[Meetup.EventWithSetting]] =
     meetups
       .filter { meetup =>
-        ZonedDateTime.of(meetup.setting.time.end, BST).isBefore(time)
+        ZonedDateTime.of(meetup.setting.time.end, londonZoneId).isBefore(time)
       }
       .map(m =>
         m.events.zipWithIndex.map {
@@ -97,11 +93,8 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       )
       .compile
       .foldMonoid
-      .map(e => {
-        e.map(t => t.setting.time.start -> t)
-          .sortBy(_._1)(Ordering[LocalDateTime].reverse)
-          .map(_._2)
-      })
+      .map(_.sortBy(_.setting.time.start)(Ordering[LocalDateTime].reverse)
+      )
 
   def event(
       meetupId: Meetup.Id,
