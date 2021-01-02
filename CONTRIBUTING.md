@@ -45,38 +45,32 @@ This project requires quite a few tools to get up and running. Don’t worry if 
 
 By this point, you should have already used GitHub, git and a terminal. If not, get set up with the [first-contributions project](https://github.com/firstcontributions/first-contributions).
 
-You’ll now need to install:
+You’ll now need to install the following tools.
+ - [Mill](http://www.lihaoyi.com/mill/)
+ - [Node.js](https://nodejs.org)
+ - [Yarn](https://yarnpkg.com/)
+
+If you're already comfortable using a package manager (such as apt, homebrew or scoop), feel free to use it. If not, follow the steps below.
   
 ### Mill
-[Version  0.8.0](http://www.lihaoyi.com/mill/)
 
-#### Windows
-You have a few options here:
-+ download Mill from: https://github.com/lihaoyi/mill/releases/download/0.9.3/0.9.3-assembly, and save it as **mill.bat**. You should copy file where it will be used or add it to Path
-+ install Mill via [Scoop](https://scoop.sh/) and start use it immediately. You can install Scoop by following [these instructions](https://github.com/lukesampson/scoop/wiki/Quick-Start).
+Download [Mill](http://www.lihaoyi.com/mill/). The most recently tested version is `0.8.0`.
 
-`scoop install mill`
+The mill [installation instructions](http://www.lihaoyi.com/mill/) should work smoothly for Linux and Mac OS. Windows requires some more effort.
 
-Note that in some environments (such as WSL), mill might have to be run without a server (using -i, --interactive, --no-server, or --repl.)
+For Windows, download the assembly file:
+ - Follow the [mill installation instructions](http://www.lihaoyi.com/mill/#windows)
+ - Save the assembly file as `mill.bat` in the repository directory (this is probably called `lsug-website`).
  
-### nodejs
-[Version 10](https://nodejs.org/)
+### Node.js
 
-#### Windows
-You can download an installer for a preferable version on [releases page](https://nodejs.org/en/download/releases/) 
+You can download an installer for a preferable version on [downloads page](https://nodejs.org/en/download/). The most recently tested version is `10`.
 
 ### yarn
-[Version 1.22](https://yarnpkg.com/)
-#### Windows
-There are few options for installing Yarn on Windows.
-+ download the installer from an (official page)(https://classic.yarnpkg.com/en/docs/install/#windows-stable)
-+ install via Scoop by running the following code in your console:
 
-`scoop install yarn`
+Download [the installer](https://classic.yarnpkg.com/en/docs/install) for your OS. The most recently tested version is `1.22`.
 
-If Node.js is not installed, scoop will give you a suggestion to install it. Example:
-
-`scoop install nodejs`
+### Source code editor
 
 You will also need an IDE. If you’re undecided on one, we recommend [VSCode](https://code.visualstudio.com/) with the following extensions:
  - the Live Share Extension Pack
@@ -86,40 +80,55 @@ You will also need an IDE. If you’re undecided on one, we recommend [VSCode](h
 
 This will enable you to pair program with a maintainer, should you want to.
 
-
 ## Checking your setup
 
 The following `mill` commands need to be run in a terminal.
+
+If you're using Windows, you must run `mill --no-server` instead of `mill` in command line. If you use Windows PowerShell use './mill' instead of 'mill'
 
 ### Mill
 
 Check you have mill installed.
 
-```sh
-mill version
-```
-
-This should print `0.8.0`.
+ - For MacOS and Linux, run:
+ 
+   ```sh
+   mill web.version
+   ```
+ - For Windows, run in command line:
+ 
+   ```sh
+   mill --no-server version
+   ```
+This should print version of installed mill.
 
 ### Scala
 
 Check that the server tests pass.
 
-```sh
-mill server.test
-```
+ - For MacOS and Linux, run:
+	
+   ```sh
+   mill server.test
+   ```
+ - For Windows, run:
 
-Note: if you are Windows user you might use --no-service optione, like:
-
-`mill server.test --no-service`
-
+   ```sh
+   mill --no-server server.test
+   ```
 ### NodeJS and Yarn
 
 Check you can bundle the client code and styles.
 
-```sh
-mill web.bundle
-```
+ - For MacOS and Linux, run:	   
+   ```sh
+   mill web.bundle
+   ```
+ - For Windows, run:
+
+   ```sh
+   mill --no-server web.bundle
+   ```
 
 ### IDE
 
@@ -129,9 +138,16 @@ You should have syntax highlighting and code completion in your IDE. If not, you
 
 Start the website.
 
-```sh
-mill web.run
-```
+ - For MacOS and Linux, run:
+
+   ```sh
+   mill web.run
+   ```
+ - For Windows, run:
+
+   ```sh
+   mill --no-server web.run
+   ```
 
 You should see the output:
 
