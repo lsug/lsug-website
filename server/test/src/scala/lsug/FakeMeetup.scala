@@ -1,4 +1,4 @@
-package lsug.markup
+package lsug
 
 import cats.effect.IO
 import lsug.Meetup
