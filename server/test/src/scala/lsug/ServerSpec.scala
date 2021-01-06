@@ -37,7 +37,7 @@ final class ServerSpec extends IOSuite {
         FakeMeetup,
         blocker
       )
-      val timeUTC = LocalDateTime.now().atZone(ZoneId.of("Europe/London"))
+      val timeUTC = ZonedDateTime.now(ZoneId.of("UTC"))
       val localTimeLondon =
         timeUTC.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime
 
