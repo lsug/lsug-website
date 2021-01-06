@@ -93,8 +93,7 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       )
       .compile
       .foldMonoid
-      .map(_.sortBy(_.setting.time.start)(Ordering[LocalDateTime].reverse)
-      )
+      .map(_.sortBy(_.setting.time.start)(Ordering[LocalDateTime].reverse))
 
   def event(
       meetupId: Meetup.Id,
