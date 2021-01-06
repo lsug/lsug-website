@@ -8,7 +8,7 @@ import java.nio.file.Paths
 import fs2._
 
 import lsug.{protocol => P}
-import lsug.{Meetup => MeetupApi}
+import lsug.{FakeMeetup => MeetupBot}
 
 class ResourceSpec extends IOSuite with PathImplicits {
 
@@ -33,9 +33,7 @@ class ResourceSpec extends IOSuite with PathImplicits {
           munitValueTransform(
             Server[IO](
               path.getParent.getParent.toAbsolutePath,
-              new MeetupApi[IO] {
-                def event(id: P.Meetup.MeetupDotCom.Event.Id) = none.pure[IO]
-              }
+              MeetupBot
             ).use { server =>
               val name = path.getFileName.baseName
               f(server, name).map { ev => assert(clue(ev).isDefined) }
