@@ -1,11 +1,11 @@
-package scala.lsug
+package lsug
 
 import cats.effect.{Blocker, IO}
 import lsug.{IOSuite, Server}
 
 import java.nio.file.Paths
 import java.time._
-import scala.lsug.markup.FakeMeetup
+import lsug.markup.FakeMeetup
 
 final class ServerSpec extends IOSuite {
 

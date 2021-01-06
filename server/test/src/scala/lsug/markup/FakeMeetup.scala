@@ -1,4 +1,4 @@
-package scala.lsug.markup
+package lsug.markup
 
 import cats.effect.IO
 import lsug.Meetup
