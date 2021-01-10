@@ -1,5 +1,5 @@
 ◊meetup{275644800}
-◊hosts{zainab-ali}
+◊hosts{zainabali}
 ◊date{2021-01-28}
 ◊time{18:00-19:30}
 ◊welcome{◊p{
