@@ -7,7 +7,7 @@ import scalafmt._
 import mill.scalajslib._
 import webpack.{WebpackModule, NpmDependency}
 
-val catsEffectDep = ivy"org.typelevel::cats-effect::2.3.0"
+val catsEffectDep = ivy"org.typelevel::cats-effect::2.3.1"
 
 val monocleDeps = Agg(
   "monocle-core",
@@ -36,7 +36,7 @@ trait ProtocolModule extends ScalaModule {
   def scalacOptions = commonScalacOptions
 
   def ivyDeps =
-    Agg(ivy"org.typelevel::cats-core::2.3.0") ++ Agg(
+    Agg(ivy"org.typelevel::cats-core::2.3.1") ++ Agg(
       "circe-core",
       "circe-parser",
       "circe-generic"
