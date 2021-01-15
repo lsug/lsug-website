@@ -1,12 +1,12 @@
 # Table of Contents
 
-1.  [Overview](#org8b89094)
-2.  [EC2 Instance configuration](#org2eb39ca)
-3.  [The SSL Certificate](#orgd3a4f01)
-    1.  [Record of certbot setup](#org10aaa17)
+1.  [Overview](#org79d0c7e)
+2.  [EC2 Instance configuration](#org47ece93)
+3.  [The SSL Certificate](#org4373427)
+    1.  [Certbot initial setup](#org0cf11fe)
 
 
-<a id="org8b89094"></a>
+<a id="org79d0c7e"></a>
 
 # Overview
 
@@ -28,7 +28,7 @@ automated deployment pipeline, it could be taken down fairly often.
 The machine is an AWS EC2 instance.
 
 
-<a id="org2eb39ca"></a>
+<a id="org47ece93"></a>
 
 # EC2 Instance configuration
 
@@ -51,7 +51,7 @@ within strings, as well as both bash and Scala variable substitutions,
 so wrangling this can be frustrating.
 
 
-<a id="orgd3a4f01"></a>
+<a id="org4373427"></a>
 
 # The SSL Certificate
 
@@ -113,39 +113,22 @@ The exact certbot command can be found in the `certbot-renew.service`
 file. It can be run with a `--dry-run` flag to troubleshoot.
 
 
-<a id="org10aaa17"></a>
+<a id="org0cf11fe"></a>
 
-## Record of certbot setup
+## Certbot initial setup
 
-The original certificate was obtained manually. The steps taken to
-obtain it are documented here for reference.
+The original certificate was obtained manually. It was obtained by:
 
-1.  Hop onto the host and install certbot.
-
+-   Installing Certbot using `yum` from the [EPEL](https://fedoraproject.org/wiki/EPEL#What_is_Extra_Packages_for_Enterprise_Linux_.28or_EPEL.29.3F) repository.
     The installation configuration can be found in the User-Data
-    script. Certbot is installed using `yum` from the [EPEL](https://fedoraproject.org/wiki/EPEL#What_is_Extra_Packages_for_Enterprise_Linux_.28or_EPEL.29.3F) repository.
+    script.
 
-2.  Stop the web server
+-   Terminating the web server to free up port 80
 
-        systemctl stop lsug.service
+-   Obtain the certificate for `www.lsug.co.uk` and `www.lsug.org`
 
-3.  Obtain the certificate.
+This generated the required files in the
+`/etc/letsencrypt/live/www.lsug.co.uk/` directory.
 
-           sudo certbot certonly --standalone #+end_src
-
-        4. Enter the domains =www.lsug.co.uk, www.lsug.org=.
-
-           This generates several files in the
-           =/etc/letsencrypt/live/www.lsug.co.uk/= directory.
-
-           #+begin_example
-             Congratulations! Your certificate and chain have been saved at:
-              /etc/letsencrypt/live/www.lsug.co.uk/fullchain.pem
-             Your key file has been saved at:
-              /etc/letsencrypt/live/www.lsug.co.uk/privkey.pem
-           #+end_example
-
-        5. Restart the web server
-
-           #+begin_src
-           systemctl start lsug.service
+If you ever need to obtain a new certificate, consult the [certbot docs](https://certbot.eff.org/docs/using.html#standalone)
+instead of these steps.
