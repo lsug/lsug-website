@@ -111,7 +111,8 @@ file. It can be run with a =--dry-run= flag to troubleshoot.
  2. Stop the web server
 
     #+begin_src
-    systemctl stop lsug.service #+end_src
+    systemctl stop lsug.service
+    #+end_src
 
  3. Obtain the certificate.
 

@@ -1,12 +1,12 @@
 # Table of Contents
 
-1.  [Overview](#org5ea3950)
-2.  [EC2 Instance configuration](#org890e50f)
-3.  [The SSL Certificate](#org96c6c8f)
-    1.  [Record of certbot setup](#org1fff41f)
+1.  [Overview](#org8b89094)
+2.  [EC2 Instance configuration](#org2eb39ca)
+3.  [The SSL Certificate](#orgd3a4f01)
+    1.  [Record of certbot setup](#org10aaa17)
 
 
-<a id="org5ea3950"></a>
+<a id="org8b89094"></a>
 
 # Overview
 
@@ -28,7 +28,7 @@ automated deployment pipeline, it could be taken down fairly often.
 The machine is an AWS EC2 instance.
 
 
-<a id="org890e50f"></a>
+<a id="org2eb39ca"></a>
 
 # EC2 Instance configuration
 
@@ -51,7 +51,7 @@ within strings, as well as both bash and Scala variable substitutions,
 so wrangling this can be frustrating.
 
 
-<a id="org96c6c8f"></a>
+<a id="orgd3a4f01"></a>
 
 # The SSL Certificate
 
@@ -113,7 +113,7 @@ The exact certbot command can be found in the `certbot-renew.service`
 file. It can be run with a `--dry-run` flag to troubleshoot.
 
 
-<a id="org1fff41f"></a>
+<a id="org10aaa17"></a>
 
 ## Record of certbot setup
 
@@ -127,11 +127,10 @@ obtain it are documented here for reference.
 
 2.  Stop the web server
 
-           systemctl stop lsug.service #+end_src
+        systemctl stop lsug.service
 
-        3. Obtain the certificate.
+3.  Obtain the certificate.
 
-           #+begin_src
            sudo certbot certonly --standalone #+end_src
 
         4. Enter the domains =www.lsug.co.uk, www.lsug.org=.
