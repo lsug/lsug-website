@@ -8,7 +8,7 @@ import cats.data._
 import cats.implicits._
 import cats.laws.discipline.FunctorTests
 import munit.DisciplineSuite
-import org.scalacheck.ScalacheckShapeless.derivedArbitrary
+import org.scalacheck.{Arbitrary, Gen}
 
 class ParserSpec extends ParserChecks with DisciplineSuite {
 
@@ -193,6 +193,36 @@ trait ParserChecks extends LsugSuite {
       .label("product")
       .build(name)
 
+  implicit def arbResult[T](implicit a: Arbitrary[T]): Arbitrary[Result[T]] =
+    Arbitrary(
+      Gen.oneOf(
+        Gen.const(Result.Fail),
+        for {
+          e <- Arbitrary.arbitrary[T]
+          s <- Arbitrary.arbitrary[String]
+        } yield Result.Success[T](e, s)
+      )
+    )
+
   implicit def parserEq[A: Eq]: Eq[Parser[A]] =
     Eq.fromUniversalEquals[Parser[A]]
+
+  implicit lazy val arbRegex: Arbitrary[Regex] = Arbitrary {
+    val lsugRegex: List[Regex] =
+      List("◊".r, "\\{".r, "\\}".r, "[a-z]+".r, "[^◊}]+".r)
+    Gen.oneOf(lsugRegex)
+  }
+
+  implicit def arbParser[T](implicit a: Arbitrary[T]): Arbitrary[Parser[T]] =
+    Arbitrary {
+      Gen.oneOf(
+        Gen.const(Parser.Fail),
+        for {
+          e <- Arbitrary.arbitrary[T]
+        } yield Parser.Pure(e),
+        for {
+          r <- Arbitrary.arbitrary[Regex]
+        } yield Parser.Pattern(r)
+      )
+    }
 }

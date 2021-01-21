@@ -102,8 +102,7 @@ object server extends ScalaModule {
         ivy"org.scalameta::munit::0.7.19",
         ivy"org.typelevel::discipline-munit::1.0.4",
         ivy"org.typelevel::cats-laws::2.0.0",
-        ivy"org.scalacheck::scalacheck::1.14.1" ,
-        ivy"com.github.alexarchambault::scalacheck-shapeless_1.14::1.2.3"
+        ivy"org.scalacheck::scalacheck::1.14.1" 
       )
     def testFrameworks = Seq("munit.Framework")
   }
