@@ -35,4 +35,13 @@ contributing, we’re here to walk you through the GitHub PR process.
 ◊p{We will be looking at improving Probably’s CLI support, and making it easier to run tests and customize the output.}
 ◊p{Take a look at issues with the ◊link{◊text{LSUG}◊url{https://github.com/propensive/probably/labels/lsug}} label for inspiration.}
 }}
+◊event{
+◊name{Typelevel}
+◊speakers{larshupel}
+◊tags{open-source}
+◊time{14:00-17:30}
+◊setup{◊p{Please have a working sbt installation ready.}}
+◊description{
+◊p{We will prepare a few tickets in various Typelevel repositories for you to hack on.}
+}}
 }
