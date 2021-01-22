@@ -113,7 +113,7 @@ object client extends ScalaJSModule {
   def moduleDeps = Seq(protocolJs)
   def ivyDeps =
     monocleDeps ++ Agg(
-      ivy"io.github.cquiroz::scala-java-time::2.0.0",
+      ivy"io.github.cquiroz::scala-java-time::2.1.0",
       catsEffectDep
     ) ++ Agg(
       "core",
