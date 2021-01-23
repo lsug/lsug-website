@@ -44,7 +44,6 @@ contributing, we’re here to walk you through the GitHub PR process.
 ◊description{
 ◊p{We will prepare a few tickets in various Typelevel repositories for you to hack on.}
 }}
-}
 ◊event{
 ◊name{ZIO}
 ◊speakers{adamfraser}
