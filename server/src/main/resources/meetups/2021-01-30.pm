@@ -1,6 +1,6 @@
 ◊meetup{274890895}
 ◊hosts{zainabali}
-◊date{2020-01-30}
+◊date{2021-01-30}
 ◊time{14:00-17:30}
 ◊welcome{◊p{We look forward to seeing you at the London Scala Open Source Saturday.}}
 ◊events{
