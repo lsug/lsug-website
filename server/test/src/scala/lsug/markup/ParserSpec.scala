@@ -9,6 +9,7 @@ import cats.implicits._
 import cats.laws.discipline.FunctorTests
 import munit.DisciplineSuite
 import org.scalacheck.{Arbitrary, Gen}
+import cats.laws.discipline.AlternativeTests
 
 class ParserSpec extends ParserChecks with DisciplineSuite {
 
@@ -60,7 +61,7 @@ class ParserSpec extends ParserChecks with DisciplineSuite {
   checkOneOrMoreFails("a mismatching string", "b")
 
   checkAll("Result.FunctorLaws", FunctorTests[Result].functor[Int, Int, String])
-  checkAll("Parser.FunctorLaws", FunctorTests[Parser].functor[Int, Int, String])
+  checkAll("Parser.AlternativeLaw", AlternativeTests[Parser].alternative[Int, Int, String])
 }
 
 trait ParserChecks extends LsugSuite {
@@ -213,6 +214,7 @@ trait ParserChecks extends LsugSuite {
     Gen.oneOf(lsugRegex)
   }
 
+
   implicit def arbParser[T](implicit a: Arbitrary[T]): Arbitrary[Parser[T]] =
     Arbitrary {
       Gen.oneOf(
@@ -221,8 +223,18 @@ trait ParserChecks extends LsugSuite {
           e <- Arbitrary.arbitrary[T]
         } yield Parser.Pure(e),
         for {
+          e <- Arbitrary.arbitrary[T]
           r <- Arbitrary.arbitrary[Regex]
-        } yield Parser.Pattern(r)
+        } yield Parser.map(Parser.Pattern(r))(_ => e)
       )
     }
+
+
+  // def arbMap[A, B](implicit a: Arbitrary[(A, B)]) = {
+  //   for {
+  //     e <- Arbitrary.arbFunction0
+  //     p <- Arbitrary.arbitrary[Parser[B]]
+  //   } yield new Parser.Map[A, B](e, p)
+  // }
+
 }

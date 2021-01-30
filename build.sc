@@ -7,7 +7,7 @@ import scalafmt._
 import mill.scalajslib._
 import webpack.{WebpackModule, NpmDependency}
 
-val catsEffectDep = ivy"org.typelevel::cats-effect::2.3.0"
+val catsEffectDep = ivy"org.typelevel::cats-effect::2.3.1"
 
 val monocleDeps = Agg(
   "monocle-core",
@@ -36,7 +36,7 @@ trait ProtocolModule extends ScalaModule {
   def scalacOptions = commonScalacOptions
 
   def ivyDeps =
-    Agg(ivy"org.typelevel::cats-core::2.3.0") ++ Agg(
+    Agg(ivy"org.typelevel::cats-core::2.3.1") ++ Agg(
       "circe-core",
       "circe-parser",
       "circe-generic"
@@ -99,7 +99,7 @@ object server extends ScalaModule {
   object test extends Tests {
     def ivyDeps =
       Agg(
-        ivy"org.scalameta::munit::0.7.19",
+        ivy"org.scalameta::munit::0.7.20",
         ivy"org.typelevel::discipline-munit::1.0.4",
         ivy"org.typelevel::cats-laws::2.0.0",
         ivy"org.scalacheck::scalacheck::1.14.1" 
@@ -119,7 +119,7 @@ object client extends ScalaJSModule {
   def moduleDeps = Seq(protocolJs)
   def ivyDeps =
     monocleDeps ++ Agg(
-      ivy"io.github.cquiroz::scala-java-time::2.0.0",
+      ivy"io.github.cquiroz::scala-java-time::2.1.0",
       catsEffectDep
     ) ++ Agg(
       "core",
