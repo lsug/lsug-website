@@ -151,15 +151,15 @@ final class Server[F[_]: Sync: ContextShift: Logger](
     )
 
   def speaker(id: Speaker.Id): F[Option[Speaker]] =
-    decodeMarkup(id)("people", (Read.speaker _))
+    decodeMarkup(id)("people", (Read.speaker))
 
   def venue(id: Venue.Id): F[Option[Venue.Summary]] =
-    decodeMarkup(id)("venues", (Read.venue _))
+    decodeMarkup(id)("venues", (Read.venue))
 
   def venue1(id: Venue.Id): F[Option[Venue.Summary]] =
-    decodeMarkup(id)("venues", (Read.venue _))
+    decodeMarkup(id)("venues", (Read.venue))
   def meetupDotCom(id: Meetup.Id): F[Option[Meetup.MeetupDotCom.Event]] = {
-    decodeMarkup(id)("meetups", (Read.meetupDotCom _))
+    decodeMarkup(id)("meetups", (Read.meetupDotCom))
       .flatMap(_.flatTraverse(meetup.event))
   }
 }
