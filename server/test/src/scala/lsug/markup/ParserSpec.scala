@@ -6,8 +6,11 @@ import scala.util.matching.Regex
 import cats._
 import cats.data._
 import cats.implicits._
+import cats.laws.discipline.FunctorTests
+import munit.DisciplineSuite
+import org.scalacheck.{Arbitrary, Gen}
 
-class ParserSpec extends ParserChecks {
+class ParserSpec extends ParserChecks with DisciplineSuite {
 
   import Parser.{fail => pfail, _}
 
@@ -55,6 +58,8 @@ class ParserSpec extends ParserChecks {
   checkOneOrMore("two characters", "aa", NonEmptyList.of("a", "a"), "")
   checkOneOrMoreFails("an empty string", "")
   checkOneOrMoreFails("a mismatching string", "b")
+
+  checkAll("Result.FunctorLaws", FunctorTests[Result].functor[Int, Int, String])
 }
 
 trait ParserChecks extends LsugSuite {
@@ -186,4 +191,15 @@ trait ParserChecks extends LsugSuite {
     checkFailure(product(left, right), text)
       .label("product")
       .build(name)
+
+  implicit def arbResult[T](implicit a: Arbitrary[T]): Arbitrary[Result[T]] =
+    Arbitrary(
+      Gen.oneOf(
+        Gen.const(Result.Fail),
+        for {
+          e <- Arbitrary.arbitrary[T]
+          s <- Arbitrary.arbitrary[String]
+        } yield Result.Success[T](e, s)
+      )
+    )
 }

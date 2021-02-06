@@ -97,7 +97,14 @@ object server extends ScalaModule {
   }
 
   object test extends Tests {
-    def ivyDeps = Agg(ivy"org.scalameta::munit::0.7.21")
+
+    def ivyDeps =
+      Agg(
+        ivy"org.scalameta::munit::0.7.21",
+        ivy"org.typelevel::discipline-munit::1.0.4",
+        ivy"org.typelevel::cats-laws::2.0.0",
+        ivy"org.scalacheck::scalacheck::1.14.1" 
+      )
     def testFrameworks = Seq("munit.Framework")
   }
 }
