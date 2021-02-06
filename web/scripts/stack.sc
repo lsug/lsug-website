@@ -112,6 +112,7 @@ def main(
               cp("s3://lsug-website-config/cert.pem", "/etc/letsencrypt/archive/www.lsug.co.uk/cert1.pem") ++
               cp("s3://lsug-website-config/privkey.pem", "/etc/letsencrypt/archive/www.lsug.co.uk/privkey1.pem") ++
               cp("s3://lsug-website-config/fullchain.pem", "/etc/letsencrypt/archive/www.lsug.co.uk/fullchain1.pem") ++ """
+                |mkdir -p /etc/letsencrypt/live/www.lsug.co.uk
                 |ln -sf /etc/letsencrypt/archive/www.lsug.co.uk/chain1.pem /etc/letsencrypt/live/www.lsug.co.uk/chain.pem
                 |ln -sf /etc/letsencrypt/archive/www.lsug.co.uk/cert1.pem /etc/letsencrypt/live/www.lsug.co.uk/cert.pem
                 |ln -sf /etc/letsencrypt/archive/www.lsug.co.uk/privkey1.pem /etc/letsencrypt/live/www.lsug.co.uk/privkey.pem

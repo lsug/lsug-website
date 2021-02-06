@@ -1,6 +1,6 @@
 ◊meetup{274890895}
 ◊hosts{zainabali}
-◊date{2020-01-30}
+◊date{2021-01-30}
 ◊time{14:00-17:30}
 ◊welcome{◊p{We look forward to seeing you at the London Scala Open Source Saturday.}}
 ◊events{
@@ -34,5 +34,25 @@ contributing, we’re here to walk you through the GitHub PR process.
 ◊p{Learn about ◊link{◊text{Probably}◊url{https://github.com/propensive/probably}}’s easy model for defining and running tests in no more than five minutes, and open your first pull request!}
 ◊p{We will be looking at improving Probably’s CLI support, and making it easier to run tests and customize the output.}
 ◊p{Take a look at issues with the ◊link{◊text{LSUG}◊url{https://github.com/propensive/probably/labels/lsug}} label for inspiration.}
+}}
+◊event{
+◊name{Typelevel}
+◊speakers{larshupel}
+◊tags{open-source}
+◊time{14:00-17:30}
+◊setup{◊p{Please have a working sbt installation ready.}}
+◊description{
+◊p{We will prepare a few tickets in various Typelevel repositories for you to hack on.}
+}}
+◊event{
+◊name{ZIO}
+◊speakers{adamfraser}
+◊tags{open-source}
+◊time{14:00-17:30}
+◊setup{◊p{Please clone the ◊link{◊text{ZIO repository}◊url{https://github.com/zio/zio}} and see the ◊link{◊text{contributor’s guide}◊url{https://github.com/zio/zio/blob/master/CONTRIBUTING.md}} to get set up.}}
+◊description{
+◊p{◊link{◊text{ZIO}◊url{https://github.com/zio/zio}} is a library for asynchronous and concurrent programming in functional Scala. Learn about ZIO and get your first PR merged!}
+◊p{We will be benchmarking and improving ZIO's Chunk data type as well as working on other new features and bug fixes. If you are interested in contributing to another ZIO ecosystem library or want to get help with your own project using ZIO technologies feel free to join as well!}
+◊p{Take a look at issues with the ◊link{◊text{zio-hackathon}◊url{https://github.com/zio/zio/labels/zio-hackathon}} label for inspiration.}
 }}
 }

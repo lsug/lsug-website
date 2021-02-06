@@ -69,7 +69,7 @@ object server extends ScalaModule {
       catsEffectDep,
       ivy"io.chrisdavenport::log4cats-slf4j::1.1.1",
       ivy"ch.qos.logback:logback-classic:1.2.3",
-      ivy"com.spotify::magnolify-cats::0.3.0"
+      ivy"com.spotify::magnolify-cats::0.4.0"
     ) ++ Agg(
       "http4s-dsl",
       "http4s-circe",
@@ -97,9 +97,10 @@ object server extends ScalaModule {
   }
 
   object test extends Tests {
+
     def ivyDeps =
       Agg(
-        ivy"org.scalameta::munit::0.7.20",
+        ivy"org.scalameta::munit::0.7.21",
         ivy"org.typelevel::discipline-munit::1.0.4",
         ivy"org.typelevel::cats-laws::2.0.0",
         ivy"org.scalacheck::scalacheck::1.14.1" 
