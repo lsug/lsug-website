@@ -13,15 +13,15 @@ sealed trait Parser[+A] {
 
 object Parser {
 
-  private case object Fail extends Parser[Nothing] {
+  case object Fail extends Parser[Nothing] {
     def apply(text: String): Result[Nothing] = Result.Fail
   }
 
-  private final case class Pure[A](value: A) extends Parser[A] {
+  final case class Pure[A](value: A) extends Parser[A] {
     def apply(text: String): Result[A] = Result.Success(value, text)
   }
 
-  private final case class Pattern(regex: Regex) extends Parser[String] {
+  final case class Pattern(regex: Regex) extends Parser[String] {
     def apply(text: String): Result[String] =
       regex
         .findPrefixOf(text)

@@ -14,6 +14,8 @@
     .meetup-page {
 	grid: {
 	    template-areas: "content sidebar" "welcome sidebar" ;
+	    template-columns: 65% 35%;
+	    template-rows: auto;
 	}
     }
 }
@@ -44,7 +46,6 @@
 
     .side-sheet {
 	grid-area: sidebar;
-	max-width: 600px;
 
 	.side-sheet-content > * {
 	    padding-top: 1rem;
@@ -53,16 +54,19 @@
     }
 
     .events {
-	grid-area: content;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 
 	.event {
+	    grid-area: content;
 	    padding-bottom: 3rem;
 	}
     }
 
     .welcome {
 	grid-area: welcome;
-	max-width: 800px;
 	padding-top: 1rem;
 	font-family: font.$body-family;
 	font-size: font.$body-normal-size;
@@ -110,8 +114,6 @@
     }
 
     .panel {
-	min-width: 600px;
-	max-width: 600px;
 	padding: 2rem 0 1rem 0;
 
 	.date {
@@ -186,8 +188,8 @@
 
 .event {
 
-    max-width: 800px;
-    min-width: 800px;
+    max-width: 33rem;
+
     padding-top: 3rem;
 
     // This is a fishy way of making the page longer than the screen height
@@ -215,6 +217,11 @@
 	line-height: font.$block-line-height;
 	font-family: font.$body-family;
 	font-size: font.$body-normal-size;
+    }
+
+    .pronoun {
+	font-family: font.$body-family;
+	font-size: font.$body-small-size;
     }
 
     .bio {

@@ -5,14 +5,15 @@ import fs2._
 import fs2.io
 import fs2.text
 import protocol._
+
 import java.nio.file.{Path, Paths}
 import cats.data._
 import cats._
 import cats.effect._
 import cats.implicits._
 import markup.Read
-import java.time.ZonedDateTime
-import java.time.ZoneId
+
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import lsug.{Meetup => MeetupApi}
 
 object Server {
@@ -63,22 +64,26 @@ final class Server[F[_]: Sync: ContextShift: Logger](
     }.value
   }
 
-  private val BST: ZoneId = ZoneId.of("Europe/London")
+  private val londonZoneId: ZoneId = ZoneId.of("Europe/London")
+
+  implicit private val localDateOrdering: Ordering[LocalDateTime] =
+    _.compareTo(_)
 
   def meetupsAfter(time: ZonedDateTime): F[List[Meetup]] = {
     meetups
       .filter { meetup =>
-        ZonedDateTime.of(meetup.setting.time.end, BST).isAfter(time)
+        ZonedDateTime.of(meetup.setting.time.end, londonZoneId).isAfter(time)
       }
       .map(_.pure[List])
       .compile
       .foldMonoid
+      .map(_.sortBy(_.setting.time.start)(Ordering[LocalDateTime]))
   }
 
-  def eventsBefore(time: ZonedDateTime): F[List[Meetup.EventWithSetting]] = {
+  def eventsBefore(time: ZonedDateTime): F[List[Meetup.EventWithSetting]] =
     meetups
       .filter { meetup =>
-        ZonedDateTime.of(meetup.setting.time.end, BST).isBefore(time)
+        ZonedDateTime.of(meetup.setting.time.end, londonZoneId).isBefore(time)
       }
       .map(m =>
         m.events.zipWithIndex.map { case (e, i) =>
@@ -87,7 +92,7 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       )
       .compile
       .foldMonoid
-  }
+      .map(_.sortBy(_.setting.time.start)(Ordering[LocalDateTime].reverse))
 
   def event(
       meetupId: Meetup.Id,
@@ -146,15 +151,15 @@ final class Server[F[_]: Sync: ContextShift: Logger](
     )
 
   def speaker(id: Speaker.Id): F[Option[Speaker]] =
-    decodeMarkup(id)("people", (Read.speaker _))
+    decodeMarkup(id)("people", Read.speaker)
 
   def venue(id: Venue.Id): F[Option[Venue.Summary]] =
-    decodeMarkup(id)("venues", (Read.venue _))
+    decodeMarkup(id)("venues", Read.venue)
 
   def venue1(id: Venue.Id): F[Option[Venue.Summary]] =
-    decodeMarkup(id)("venues", (Read.venue _))
+    decodeMarkup(id)("venues", Read.venue)
   def meetupDotCom(id: Meetup.Id): F[Option[Meetup.MeetupDotCom.Event]] = {
-    decodeMarkup(id)("meetups", (Read.meetupDotCom _))
+    decodeMarkup(id)("meetups", Read.meetupDotCom)
       .flatMap(_.flatTraverse(meetup.event))
   }
 }
