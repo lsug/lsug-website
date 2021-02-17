@@ -8,3 +8,7 @@ target
 *.js.map
 *.css
 *.css.map
+
+# IDE specific
+.idea*
+.vscode

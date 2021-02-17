@@ -89,20 +89,60 @@ private object Decoders {
     (
       child("name").andThen(text),
       child("photo").andThen(text).optional.map(_.map(new Asset(_)))
-    ).mapN { case (name, photo) => id => Speaker.Profile(id, name, photo) }
+    ).mapN {
+      case (name, photo) =>
+        id => Speaker.Profile(id, name, photo)
+    }
+  }
+
+  /** List of pronouns used to enforce a standard format of subject / object.
+    *
+    * This list is by no means complete. If you find your pronoun missing please
+    * do add it here.
+    */
+  val recognizedPronouns: List[Speaker.Pronoun] = List(
+    Speaker.Pronoun("he", "him"),
+    Speaker.Pronoun("she", "her"),
+    Speaker.Pronoun("they", "them")
+  )
+
+  def pronoun(text: String): Either[Error, Speaker.Pronoun] = {
+    text.split("/").toList match {
+      case List(sub, ob)
+          if recognizedPronouns.exists(_ === Speaker.Pronoun(sub, ob)) =>
+        Speaker.Pronoun(sub, ob).pure[Either[Error, ?]]
+      case _ =>
+        Error
+          .InvalidContents(
+            "pronoun",
+            text,
+            "Unrecognized — please add this pronoun to lsug.markup.Decoders.recognizedPronouns"
+          )
+          .asLeft
+    }
   }
 
   def speaker: Decoder[Speaker.Id => Speaker] = {
-    (speakerProfile, socialMedia, child("bio").andThen(markup).optional).mapN {
-      case (profilef, social, bio) =>
+    (
+      speakerProfile,
+      socialMedia,
+      child("bio").andThen(markup).optional,
+      child("pronoun")
+        .andThen(text)
+        .optional
+        .mapError(_.traverse(pronoun))
+    ).mapN {
+      case (profilef, social, bio, pronoun) =>
         id =>
           Speaker(
             profilef(id),
             bio.toList.flatten,
-            social
+            social,
+            pronoun
           )
     }
   }
+
   def address: Decoder[NonEmptyList[String]] =
     child("address").andThen(text).mapError(commaSeparated("address", _))
 

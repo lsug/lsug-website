@@ -58,6 +58,13 @@ object Speaker {
       }
       .getOrElse(ProfilePicture(profile.some): TagMod)
 
+  private def pronoun(pr: P.Speaker.Pronoun) =
+    <.p(
+      ^.cls := "pronoun",
+      "Referred to as ",
+      <.strong(s"${pr.subjective}/${pr.objective}")
+    )
+
   val Speaker =
     ScalaComponent
       .builder[Option[P.Speaker]]("Speaker")
@@ -73,7 +80,8 @@ object Speaker {
                     blog,
                     twitter,
                     github
-                  )
+                  ),
+                  pr
                   ) =>
                 React.Fragment(
                   <.header(
@@ -85,6 +93,7 @@ object Speaker {
                       twitter.map(Twitter(_))
                     )
                   ),
+                  pr.map(pronoun),
                   <.div(
                     ^.cls := "bio",
                     bio.zipWithIndex.map {
