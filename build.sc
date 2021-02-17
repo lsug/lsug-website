@@ -7,7 +7,7 @@ import scalafmt._
 import mill.scalajslib._
 import webpack.{WebpackModule, NpmDependency}
 
-val catsEffectDep = ivy"org.typelevel::cats-effect::2.3.0"
+val catsEffectDep = ivy"org.typelevel::cats-effect::2.3.1"
 
 val monocleDeps = Agg(
   "monocle-core",
@@ -36,7 +36,7 @@ trait ProtocolModule extends ScalaModule {
   def scalacOptions = commonScalacOptions
 
   def ivyDeps =
-    Agg(ivy"org.typelevel::cats-core::2.2.0") ++ Agg(
+    Agg(ivy"org.typelevel::cats-core::2.3.1") ++ Agg(
       "circe-core",
       "circe-parser",
       "circe-generic"
@@ -69,7 +69,7 @@ object server extends ScalaModule {
       catsEffectDep,
       ivy"io.chrisdavenport::log4cats-slf4j::1.1.1",
       ivy"ch.qos.logback:logback-classic:1.2.3",
-      ivy"com.spotify::magnolify-cats::0.3.0"
+      ivy"com.spotify::magnolify-cats::0.4.1"
     ) ++ Agg(
       "http4s-dsl",
       "http4s-circe",
@@ -97,7 +97,14 @@ object server extends ScalaModule {
   }
 
   object test extends Tests {
-    def ivyDeps = Agg(ivy"org.scalameta::munit::0.7.19")
+
+    def ivyDeps =
+      Agg(
+        ivy"org.scalameta::munit::0.7.21",
+        ivy"org.typelevel::discipline-munit::1.0.4",
+        ivy"org.typelevel::cats-laws::2.4.1",
+        ivy"org.scalacheck::scalacheck::1.14.1" 
+      )
     def testFrameworks = Seq("munit.Framework")
   }
 }
@@ -113,13 +120,13 @@ object client extends ScalaJSModule {
   def moduleDeps = Seq(protocolJs)
   def ivyDeps =
     monocleDeps ++ Agg(
-      ivy"io.github.cquiroz::scala-java-time::2.0.0",
+      ivy"io.github.cquiroz::scala-java-time::2.1.0",
       catsEffectDep
     ) ++ Agg(
       "core",
       "extra",
       "ext-cats"
-    ).map { dep => ivy"com.github.japgolly.scalajs-react::${dep}::1.7.0" }
+    ).map { dep => ivy"com.github.japgolly.scalajs-react::${dep}::1.7.7" }
 }
 
 trait WebModule extends WebpackModule {

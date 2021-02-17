@@ -45,10 +45,32 @@ This project requires quite a few tools to get up and running. Don’t worry if 
 
 By this point, you should have already used GitHub, git and a terminal. If not, get set up with the [first-contributions project](https://github.com/firstcontributions/first-contributions).
 
-You’ll now need to install:
- - [mill version 0.8.0](http://www.lihaoyi.com/mill/)
- - [nodejs version 10](https://nodejs.org/)
- - [yarn version 1.22](https://yarnpkg.com/)
+You’ll now need to install the following tools.
+ - [Mill](http://www.lihaoyi.com/mill/)
+ - [Node.js](https://nodejs.org)
+ - [Yarn](https://yarnpkg.com/)
+
+If you're already comfortable using a package manager (such as apt, homebrew or scoop), feel free to use it. If not, follow the steps below.
+  
+### Mill
+
+Download [Mill](http://www.lihaoyi.com/mill/). The most recently tested version is `0.8.0`.
+
+The mill [installation instructions](http://www.lihaoyi.com/mill/) should work smoothly for Linux and Mac OS. Windows requires some more effort.
+
+For Windows, download the assembly file:
+ - Follow the [mill installation instructions](http://www.lihaoyi.com/mill/#windows)
+ - Save the assembly file as `mill.bat` in the repository directory (this is probably called `lsug-website`).
+ 
+### Node.js
+
+You can download an installer for a preferable version on [downloads page](https://nodejs.org/en/download/). The most recently tested version is `10`.
+
+### yarn
+
+Download [the installer](https://classic.yarnpkg.com/en/docs/install) for your OS. The most recently tested version is `1.22`.
+
+### Source code editor
 
 You will also need an IDE. If you’re undecided on one, we recommend [VSCode](https://code.visualstudio.com/) with the following extensions:
  - the Live Share Extension Pack
@@ -58,36 +80,55 @@ You will also need an IDE. If you’re undecided on one, we recommend [VSCode](h
 
 This will enable you to pair program with a maintainer, should you want to.
 
-
 ## Checking your setup
 
 The following `mill` commands need to be run in a terminal.
+
+If you're using Windows, you must run `mill --no-server` instead of `mill` in command line. If you use Windows PowerShell use './mill' instead of 'mill'
 
 ### Mill
 
 Check you have mill installed.
 
-```sh
-mill version
-```
-
-This should print `0.8.0`.
+ - For MacOS and Linux, run:
+ 
+   ```sh
+   mill web.version
+   ```
+ - For Windows, run in command line:
+ 
+   ```sh
+   mill --no-server version
+   ```
+This should print version of installed mill.
 
 ### Scala
 
 Check that the server tests pass.
 
-```sh
-mill server.test
-```
+ - For MacOS and Linux, run:
+	
+   ```sh
+   mill server.test
+   ```
+ - For Windows, run:
 
+   ```sh
+   mill --no-server server.test
+   ```
 ### NodeJS and Yarn
 
 Check you can bundle the client code and styles.
 
-```sh
-mill web.bundle
-```
+ - For MacOS and Linux, run:	   
+   ```sh
+   mill web.bundle
+   ```
+ - For Windows, run:
+
+   ```sh
+   mill --no-server web.bundle
+   ```
 
 ### IDE
 
@@ -97,9 +138,16 @@ You should have syntax highlighting and code completion in your IDE. If not, you
 
 Start the website.
 
-```sh
-mill web.run
-```
+ - For MacOS and Linux, run:
+
+   ```sh
+   mill web.run
+   ```
+ - For Windows, run:
+
+   ```sh
+   mill --no-server web.run
+   ```
 
 You should see the output:
 
@@ -140,6 +188,7 @@ Navigate to https://localhost:8443/ in any browser. You should see a security wa
 
 We use a fake, hence insecure, certificate for local development. You can safely bypass the warning. This is done in different ways depending on your browser.
  - In Firefox, click `Advanced…`, then `Accept the risk and continue`.
+ - In Chrome, click `Advanced…`, then `Proceed to localhost (unsafe)`.
  - Let us know if you have a different browser. We’ll update this list with better instructions.
 
 Finally, you should see the website home page:

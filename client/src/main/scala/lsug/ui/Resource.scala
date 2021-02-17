@@ -29,7 +29,7 @@ object Resource {
   )(lens: Lens[S, Option[R]], path: String): AsyncCallback[R] = {
     apply[R](path).value.flatMap(
       _.bimap(
-        AsyncCallback.throwException,
+        AsyncCallback.throwException(_),
         r => modify(lens.set(r.some)).async.as(r)
       ).merge
     )
