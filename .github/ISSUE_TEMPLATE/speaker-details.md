@@ -17,9 +17,10 @@ You may have trouble typing the lozenge character ◊. If so, see [pollen's inst
 # Your profile
  - Take a look at the [bio template](https://github.com/lsug/lsug-website/blob/master/server/src/main/resources/people-template.pm).  
  - Copy the template to [the people directory](https://github.com/lsug/lsug-website/tree/master/server/src/main/resources/people).
- - You must fill in your name and bio. The `photo`, `twitter`, `github` and `blog` fields are optional. 
+ - You must fill in your name and bio. The `pronoun`, `photo`, `twitter`, `github` and `blog` fields are optional. 
     Let me know if you'd like any other fields - we can add them in the long term.
  - Photos will make your profile all the more friendly. If you'd like one, store it in [the assets directory](https://github.com/lsug/lsug-website/tree/master/web/assets).
+ - The list of supported gender pronouns is hard-coded, but that doesn't mean it’s set in stone. Add your gender pronoun to the `recognizedPronouns` list in [the decoder](https://github.com/lsug/lsug-website/blob/master/server/src/main/scala/lsug/markup/Decoders.scala) if you can’t find it.
 
 # Your event
 

@@ -95,46 +95,30 @@ private object Decoders {
     }
   }
 
+  /** List of pronouns used to enforce a standard format of subject / object.
+    *
+    * This list is by no means complete. If you find your pronoun missing please
+    * do add it here.
+    */
   val recognizedPronouns: List[Speaker.Pronoun] = List(
     Speaker.Pronoun("he", "him"),
     Speaker.Pronoun("she", "her"),
     Speaker.Pronoun("they", "them")
   )
 
-  // TODO: this is a mess - refactor
-  def pronoun(text: Option[String]): Either[Error, Option[Speaker.Pronoun]] = {
-    text match {
-      case Some(p) =>
-        val pns = p.split("/").toList
-
-        if (pns.length != 2) {
-          Left(
-            Error.InvalidContents(
-              "pronoun",
-              p,
-              "Not found - please check the existing list and add your preference if it's missing"
-            )
+  def pronoun(text: String): Either[Error, Speaker.Pronoun] = {
+    text.split("/").toList match {
+      case List(sub, ob)
+          if recognizedPronouns.exists(_ === Speaker.Pronoun(sub, ob)) =>
+        Speaker.Pronoun(sub, ob).pure[Either[Error, ?]]
+      case _ =>
+        Error
+          .InvalidContents(
+            "pronoun",
+            text,
+            "Unrecognized — please add this pronoun to lsug.markup.Decoders.recognizedPronouns"
           )
-        }
-
-        val x = recognizedPronouns
-          .find(p => {
-            Speaker.Pronoun(pns(0), pns(1)).equals(p)
-          })
-
-        x match {
-          case Some(p) => Either.right(Some(p))
-          case None =>
-            Either.left(
-              Error.InvalidContents(
-                "pronoun",
-                p,
-                "Not found - please check the existing list and add your preference if it's missing"
-              )
-            )
-        }
-
-      case None => Either.right(None)
+          .asLeft
     }
   }
 
@@ -146,7 +130,7 @@ private object Decoders {
       child("pronoun")
         .andThen(text)
         .optional
-        .mapError(pronoun(_))
+        .mapError(_.traverse(pronoun))
     ).mapN {
       case (profilef, social, bio, pronoun) =>
         id =>

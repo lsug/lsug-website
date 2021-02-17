@@ -58,15 +58,12 @@ object Speaker {
       }
       .getOrElse(ProfilePicture(profile.some): TagMod)
 
-  // TODO: add styling to class
-  private def pronoun(p: Option[P.Speaker.Pronoun]) =
-    p.map { pn =>
-      <.p(
-        ^.cls := "pronoun",
-        "Referred to as: ",
-        <.b(s"${pn.subjective}/${pn.objective}")
-      )
-    }
+  private def pronoun(pr: P.Speaker.Pronoun) =
+    <.p(
+      ^.cls := "pronoun",
+      "Referred to as ",
+      <.strong(s"${pr.subjective}/${pr.objective}")
+    )
 
   val Speaker =
     ScalaComponent
@@ -96,7 +93,7 @@ object Speaker {
                       twitter.map(Twitter(_))
                     )
                   ),
-                  pronoun(pr),
+                  pr.map(pronoun),
                   <.div(
                     ^.cls := "bio",
                     bio.zipWithIndex.map {

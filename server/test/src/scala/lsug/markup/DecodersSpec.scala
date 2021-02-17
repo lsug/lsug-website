@@ -45,6 +45,9 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
   val bioP = Tag("bio", List(paragraphP, paragraphP))
   val bioWithCommentsP = Tag("bio", List(paragraphP, paragraphP, textP))
   val markupEl = List(paragraphEl, paragraphEl)
+  val pronounSub = "they"
+  val pronounOb = "them"
+  val pronoun = s"$pronounSub/$pronounOb"
 
   val speakerP = Tag(
     "speaker",
@@ -59,7 +62,7 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
       ),
       tagWithText("name", text),
       tagWithText("photo", text),
-      tagWithText("pronoun", text),
+      tagWithText("pronoun", pronoun),
       bioP
     )
   )
@@ -94,17 +97,17 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
       profile = Speaker.Profile(
         id = id,
         name = text,
-        photo = Some(new Asset(text)),
-        pronoun = Some(new Speaker.Pronoun(text))
-      )
+        photo = Some(new Asset(text))
+      ),
+      pronoun = Some(new Speaker.Pronoun(pronounSub, pronounOb))
     )
 
   val nameOnlySpeakerEl = (id: Speaker.Id) =>
     Speaker(
       bio = Nil,
       socialMedia = unsocialMediaEl,
-      profile =
-        Speaker.Profile(id = id, name = text, photo = None, pronoun = None)
+      profile = Speaker.Profile(id = id, name = text, photo = None),
+      pronoun = None
     )
   val unnamedSpeakerP = emptyTag("speaker")
   val csvList = NonEmptyList.of("a", "csv", "value")

@@ -174,8 +174,6 @@ object Sponsor {
 
 }
 
-
-
 case class Speaker(
     profile: Speaker.Profile,
     bio: List[Markup],
@@ -219,7 +217,7 @@ object Speaker {
   case class Profile(
       id: Id,
       name: String,
-      photo: Option[Asset],
+      photo: Option[Asset]
   )
 
   object Profile {
@@ -234,10 +232,7 @@ object Speaker {
 
   object Pronoun {
     implicit val codec: Codec[Pronoun] = deriveCodec[Pronoun]
-    implicit val eq: Eq[Pronoun] = Eq.instance {
-      case (Pronoun(s, o), Pronoun(ss, oo)) =>
-        s === ss && o === oo
-    }
+    implicit val eq: Eq[Pronoun] = Eq.fromUniversalEquals[Pronoun]
   }
 
 }
