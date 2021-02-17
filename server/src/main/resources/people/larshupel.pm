@@ -1,4 +1,5 @@
 ◊name{Lars Hupel}
+◊pronoun{they/them}
 ◊photo{lars-hupel.jpg}
 ◊social{
   ◊twitter{larsr_h}
