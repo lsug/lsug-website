@@ -177,7 +177,8 @@ object Sponsor {
 case class Speaker(
     profile: Speaker.Profile,
     bio: List[Markup],
-    socialMedia: Speaker.SocialMedia
+    socialMedia: Speaker.SocialMedia,
+    pronoun: Option[Speaker.Pronoun]
 )
 
 object Speaker {
@@ -226,6 +227,14 @@ object Speaker {
         i === ii && n === nn && p === pp
     }
   }
+
+  case class Pronoun(subjective: String, objective: String)
+
+  object Pronoun {
+    implicit val codec: Codec[Pronoun] = deriveCodec[Pronoun]
+    implicit val eq: Eq[Pronoun] = Eq.fromUniversalEquals[Pronoun]
+  }
+
 }
 
 object Venue {
