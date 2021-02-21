@@ -32,7 +32,20 @@ libraries?” and “How can MUnit help dealing with flaky tests?”.
 ◊tags{Scala,testing,cats-effect}
 ◊time{18:45-19:45}
 ◊description{
-◊p{Watch this space for more details.}
+◊p{
+How do you test time‑sensitive application logic? In this talk, we
+will explore what lives under ExecutionContext and
+cats.effect.Timer and how these abstractions allow us “warp”
+forward in time. Armed with our new knowledge, we will then look at
+how time‑sensitive tests are structured to make them fast and
+reliable.
+}
+◊p{This talk uses ◊scaladex{◊org{typelevel}◊repo{cats-effect}} in its
+examples but a lot of the concepts are shared across all effect
+libraries in Scala, so if you use ZIO or even just plain Scala
+Futures, you too can learn the secrets behind time-warping and perform
+the magic yourself :)
+}
 }
 }
 }
