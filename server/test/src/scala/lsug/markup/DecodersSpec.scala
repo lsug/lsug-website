@@ -45,6 +45,9 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
   val bioP = Tag("bio", List(paragraphP, paragraphP))
   val bioWithCommentsP = Tag("bio", List(paragraphP, paragraphP, textP))
   val markupEl = List(paragraphEl, paragraphEl)
+  val pronounSub = "they"
+  val pronounOb = "them"
+  val pronoun = s"$pronounSub/$pronounOb"
 
   val speakerP = Tag(
     "speaker",
@@ -59,6 +62,7 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
       ),
       tagWithText("name", text),
       tagWithText("photo", text),
+      tagWithText("pronoun", pronoun),
       bioP
     )
   )
@@ -84,21 +88,26 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
     twitter = None,
     github = Some(new Github.User(text))
   )
-  val unsocialSpeakerP = Tag("speaker", List(tagWithText("name", text)))
+  val nameOnlySpeakerP = Tag("speaker", List(tagWithText("name", text)))
   val unsocialMediaEl = Speaker.SocialMedia.empty
   val speakerEl = (id: Speaker.Id) =>
     Speaker(
       bio = markupEl,
       socialMedia = socialMediaEl,
-      profile =
-        Speaker.Profile(id = id, name = text, photo = Some(new Asset(text)))
+      profile = Speaker.Profile(
+        id = id,
+        name = text,
+        photo = Some(new Asset(text))
+      ),
+      pronoun = Some(new Speaker.Pronoun(pronounSub, pronounOb))
     )
 
-  val unseenSpeakerEl = (id: Speaker.Id) =>
+  val nameOnlySpeakerEl = (id: Speaker.Id) =>
     Speaker(
       bio = Nil,
       socialMedia = unsocialMediaEl,
-      profile = Speaker.Profile(id = id, name = text, photo = None)
+      profile = Speaker.Profile(id = id, name = text, photo = None),
+      pronoun = None
     )
   val unnamedSpeakerP = emptyTag("speaker")
   val csvList = NonEmptyList.of("a", "csv", "value")
@@ -162,14 +171,18 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
   check("markup", "contains paragraphs")(markup, bioP, markupEl)
   check("markup", "can have comments")(markup, bioWithCommentsP, markupEl)
   check("social media", "full profile")(socialMedia, speakerP, socialMediaEl)
-  check("social media", "empty")(socialMedia, unsocialSpeakerP, unsocialMediaEl)
+  check("social media", "empty")(socialMedia, nameOnlySpeakerP, unsocialMediaEl)
   check("social media", "optional parts")(
     socialMedia,
     somewhatSocialSpeakerP,
     somewhatSocialMediaEl
   )
-  check("speaker", "has name, photo and profile")(speaker, speakerP, speakerEl)
-  check("speaker", "optional photo")(speaker, unsocialSpeakerP, unseenSpeakerEl)
+  check("speaker", "has name, photo, profile and pronoun")(
+    speaker,
+    speakerP,
+    speakerEl
+  )
+  check("speaker", "name only")(speaker, nameOnlySpeakerP, nameOnlySpeakerEl)
   checkFailed("speaker", "missing name")(
     speaker,
     unnamedSpeakerP,
