@@ -1,4 +1,5 @@
 ◊name{Zainab Ali}
+◊pronoun{she/her}
 ◊photo{zainabali.jpg}
 ◊social{
 ◊github{zainab-ali}
