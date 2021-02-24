@@ -23,7 +23,8 @@ does MUnit not have a DSL?”, “How do we integrate MUnit with other
 libraries?” and “How can MUnit help dealing with flaky tests?”.
 }
 
-◊p{At the end the presentation, MUnit may become your new favorite testing library!}
+◊p{At the end the presentation, MUnit may become your new favorite
+testing library!}
 }
 }
 ◊event{
@@ -35,7 +36,7 @@ libraries?” and “How can MUnit help dealing with flaky tests?”.
 ◊p{
 How do you test time‑sensitive application logic? In this talk, we
 will explore what lives under ExecutionContext and
-cats.effect.Timer and how these abstractions allow us “warp”
+cats.effect.Timer and how these abstractions allow us to “warp”
 forward in time. Armed with our new knowledge, we will then look at
 how time‑sensitive tests are structured to make them fast and
 reliable.

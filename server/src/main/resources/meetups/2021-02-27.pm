@@ -24,4 +24,32 @@ experiences are welcome. Don’t be nervous if it’s you’re first time
 contributing, we’re here to walk you through the GitHub PR process.
 }
 }}
+◊event{
+◊name{Circe}
+◊speakers{travisbrown}
+◊tags{open-source}
+◊time{14:00-17:30}
+◊setup{◊p{Please clone the ◊link{◊text{Circe repository}◊url{https://github.com/circe/circe}} and see the ◊link{◊text{contributor’s guide}◊url{https://github.com/circe/circe/blob/master/CONTRIBUTING.md}} to get set up.}}
+◊description{
+◊p{Make your first pull request to the ◊link{◊text{Circe project}◊url{https://github.com/circe/circe}}.}
+◊p{Take a look at issues with the
+◊link{◊text{LSUG}◊url{https://github.com/circe/circe/labels/LSUG}} and
+◊link{◊text{help
+wanted}◊url{https://github.com/circe/circe/labels/help%20wanted}}
+labels for inspiration.}
+}}
+◊event{
+◊name{http4s}
+◊speakers{rossabaker}
+◊tags{open-source}
+◊time{14:00-17:30}
+◊setup{◊p{Please clone the ◊link{◊text{http4s
+repository}◊url{https://github.com/http4s/http4s}} and run through the
+◊link{◊text{contributor’s
+guide}◊url{https://github.com/http4s/http4s/blob/main/CONTRIBUTING.md}}
+to get set up.}}
+◊description{
+◊p{Make your first pull request to ◊link{◊text{http4s}◊url{https://github.com/http4s/http4s}} and related projects.}
+◊p{Browse through the issues with the ◊link{◊text{lsug label}◊url{https://github.com/http4s/http4s/labels/lsug}}.}
+}}
 }
