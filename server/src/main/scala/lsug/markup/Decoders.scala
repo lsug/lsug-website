@@ -1,6 +1,9 @@
 package lsug
 package markup
 
+/** This file contains the decoder instances that take pollen and
+  * convert it into algebraic data types. */
+
 import scala.util.Try
 
 import java.time._
