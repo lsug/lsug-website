@@ -52,4 +52,16 @@ to get set up.}}
 ◊p{Make your first pull request to ◊link{◊text{http4s}◊url{https://github.com/http4s/http4s}} and related projects.}
 ◊p{Browse through the issues with the ◊link{◊text{lsug label}◊url{https://github.com/http4s/http4s/labels/lsug}}.}
 }}
+
+
+◊event{
+    ◊name{ScalaBridge London}
+    ◊speakers{noelwelsh}
+    ◊tags{open-source}
+    ◊time{14:00-17:30}
+    ◊setup{◊p{Please see the ◊link{◊text{open issues}◊url{https://github.com/scalabridgelondon/lesson-plans/issues}}
+      in the ScalaBridge lesson plans repository.}}
+    ◊description{
+        ◊p{Contribute to the ScalaBridge lessons, both coding and writing lesson content.}
+    }
 }
