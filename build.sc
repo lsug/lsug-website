@@ -14,7 +14,7 @@ val monocleDeps = Agg(
   "monocle-macro"
 ).map { dep => ivy"com.github.julien-truffaut::${dep}::2.1.0" }
 
-val sjsVersion = "1.3.1"
+val sjsVersion = "1.5.0"
 
 val commonScalacOptions =
   Seq(
