@@ -29,10 +29,9 @@ object Scaladex {
         ListMap(
           "organization" -> org.show,
           "repository" -> repo.show
-        ).map {
-            case (k, v) => s"$k=$v"
-          }
-          .mkString("&")
+        ).map { case (k, v) =>
+          s"$k=$v"
+        }.mkString("&")
       )
       .withQueryParam("target", "JVM")
       .withQueryParam("scalaVersion", "2.13")
@@ -52,7 +51,9 @@ object Scaladex {
         )(jsonOf[F, List[P.Project]])
         response.map(
           // Search rankings are fuzzy which means even an exact match may not be at the head position
-          _.filter(p => p.organization === org && p.repository === repo).headOption
+          _.filter(p =>
+            p.organization === org && p.repository === repo
+          ).headOption
         )
       }
     }

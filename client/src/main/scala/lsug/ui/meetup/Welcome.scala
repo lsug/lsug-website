@@ -54,37 +54,35 @@ object Welcome {
 
     ScalaComponent
       .builder[(Option[PEvent], Speakers)]("EventWelcome")
-      .render_P {
-        case (event, speakers) =>
-          event
-            .map {
-              case P.Meetup(
+      .render_P { case (event, speakers) =>
+        event
+          .map {
+            case P.Meetup(
                   hosts,
                   welcome,
                   _,
                   P.Meetup.Setting(_, time, _),
                   _,
                   _
-                  ) =>
-                <.header(
-                  ^.cls := "welcome",
-                  <.h1(
-                    ^.cls := "screenreader-only",
-                    time.start.format(pattern)
-                  ),
-                  <.section(
-                    ^.cls := "message",
-                    welcome.zipWithIndex.map {
-                      case (m, i) =>
-                        markup.Markup.withKey(i.toLong)(m, markup.Options(true))
-                    }.toTagMod
-                  ),
-                  EventHosts(hosts.traverse(speakers.get))
+                ) =>
+              <.header(
+                ^.cls := "welcome",
+                <.h1(
+                  ^.cls := "screenreader-only",
+                  time.start.format(pattern)
                 ),
-            }
-            .getOrElse(
-              <.header(^.cls := "event-header placeholder")
-            )
+                <.section(
+                  ^.cls := "message",
+                  welcome.zipWithIndex.map { case (m, i) =>
+                    markup.Markup.withKey(i.toLong)(m, markup.Options(true))
+                  }.toTagMod
+                ),
+                EventHosts(hosts.traverse(speakers.get))
+              ),
+          }
+          .getOrElse(
+            <.header(^.cls := "event-header placeholder")
+          )
       }
       .build
   }

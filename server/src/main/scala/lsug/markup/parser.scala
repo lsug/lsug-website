@@ -67,9 +67,8 @@ object Parser {
     )
 
   def oneOrMore[A](pa: => Parser[A]): Parser[NonEmptyList[A]] =
-    product(pa, zeroOrMore(pa)).map {
-      case (head, tail) =>
-        NonEmptyList(head, tail)
+    product(pa, zeroOrMore(pa)).map { case (head, tail) =>
+      NonEmptyList(head, tail)
     }
 
   implicit val parserFunctor: Functor[Parser] = new Functor[Parser] {
@@ -80,8 +79,8 @@ object Parser {
     new Alternative[Parser] {
       def pure[A](x: A): Parser[A] = new Pure(x)
       def ap[A, B](pf: Parser[A => B])(pa: Parser[A]): Parser[B] =
-        Parser.map(Parser.product(pf, pa)) {
-          case (f, a) => f(a)
+        Parser.map(Parser.product(pf, pa)) { case (f, a) =>
+          f(a)
         }
 
       def empty[A]: Parser[A] = Parser.Fail

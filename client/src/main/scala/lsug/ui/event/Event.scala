@@ -79,21 +79,21 @@ object Event {
       .builder[Props[S, I]]("Event")
       .render_P {
         case Props(
-            P.Meetup.Event(
-              event,
-              desc,
-              speakerIds,
-              tags,
-              material,
-              setup,
-              slides,
-              recording,
-              _
-            ),
-            speakers,
-            modalProps,
-            modalId,
-            tabProps
+              P.Meetup.Event(
+                event,
+                desc,
+                speakerIds,
+                tags,
+                material,
+                setup,
+                slides,
+                recording,
+                _
+              ),
+              speakers,
+              modalProps,
+              modalId,
+              tabProps
             ) =>
           val existingTabs =
             List(

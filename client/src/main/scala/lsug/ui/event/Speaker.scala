@@ -74,14 +74,14 @@ object Speaker {
           speaker
             .map {
               case P.Speaker(
-                  p @ P.Speaker.Profile(_, name, _),
-                  bio,
-                  P.Speaker.SocialMedia(
-                    blog,
-                    twitter,
-                    github
-                  ),
-                  pr
+                    p @ P.Speaker.Profile(_, name, _),
+                    bio,
+                    P.Speaker.SocialMedia(
+                      blog,
+                      twitter,
+                      github
+                    ),
+                    pr
                   ) =>
                 React.Fragment(
                   <.header(
@@ -96,9 +96,8 @@ object Speaker {
                   pr.map(pronoun),
                   <.div(
                     ^.cls := "bio",
-                    bio.zipWithIndex.map {
-                      case (bio, index) =>
-                        markup.Markup.withKey(index)(bio, markup.Options(true))
+                    bio.zipWithIndex.map { case (bio, index) =>
+                      markup.Markup.withKey(index)(bio, markup.Options(true))
                     }.toTagMod
                   )
                 )

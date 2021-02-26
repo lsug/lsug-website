@@ -86,9 +86,8 @@ final class Server[F[_]: Sync: ContextShift: Logger](
         ZonedDateTime.of(meetup.setting.time.end, londonZoneId).isBefore(time)
       }
       .map(m =>
-        m.events.zipWithIndex.map {
-          case (e, i) =>
-            Meetup.EventWithSetting(m.setting, e, new Meetup.Event.Id(i))
+        m.events.zipWithIndex.map { case (e, i) =>
+          Meetup.EventWithSetting(m.setting, e, new Meetup.Event.Id(i))
         }
       )
       .compile
@@ -103,9 +102,8 @@ final class Server[F[_]: Sync: ContextShift: Logger](
       .find { meetup => meetup.setting.id === meetupId }
       .flatMap(m =>
         Stream.emits(
-          m.events.zipWithIndex.map {
-            case (e, i) =>
-              Meetup.EventWithSetting(m.setting, e, new Meetup.Event.Id(i))
+          m.events.zipWithIndex.map { case (e, i) =>
+            Meetup.EventWithSetting(m.setting, e, new Meetup.Event.Id(i))
           }
         )
       )
@@ -120,7 +118,9 @@ final class Server[F[_]: Sync: ContextShift: Logger](
 
   private def meetups: Stream[F, Meetup] = {
 
-    Stream.eval(Logger[F].debug(s"reading directory ${root}/meetups")) *> io.file
+    Stream.eval(
+      Logger[F].debug(s"reading directory ${root}/meetups")
+    ) *> io.file
       .directoryStream(
         blocker,
         root.resolve("meetups"),

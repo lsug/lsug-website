@@ -14,9 +14,12 @@ trait IOSuite extends FunSuite {
 
   override def munitValueTransforms = {
     super.munitValueTransforms ++ List(
-      new ValueTransform("IO", {
-        case io: IO[_] => io.unsafeToFuture
-      })
+      new ValueTransform(
+        "IO",
+        { case io: IO[_] =>
+          io.unsafeToFuture
+        }
+      )
     )
   }
 }

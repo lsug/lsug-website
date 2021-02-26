@@ -94,8 +94,8 @@ object Connections {
         .defaultPort(defaultPort)
         .securityGroups(securityGroups.asJava)
         .build
-      ingress.foreach {
-        case (conn, p) => connection.allowFrom(conn, p)
+      ingress.foreach { case (conn, p) =>
+        connection.allowFrom(conn, p)
       }
       connection
     }
@@ -122,7 +122,7 @@ object App {
     val app =
       new core.App(
         core.AppProps.builder
-        // .outdir(path.toString)
+          // .outdir(path.toString)
           .build()
       )
     children.foreach(_(app))

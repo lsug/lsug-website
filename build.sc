@@ -136,8 +136,8 @@ trait WebModule extends WebpackModule {
   def webpackDevServerVersion = "3.1.7"
   def sassVersion = "1.25.0"
   def npmDeps =
-    Agg("react" -> "React", "react-dom" -> "ReactDOM").map {
-      case (n, g) => NpmDependency(n, "16.7.0", g)
+    Agg("react" -> "React", "react-dom" -> "ReactDOM").map { case (n, g) =>
+      NpmDependency(n, "16.7.0", g)
     }
 
   def millSourcePath = build.millSourcePath / "web"
@@ -167,9 +167,9 @@ object web extends WebModule {
 
     (r0, r1, r2) match {
       case (
-          Result.Success(bundle),
-          Result.Success(assetDir),
-          Result.Success(sslKey)
+            Result.Success(bundle),
+            Result.Success(assetDir),
+            Result.Success(sslKey)
           ) =>
         server.runBackground(
           bundle.path.toString,
@@ -194,9 +194,9 @@ object web extends WebModule {
 
     (r0, r1, r2) match {
       case (
-          Result.Success(bundle),
-          Result.Success(assetDir),
-          Result.Success(sslKey)
+            Result.Success(bundle),
+            Result.Success(assetDir),
+            Result.Success(sslKey)
           ) =>
         server.run(
           bundle.path.toString,

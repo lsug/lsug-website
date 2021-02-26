@@ -53,8 +53,8 @@ trait WebpackModule extends Module {
     val path = T.ctx.dest / "entrypoint.js"
 
     val require = npmDeps()
-      .map {
-        case NpmDependency(n, _, g) => s"global['$g'] = require('$n')"
+      .map { case NpmDependency(n, _, g) =>
+        s"global['$g'] = require('$n')"
       }
       .mkString("\n")
 

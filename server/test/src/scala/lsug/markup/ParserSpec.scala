@@ -66,8 +66,8 @@ trait ParserChecks extends LsugSuite {
 
   import Parser._
 
-  def assertRest(rest: String, expected: String)(
-      implicit loc: munit.Location
+  def assertRest(rest: String, expected: String)(implicit
+      loc: munit.Location
   ): Unit = {
     assert(clue(rest) === clue(expected), "The rest of the text was incorrect")
   }
@@ -87,30 +87,29 @@ trait ParserChecks extends LsugSuite {
 
       assert(result.isDefined, "parsing failed")
 
-      result.foreach {
-        case (value, rest) =>
-          assertRest(rest, expectedRest)
-          assertEquals(value, expected)
+      result.foreach { case (value, rest) =>
+        assertRest(rest, expectedRest)
+        assertEquals(value, expected)
       }
     }).label("success")
 
-  def checkFailure[A: Eq](pa: Parser[A], text: String)(
-      implicit loc: munit.Location
+  def checkFailure[A: Eq](pa: Parser[A], text: String)(implicit
+      loc: munit.Location
   ): TestBuilder =
     (builder {
       val result = pa(text)
       assert(clue(result) === Result.Fail, "parsing succeeded")
     }).label("fail")
 
-  def checkPure[A](name: String, value: A, text: String)(
-      implicit loc: munit.Location
+  def checkPure[A](name: String, value: A, text: String)(implicit
+      loc: munit.Location
   ): Unit =
     check(pure(value), text, value, text)
       .label("pure")
       .build(name)
 
-  def checkPattern(name: String, regex: Regex, text: String)(
-      implicit loc: munit.Location
+  def checkPattern(name: String, regex: Regex, text: String)(implicit
+      loc: munit.Location
   ): Unit =
     check(
       pattern(regex),
@@ -119,8 +118,8 @@ trait ParserChecks extends LsugSuite {
       text.tail
     ).label("pattern").build(name)
 
-  def checkPatternFails(name: String, regex: Regex, text: String)(
-      implicit loc: munit.Location
+  def checkPatternFails(name: String, regex: Regex, text: String)(implicit
+      loc: munit.Location
   ): Unit =
     checkFailure(pattern(regex), text)
       .label("pattern")
@@ -146,8 +145,8 @@ trait ParserChecks extends LsugSuite {
       .label("oneOrMore")
       .build(name)
 
-  def checkOneOrMoreFails(name: String, text: String)(
-      implicit loc: munit.Location
+  def checkOneOrMoreFails(name: String, text: String)(implicit
+      loc: munit.Location
   ): Unit =
     checkFailure(oneOrMore(pattern("a".r)), text)
       .label("oneOrMore")

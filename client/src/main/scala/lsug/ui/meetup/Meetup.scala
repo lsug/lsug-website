@@ -82,30 +82,29 @@ object Meetup {
             .map { meetup =>
               <.section(
                 ^.cls := "events",
-                meetup.events.zipWithIndex.map {
-                  case (event, i) =>
-                    val eventId = new P.Meetup.Event.Id(i)
-                    UIEvent
-                      .Event[State, ModalId]
-                      .withKey(s"event-${eventId.show}")(
-                        UIEvent.Props(
-                          event = event,
-                          speakers = s.speakers.view
-                            .filterKeys(event.speakers.contains(_))
-                            .toMap,
-                          modalId = ModalId(new P.Meetup.Event.Id(i), _),
-                          modalProps = ModalProps(
-                            currentModal = s.modal,
-                            lens = State._modal,
-                            modify = $.modState
-                          ),
-                          tabProps = TabProps(
-                            currentTab = State._tab(eventId).get(s),
-                            lens = State._tab(eventId),
-                            modify = $.modState
-                          )
+                meetup.events.zipWithIndex.map { case (event, i) =>
+                  val eventId = new P.Meetup.Event.Id(i)
+                  UIEvent
+                    .Event[State, ModalId]
+                    .withKey(s"event-${eventId.show}")(
+                      UIEvent.Props(
+                        event = event,
+                        speakers = s.speakers.view
+                          .filterKeys(event.speakers.contains(_))
+                          .toMap,
+                        modalId = ModalId(new P.Meetup.Event.Id(i), _),
+                        modalProps = ModalProps(
+                          currentModal = s.modal,
+                          lens = State._modal,
+                          modify = $.modState
+                        ),
+                        tabProps = TabProps(
+                          currentTab = State._tab(eventId).get(s),
+                          lens = State._tab(eventId),
+                          modify = $.modState
                         )
                       )
+                    )
                 }.toTagMod
               )
             }

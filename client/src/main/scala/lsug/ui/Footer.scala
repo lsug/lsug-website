@@ -15,20 +15,19 @@ object Footer {
 
     ScalaComponent
       .builder[(String, LocalDate)]("Disclaimer")
-      .render_P {
-        case (id, now) =>
-          <.div(
-            ^.cls := "disclaimer",
-            <.p(
-              s"© ${now.format(format)}.",
-              s"London Scala User Group is a registered community interest group in England and Wales (",
-              <.a(
-                id,
-                ^.href := s"https://beta.companieshouse.gov.uk/company/${id}"
-              ),
-              ")"
-            )
+      .render_P { case (id, now) =>
+        <.div(
+          ^.cls := "disclaimer",
+          <.p(
+            s"© ${now.format(format)}.",
+            s"London Scala User Group is a registered community interest group in England and Wales (",
+            <.a(
+              id,
+              ^.href := s"https://beta.companieshouse.gov.uk/company/${id}"
+            ),
+            ")"
           )
+        )
       }
       .build
   }

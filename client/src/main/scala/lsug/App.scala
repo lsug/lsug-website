@@ -54,36 +54,34 @@ object App extends IOApp {
     def eventRoute =
       dynamicRouteCT(
         root / "events" / (string("[0-9\\-]+") / int).caseClass[Page.Event]
-      ) ~> dynRenderR {
-        case (Page.Event(meetupId, eventId), ctl) =>
-          page(
-            const(
-              lui.event.EventPage.EventPage(
-                (
-                  ctl.narrow,
-                  new P.Meetup.Id(meetupId),
-                  new P.Meetup.Event.Id(eventId)
-                )
+      ) ~> dynRenderR { case (Page.Event(meetupId, eventId), ctl) =>
+        page(
+          const(
+            lui.event.EventPage.EventPage(
+              (
+                ctl.narrow,
+                new P.Meetup.Id(meetupId),
+                new P.Meetup.Event.Id(eventId)
               )
             )
           )
+        )
       }
 
     def meetupRoute =
       dynamicRouteCT(
         root / "meetups" / (string("[0-9\\-]+")).caseClass[Page.Meetup]
-      ) ~> dynRenderR {
-        case (Page.Meetup(meetupId), ctl) =>
-          page(
-            const(
-              lui.meetup.Meetup.Meetup(
-                (
-                  ctl.narrow,
-                  new P.Meetup.Id(meetupId)
-                )
+      ) ~> dynRenderR { case (Page.Meetup(meetupId), ctl) =>
+        page(
+          const(
+            lui.meetup.Meetup.Meetup(
+              (
+                ctl.narrow,
+                new P.Meetup.Id(meetupId)
               )
             )
           )
+        )
       }
 
     (homeRoute | eventRoute | meetupRoute | sponsorsRoute | aboutRoute)
@@ -94,12 +92,11 @@ object App extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
     IO.delay {
-        Locale.setDefault(Locale.ENGLISH)
-        val router = Router(BaseUrl.fromWindowOrigin, routerConfig)
-        val div = document.createElement("div")
-        document.body.appendChild(div)
-        router().renderIntoDOM(div)
-      }
-      .map(_ => ExitCode.Success)
+      Locale.setDefault(Locale.ENGLISH)
+      val router = Router(BaseUrl.fromWindowOrigin, routerConfig)
+      val div = document.createElement("div")
+      document.body.appendChild(div)
+      router().renderIntoDOM(div)
+    }.map(_ => ExitCode.Success)
   }
 }

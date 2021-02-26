@@ -12,28 +12,26 @@ object SideSheet {
 
     val Summary = ScalaComponent
       .builder[(Boolean, Boolean => Callback)]("PanelSummary")
-      .render_PC {
-        case ((expanded, onToggle), children) =>
-          <.div(
-            ^.cls := ("panel-summary".cls |+| (if (expanded)
-                                                 "panel-toggle-on".cls
-                                               else
-                                                 "panel-toggle-off".cls)).show,
-            ^.onClick --> onToggle(!expanded),
-            children
-          )
+      .render_PC { case ((expanded, onToggle), children) =>
+        <.div(
+          ^.cls := ("panel-summary".cls |+| (if (expanded)
+                                               "panel-toggle-on".cls
+                                             else
+                                               "panel-toggle-off".cls)).show,
+          ^.onClick --> onToggle(!expanded),
+          children
+        )
       }
       .build
 
     val Details = ScalaComponent
       .builder[Boolean]("PanelDetails")
-      .render_PC {
-        case (expanded, children) =>
-          <.div(
-            ^.cls := (if (expanded) "panel-details"
-                      else "panel-details hidden"),
-            children
-          )
+      .render_PC { case (expanded, children) =>
+        <.div(
+          ^.cls := (if (expanded) "panel-details"
+                    else "panel-details hidden"),
+          children
+        )
       }
       .build
 

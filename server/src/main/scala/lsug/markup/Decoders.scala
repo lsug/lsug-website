@@ -89,9 +89,8 @@ private object Decoders {
     (
       child("name").andThen(text),
       child("photo").andThen(text).optional.map(_.map(new Asset(_)))
-    ).mapN {
-      case (name, photo) =>
-        id => Speaker.Profile(id, name, photo)
+    ).mapN { case (name, photo) =>
+      id => Speaker.Profile(id, name, photo)
     }
   }
 
@@ -131,15 +130,14 @@ private object Decoders {
         .andThen(text)
         .optional
         .mapError(_.traverse(pronoun))
-    ).mapN {
-      case (profilef, social, bio, pronoun) =>
-        id =>
-          Speaker(
-            profilef(id),
-            bio.toList.flatten,
-            social,
-            pronoun
-          )
+    ).mapN { case (profilef, social, bio, pronoun) =>
+      id =>
+        Speaker(
+          profilef(id),
+          bio.toList.flatten,
+          social,
+          pronoun
+        )
     }
   }
 
@@ -147,8 +145,8 @@ private object Decoders {
     child("address").andThen(text).mapError(commaSeparated("address", _))
 
   def venue: Decoder[Venue.Id => Venue.Summary] = {
-    (child("name").andThen(text), address).mapN {
-      case (name, address) => Venue.Summary(_, name, address)
+    (child("name").andThen(text), address).mapN { case (name, address) =>
+      Venue.Summary(_, name, address)
     }
   }
 
@@ -161,8 +159,8 @@ private object Decoders {
   def slides: Decoder[Option[PMeetup.Media]] = {
     val media =
       (child("url").andThen(text).map(new Link(_)), child("external").optional)
-        .mapN {
-          case (url, maybeOpen) => new PMeetup.Media(url, maybeOpen.isDefined)
+        .mapN { case (url, maybeOpen) =>
+          new PMeetup.Media(url, maybeOpen.isDefined)
         }
     child("slides").optional.andThenTraverse(media)
   }
@@ -209,15 +207,15 @@ private object Decoders {
       recording
     ).mapN {
       case (
-          name,
-          speakers,
-          material,
-          tags,
-          (start, end),
-          description,
-          setup,
-          slides,
-          recording
+            name,
+            speakers,
+            material,
+            tags,
+            (start, end),
+            description,
+            setup,
+            slides,
+            recording
           ) =>
         Event(
           name = name,
