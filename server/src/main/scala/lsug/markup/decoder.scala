@@ -2,21 +2,21 @@ package lsug
 package markup
 
 /** This file contains the inner workings of the decoder class.
-
+  *
   * A decoder converts pollen markup into algebraic data types. At a
   * high level, it is a function that takes pollen as an input and
   * outputs either an error or a data type.
-  * 
+  *
   * This function is modelled using monad transformers as a Kleisli,
   * sometimes known as a ReaderT. The monad transformer logic uses the
   * cats library. You should read up on cats and monad transformers
   * before editing this file.
-  * 
+  *
   * Decoders can be be mapped (transformed to decode similar data
   * types), and combined with other decoders to construct larger data
   * types. These operations are described using typeclasses from the
   * cats library.
-  * 
+  *
   * The 'ops' pattern is used to make working with decoders a little
   * bit easier.
   */
