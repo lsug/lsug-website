@@ -89,9 +89,8 @@ private object Decoders {
     (
       child("name").andThen(text),
       child("photo").andThen(text).optional.map(_.map(new Asset(_)))
-    ).mapN {
-      case (name, photo) =>
-        id => Speaker.Profile(id, name, photo)
+    ).mapN { case (name, photo) =>
+      id => Speaker.Profile(id, name, photo)
     }
   }
 
@@ -131,15 +130,14 @@ private object Decoders {
         .andThen(text)
         .optional
         .mapError(_.traverse(pronoun))
-    ).mapN {
-      case (profilef, social, bio, pronoun) =>
-        id =>
-          Speaker(
-            profilef(id),
-            bio.toList.flatten,
-            social,
-            pronoun
-          )
+    ).mapN { case (profilef, social, bio, pronoun) =>
+      id =>
+        Speaker(
+          profilef(id),
+          bio.toList.flatten,
+          social,
+          pronoun
+        )
     }
   }
 

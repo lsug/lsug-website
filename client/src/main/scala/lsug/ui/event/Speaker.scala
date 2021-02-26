@@ -74,14 +74,14 @@ object Speaker {
           speaker
             .map {
               case P.Speaker(
-                  p @ P.Speaker.Profile(_, name, _),
-                  bio,
-                  P.Speaker.SocialMedia(
-                    blog,
-                    twitter,
-                    github
-                  ),
-                  pr
+                    p @ P.Speaker.Profile(_, name, _),
+                    bio,
+                    P.Speaker.SocialMedia(
+                      blog,
+                      twitter,
+                      github
+                    ),
+                    pr
                   ) =>
                 React.Fragment(
                   <.header(
