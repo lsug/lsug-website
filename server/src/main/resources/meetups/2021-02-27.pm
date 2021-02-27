@@ -65,3 +65,4 @@ to get set up.}}
         ◊p{Contribute to the ScalaBridge lessons, both coding and writing lesson content.}
     }
 }
+}
