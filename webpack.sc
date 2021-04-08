@@ -167,4 +167,23 @@ trait WebpackModule extends Module {
     PathRef(T.ctx.dest)
   }
 
+  def serifProFontVersion = T { "3.001R" }
+  def sansProFontVersion = T { "3v028R" }
+  def sansProFontVersionPath = T { "3.028R" }
+
+  def fonts = T {
+    val dest = T.ctx().dest
+    val fontsDir = dest / 'fonts
+
+    mkdir(fontsDir)
+    mill.modules.Util.downloadUnpackZip(
+      s"https://github.com/adobe-fonts/source-serif-pro/releases/download/${serifProFontVersion()}/source-serif-pro-${serifProFontVersion()}.zip",
+      s"source-serif-pro-${serifProFontVersion()}")
+    os.copy(dest / s"source-serif-pro-${serifProFontVersion()}", fontsDir/s"source-serif-pro-${serifProFontVersion()}", replaceExisting = true)
+    mill.modules.Util.downloadUnpackZip(
+      s"https://github.com/adobe-fonts/source-sans-pro/releases/download/${sansProFontVersionPath()}/source-sans-${sansProFontVersion()}.zip",
+      s"source-sans-pro-${sansProFontVersion()}")
+    os.copy(dest / s"source-sans-pro-${sansProFontVersion()}", fontsDir/s"source-sans-pro-${sansProFontVersion()}", replaceExisting = true)
+    PathRef(fontsDir)
+  }
 }
