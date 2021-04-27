@@ -102,7 +102,7 @@ object server extends ScalaModule {
       Agg(
         ivy"org.scalameta::munit::0.7.22",
         ivy"org.typelevel::discipline-munit::1.0.6",
-        ivy"org.typelevel::cats-laws::2.4.2",
+        ivy"org.typelevel::cats-laws::2.6.0",
         ivy"org.scalacheck::scalacheck::1.14.3" 
       )
     def testFrameworks = Seq("munit.Framework")
