@@ -2,10 +2,9 @@ package lsug
 package markup
 
 import lsug.protocol._
-import cats.data._
 import cats._
-
-import magnolify.cats.auto._
+import cats.data._
+import cats.implicits._
 
 private class DecodersSpec extends LsugSuite with DecoderAssertions {
 
@@ -19,6 +18,28 @@ private class DecodersSpec extends LsugSuite with DecoderAssertions {
     Tag(name, List(Contents(contents)))
 
   def emptyTag(name: String): Tag = Tag(name, Nil)
+
+  implicit val linkShow: Show[MText.Link] = Show.fromToString[MText.Link]
+  implicit val paragraphShow: Show[Markup.Paragraph] =
+    Show.fromToString[Markup.Paragraph]
+  implicit val markupShow: Show[Markup] = Show.fromToString[Markup]
+  implicit val socialMediaShow: Show[Speaker.SocialMedia] =
+    Show.fromToString[Speaker.SocialMedia]
+  implicit val mediaShow: Show[PMeetup.Media] = Show.fromToString[PMeetup.Media]
+  implicit val materialShow: Show[PMeetup.Material] =
+    Show.fromToString[PMeetup.Material]
+
+  implicit val linkEq: Eq[MText.Link] = Eq.fromUniversalEquals[MText.Link]
+  implicit val strongEq: Eq[MText.Styled.Strong] = Eq[String].contramap(_.text)
+  implicit val strongShow: Show[MText.Styled.Strong] =
+    Show[String].contramap(_.text)
+  implicit val paragraphEq: Eq[Markup.Paragraph] =
+    Eq.fromUniversalEquals[Markup.Paragraph]
+  implicit val speakerEq: Eq[Speaker] = Eq.fromUniversalEquals[Speaker]
+  implicit val mediaEq: Eq[PMeetup.Media] =
+    Eq.fromUniversalEquals[PMeetup.Media]
+  implicit val materialEq: Eq[PMeetup.Material] =
+    Eq.fromUniversalEquals[PMeetup.Material]
 
   val text = "text"
   val textP = Contents(text)

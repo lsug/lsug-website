@@ -6,7 +6,9 @@ import cats.implicits._
 
 trait DecoderAssertions { self: LsugSuite =>
 
-  import magnolify.cats.auto._
+  implicit val decoderEq: Eq[DecoderError] =
+    Eq.fromUniversalEquals[DecoderError]
+  implicit val decoderShow: Show[DecoderError] = Show.fromToString[DecoderError]
 
   def assertEither[A: Eq: Show](
       decoder: Decoder[A],

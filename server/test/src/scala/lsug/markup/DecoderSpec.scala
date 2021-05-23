@@ -6,11 +6,12 @@ import cats.implicits._
 
 private class DecoderSpec extends LsugSuite with DecoderAssertions {
 
-  import magnolify.cats.auto._
-
   import Pollen._
   import Decoder._
   import DecoderError._
+
+  implicit val tagEq: Eq[Pollen.Tag] = Eq.fromUniversalEquals[Pollen.Tag]
+  implicit val tagShow: Show[Pollen.Tag] = Show.fromToString[Pollen.Tag]
 
   val line: String = "A truth that's told with bad intent"
   val lineP: Pollen = Contents(line)
