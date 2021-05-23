@@ -36,7 +36,7 @@ trait ProtocolModule extends ScalaModule {
   def scalacOptions = commonScalacOptions
 
   def ivyDeps =
-    Agg(ivy"org.typelevel::cats-core::2.3.1") ++ Agg(
+    Agg(ivy"org.typelevel::cats-core::2.6.0") ++ Agg(
       "circe-core",
       "circe-parser",
       "circe-generic"
@@ -67,9 +67,8 @@ object server extends ScalaModule {
   def ivyDeps =
     Agg(
       catsEffectDep,
-      ivy"org.typelevel::log4cats-slf4j::1.2.0",
-      ivy"ch.qos.logback:logback-classic:1.2.3",
-      ivy"com.spotify::magnolify-cats::0.4.1"
+      ivy"io.chrisdavenport::log4cats-slf4j::1.1.1",
+      ivy"ch.qos.logback:logback-classic:1.2.3"
     ) ++ Agg(
       "http4s-dsl",
       "http4s-circe",
@@ -101,9 +100,9 @@ object server extends ScalaModule {
     def ivyDeps =
       Agg(
         ivy"org.scalameta::munit::0.7.22",
-        ivy"org.typelevel::discipline-munit::1.0.6",
-        ivy"org.typelevel::cats-laws::2.4.2",
-        ivy"org.scalacheck::scalacheck::1.14.3" 
+        ivy"org.typelevel::discipline-munit::1.0.9",
+        ivy"org.typelevel::cats-laws::2.6.0",
+        ivy"org.scalacheck::scalacheck::1.15.4" 
       )
     def testFrameworks = Seq("munit.Framework")
   }
@@ -120,7 +119,7 @@ object client extends ScalaJSModule {
   def moduleDeps = Seq(protocolJs)
   def ivyDeps =
     monocleDeps ++ Agg(
-      ivy"io.github.cquiroz::scala-java-time::2.1.0",
+      ivy"io.github.cquiroz::scala-java-time::2.3.0",
       catsEffectDep
     ) ++ Agg(
       "core",
