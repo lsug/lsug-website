@@ -101,9 +101,9 @@ object server extends ScalaModule {
     def ivyDeps =
       Agg(
         ivy"org.scalameta::munit::0.7.22",
-        ivy"org.typelevel::discipline-munit::1.0.6",
-        ivy"org.typelevel::cats-laws::2.6.1",
-        ivy"org.scalacheck::scalacheck::1.14.3" 
+        ivy"org.typelevel::discipline-munit::1.0.9",
+        ivy"org.typelevel::cats-laws::2.6.0",
+        ivy"org.scalacheck::scalacheck::1.15.4" 
       )
     def testFrameworks = Seq("munit.Framework")
   }
@@ -120,7 +120,7 @@ object client extends ScalaJSModule {
   def moduleDeps = Seq(protocolJs)
   def ivyDeps =
     monocleDeps ++ Agg(
-      ivy"io.github.cquiroz::scala-java-time::2.2.2",
+      ivy"io.github.cquiroz::scala-java-time::2.3.0",
       catsEffectDep
     ) ++ Agg(
       "core",
