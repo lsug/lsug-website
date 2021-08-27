@@ -8,7 +8,12 @@ object NpmDependency {
     upickle.default.macroRW
 }
 
-case class Yarn(yarnCmd: String, nodeModules: PathRef, packageJson: PathRef, lockFile: PathRef) {
+case class Yarn(
+    yarnCmd: String,
+    nodeModules: PathRef,
+    packageJson: PathRef,
+    lockFile: PathRef
+) {
 
   import ammonite.ops._
   import ammonite.ops.ImplicitWd._
@@ -17,7 +22,11 @@ case class Yarn(yarnCmd: String, nodeModules: PathRef, packageJson: PathRef, loc
     os.copy.over(packageJson.path, wd / "package.json")
     os.copy.over(lockFile.path, wd / "yarn.lock")
     val exec = Command(
-      (Vector[Shellable](yarnCmd, "--modules-folder", nodeModules.path) ++ cmd.toVector)
+      (Vector[Shellable](
+        yarnCmd,
+        "--modules-folder",
+        nodeModules.path
+      ) ++ cmd.toVector)
         .map(_.s.toVector)
         .reduce(_ ++ _),
       Map.empty,
@@ -95,7 +104,7 @@ trait WebpackModule extends Module {
         "yarn.cmd"
       else
         "yarn"
-        
+
     %(yarnCmd, "install")(wd = T.ctx.dest)
     Yarn(
       yarnCmd,
@@ -178,12 +187,22 @@ trait WebpackModule extends Module {
     mkdir(fontsDir)
     mill.modules.Util.downloadUnpackZip(
       s"https://github.com/adobe-fonts/source-serif-pro/releases/download/${serifProFontVersion()}/source-serif-pro-${serifProFontVersion()}.zip",
-      s"source-serif-pro-${serifProFontVersion()}")
-    os.copy(dest / s"source-serif-pro-${serifProFontVersion()}", fontsDir/s"source-serif-pro-${serifProFontVersion()}", replaceExisting = true)
+      s"source-serif-pro-${serifProFontVersion()}"
+    )
+    os.copy(
+      dest / s"source-serif-pro-${serifProFontVersion()}",
+      fontsDir / s"source-serif-pro-${serifProFontVersion()}",
+      replaceExisting = true
+    )
     mill.modules.Util.downloadUnpackZip(
       s"https://github.com/adobe-fonts/source-sans-pro/releases/download/${sansProFontVersionPath()}/source-sans-${sansProFontVersion()}.zip",
-      s"source-sans-pro-${sansProFontVersion()}")
-    os.copy(dest / s"source-sans-pro-${sansProFontVersion()}", fontsDir/s"source-sans-pro-${sansProFontVersion()}", replaceExisting = true)
+      s"source-sans-pro-${sansProFontVersion()}"
+    )
+    os.copy(
+      dest / s"source-sans-pro-${sansProFontVersion()}",
+      fontsDir / s"source-sans-pro-${sansProFontVersion()}",
+      replaceExisting = true
+    )
     PathRef(fontsDir)
   }
 }
