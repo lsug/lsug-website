@@ -3,25 +3,22 @@ package protocol
 
 /** This file contains the data types shared between the client and server.
   *
-  * As with all websites, the data for each webpage is sent from the
-  * server to the browser client over a network. The client makes a
-  * http request and the server responds with data in the form of
-  * JSON.
+  * As with all websites, the data for each webpage is sent from the server to
+  * the browser client over a network. The client makes a http request and the
+  * server responds with data in the form of JSON.
   *
-  * All the data types sent must be converted into JSON by the server
-  * and then back into a Scala data type by the client. These
-  * conversions are known as encoding and decoding.  This file
-  * contains the data types, but it also contains the JSON codecs (the
-  * encoders and decoders).
+  * All the data types sent must be converted into JSON by the server and then
+  * back into a Scala data type by the client. These conversions are known as
+  * encoding and decoding. This file contains the data types, but it also
+  * contains the JSON codecs (the encoders and decoders).
   *
-  *  Most of the data types are Algebraic Data Types. You
-  * can read up on these in the Scala 3 Cookbook
-  * (https://docs.scala-lang.org/scala3/book/domain-modeling-fp.html). This
-  * code uses Scala 2, so the syntax is a little different.
+  * Most of the data types are Algebraic Data Types. You can read up on these in
+  * the Scala 3 Cookbook
+  * (https://docs.scala-lang.org/scala3/book/domain-modeling-fp.html). This code
+  * uses Scala 2, so the syntax is a little different.
   *
-  * Some very simple data types use AnyVal. Read a little bit about
-  * them in the Scala 2 guide
-  * https://docs.scala-lang.org/overviews/core/value-classes.html
+  * Some very simple data types use AnyVal. Read a little bit about them in the
+  * Scala 2 guide https://docs.scala-lang.org/overviews/core/value-classes.html
   *
   * The codecs are written using the circe library.
   */
@@ -128,12 +125,10 @@ object Asset {
   val github = new Asset("github.png")
 }
 
-/** Markup refers to the stylistic meaning of the text on the
-  * webpages.
+/** Markup refers to the stylistic meaning of the text on the webpages.
   *
-  * It is used within event descriptions and abstracts.  If you're
-  * familiar with Markdown, you'll already have a rough idea of what
-  * this is.
+  * It is used within event descriptions and abstracts. If you're familiar with
+  * Markdown, you'll already have a rough idea of what this is.
   */
 sealed trait Markup
 

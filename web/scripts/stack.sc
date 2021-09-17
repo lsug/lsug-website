@@ -105,13 +105,34 @@ def main(
               | exec > >(tee /var/log/user-data.log) 2>&1
                 |code_dir=$$(mktemp -d)
                 |""".stripMargin +
-              cp(s"s3://${asset.getS3BucketName}/${asset.getS3ObjectKey}", "$code_dir/assets.zip") +
-              cp("s3://lsug-website-config/fullchain.pkcs12", "$code_dir/fullchain.pkcs12") +
-              cp("s3://lsug-website-config/cert-renewal.conf", "/etc/letsencrypt/renewal/www.lsug.co.uk.conf") +
-              cp("s3://lsug-website-config/chain.pem", "/etc/letsencrypt/archive/www.lsug.co.uk/chain1.pem") ++
-              cp("s3://lsug-website-config/cert.pem", "/etc/letsencrypt/archive/www.lsug.co.uk/cert1.pem") ++
-              cp("s3://lsug-website-config/privkey.pem", "/etc/letsencrypt/archive/www.lsug.co.uk/privkey1.pem") ++
-              cp("s3://lsug-website-config/fullchain.pem", "/etc/letsencrypt/archive/www.lsug.co.uk/fullchain1.pem") ++ """
+                cp(
+                  s"s3://${asset.getS3BucketName}/${asset.getS3ObjectKey}",
+                  "$code_dir/assets.zip"
+                ) +
+                cp(
+                  "s3://lsug-website-config/fullchain.pkcs12",
+                  "$code_dir/fullchain.pkcs12"
+                ) +
+                cp(
+                  "s3://lsug-website-config/cert-renewal.conf",
+                  "/etc/letsencrypt/renewal/www.lsug.co.uk.conf"
+                ) +
+                cp(
+                  "s3://lsug-website-config/chain.pem",
+                  "/etc/letsencrypt/archive/www.lsug.co.uk/chain1.pem"
+                ) ++
+                cp(
+                  "s3://lsug-website-config/cert.pem",
+                  "/etc/letsencrypt/archive/www.lsug.co.uk/cert1.pem"
+                ) ++
+                cp(
+                  "s3://lsug-website-config/privkey.pem",
+                  "/etc/letsencrypt/archive/www.lsug.co.uk/privkey1.pem"
+                ) ++
+                cp(
+                  "s3://lsug-website-config/fullchain.pem",
+                  "/etc/letsencrypt/archive/www.lsug.co.uk/fullchain1.pem"
+                ) ++ """
                 |mkdir -p /etc/letsencrypt/live/www.lsug.co.uk
                 |ln -sf /etc/letsencrypt/archive/www.lsug.co.uk/chain1.pem /etc/letsencrypt/live/www.lsug.co.uk/chain.pem
                 |ln -sf /etc/letsencrypt/archive/www.lsug.co.uk/cert1.pem /etc/letsencrypt/live/www.lsug.co.uk/cert.pem
