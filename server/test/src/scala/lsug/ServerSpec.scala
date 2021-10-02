@@ -13,11 +13,13 @@ final class ServerSpec extends IOSuite {
     * The 'adjacent' element is the next element. For example the adjacent
     * element to `2` in `List(1, 2, 3)` is `3`.
     *
-    * @param as      The list to check
-    * @param initial The value to check the head of the list against. This is
-    *                passed to the predicate as the first parameter. The head
-    *                is passed as the second.
-    * @param pred    The predicate
+    * @param as
+    *   The list to check
+    * @param initial
+    *   The value to check the head of the list against. This is passed to the
+    *   predicate as the first parameter. The head is passed as the second.
+    * @param pred
+    *   The predicate
     */
   private def checkAdjacent[A](as: List[A], initial: A)(
       pred: (A, A) => Boolean
