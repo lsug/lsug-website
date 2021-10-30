@@ -66,7 +66,7 @@ object plan {
   }
 
   val Schedule = {
-    //TODO colour current
+    // TODO colour current
     val format = DateTimeFormatter.ofPattern("HH:mm")
 
     ScalaComponent

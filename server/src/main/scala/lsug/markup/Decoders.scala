@@ -1,8 +1,8 @@
 package lsug
 package markup
 
-/** This file contains the decoder instances that take pollen and
-  * convert it into algebraic data types.
+/** This file contains the decoder instances that take pollen and convert it
+  * into algebraic data types.
   */
 
 import scala.util.Try
@@ -49,9 +49,9 @@ private object Decoders {
       children =>
         (children
           .traverse {
-            case Output.Text(text)                   => Right(Markup.Text.Plain(text))
+            case Output.Text(text) => Right(Markup.Text.Plain(text))
             case Output.Markup(_, text: Markup.Text) => Right(text)
-            case Output.Markup(name, _)              => Left(Error.UnexpectedTag(name))
+            case Output.Markup(name, _) => Left(Error.UnexpectedTag(name))
           })
           .flatMap(cs =>
             NonEmptyList.fromList(cs).toRight(Error.EmptyContents("p"))
