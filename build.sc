@@ -85,7 +85,7 @@ object server extends ScalaModule {
       "fs2-io",
       "fs2-core"
     ).map { dep => ivy"co.fs2::${dep}::2.4.6" } ++ monocleDeps ++
-      Agg(ivy"io.chrisdavenport::cats-time::0.3.4")
+      Agg(ivy"io.chrisdavenport::cats-time::0.4.0")
 
   def assetDir = T.source {
     millSourcePath / "src" / "main" / "resources"
